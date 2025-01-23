@@ -189,76 +189,103 @@ class TcController extends Controller
             $jobPositions = $uniquejobPositions->unique('job_position');
         } else {
             // Jika tidak, tentukan job_position berdasarkan nama user
-            if ($userName == 'VITRI HANDAYANI') {
+            if ($userName == 'HARDI SAPUTRA') {
                 $jobPositions = $uniquejobPositions->whereIn('job_position', [
-                    'Purchasing & Logistics Sec. Head',
-                    'Logistic Foreman',
-                    'Feeder',
-                    'Delivery Staff',
+                    'Warehouse Foreman', //tidak ada di db
                     'Admin Cutting Sheet (ACS)',
-                    'Logistic Admin'
+                    'Delivery Staff',
+                    'Feeder',
+                    'Warehouse Admin', //tidak ada di db
+                    'PPIC Staff'
                 ])->unique('job_position');
-            } elseif ($userName == 'ARY RODJO PRASETYO' || $userName == 'MUGI PRAMONO' || $userName == 'ABDUR RAHMAN AL FAAIZ' || $userName == 'RAGIL ISHA RAHMANTO') {
+            } elseif ($userName == 'ABDUR RAHMAN AL FAAIZ') {
                 $jobPositions = $uniquejobPositions->whereIn('job_position', [
-                    'Machining Custom Sec. Head',
-                    'Produksi HT Sec. Head',
-                    'Produksi CT & MC Sec. Head',
-                    'Foreman CT & MC',
-                    'Leader CT',
-                    'PPIC Staff',
-                    'Operator CT',
-                    'Foreman Machining Custom',
-                    'Foreman QC',
-                    'Leader MC',
-                    'Operator Bubut',
-                    'Operator Mc. Custom',
-                    'MC Custom Staff',
-                    'Operator Machining',
-                    'Leader HT',
-                    'Operator HT',
-                    'Admin HT & PPC',
-                    'Operator MTN'
+                    'Warehouse Foreman', //tidak ada di db
+                    'Admin Cutting Sheet (ACS)',
+                    'Delivery Staff',
+                    'Feeder',
+                    'Warehouse Admin', //tidak ada di db
+                    'PPIC Staff'
                 ])->unique('job_position')
                     ->sortBy('job_position');
+            } elseif ($userName == 'ARYA RODJO PRASETYO') {
+                $jobPositions = $uniquejobPositions->whereIn('job_position', [
+                    'Cutting Leader',
+                    'Cutting Operator',
+                    'Foreman QC',
+                    'Production HT Leader', //tidak ada di db
+                    'production HT Admin', //tidak ada di db
+                    'Admin HT & PPC',
+                    'Production HT Operator', //tidak ada di db
+                    'Maintenance Operator', //tidak ada di db
+
+                    'MC Custom & Bubut Leader', //tidak ada di db
+                    'MC Custom Staff',
+                    'Operator Mc. Custom',
+                    'Operator Machining',
+                    'Leader MC',
+                    'MC Operator', //tidak ada di db
+                    'Bubut Operator', //tidak ada di db
+                ])->unique('job_position');
+            } elseif ($userName == 'MUGI PRAMONO') {
+                $jobPositions = $uniquejobPositions->whereIn('job_position', [
+                    'Cutting Leader',
+                    'Cutting Operator',
+                    'Foreman QC',
+                    'Production HT Leader', //tidak ada di db
+                    'production HT Admin', //tidak ada di db
+                    'Admin HT & PPC',
+                    'Production HT Operator', //tidak ada di db
+                    'Maintenance Operator', //tidak ada di db
+                ])->unique('job_position')
+                    ->sortBy('job_position');
+            } elseif ($userName == 'RAGIL ISHA') {
+                $jobPositions = $uniquejobPositions->whereIn('job_position', [
+                    'MC Custom & Bubut Leader', //tidak ada di db
+                    'MC Custom Staff',
+                    'Operator Mc. Custom',
+                    'Operator Machining',
+                    'Leader MC',
+                    'MC Operator', //tidak ada di db
+                    'Bubut Operator', //tidak ada di db
+                ])->unique('job_position');
             } elseif ($userName == 'MARTINUS CAHYO RAHASTO') {
                 $jobPositions = $uniquejobPositions->whereIn('job_position', [
-                    'Finance & Accounting Sec. Head',
-                    'Finance & Treasury',
-                    'HRGA & CSR Staff',
-                    'HR & Legal Staff',
-                    'HR, GA, Legal, PDCA, Procurement & IT Se. Head',
-                    'IT Staff',
-                    'Procurement Staff',
                     'Accounting Staff & Kasir',
                     'AR Staff',
                     'Invoicing Staff',
-                    'Kurir'
+                    'Accounting Staff', //Tidak ada di db
+
+                    'Inventory Staff', //tidak ada di db
+                    'HR, GA, Legal, PDCA, Procurement & IT Se. Head',
+                    'IT Staff',
+                    'PDCA, Procurement Staff',//tidak ada di db
+                    'Purchasing Import Staff',
+
+                    'GA & CSR Staff',
+                    'HRGA & Legal Staff'
                 ])->unique('job_position');
-            } elseif ($userName == 'YULMAI RIDO WINANDA') {
+            } elseif ($userName == 'ADHI PRASETYO') {
                 $jobPositions = $uniquejobPositions->whereIn('job_position', [
-                    'SOH Region 1',
-                    'SOH Region 2',
-                    'Sales Engineer Reg 1',
-                    'Sales Engineer Reg 2',
-                    'Sales Admin'
-                ])->unique('job_position')
-                    ->sortBy('job_position');
-            } elseif ($userName == 'ANDIK TOTOK SISWOYO') {
-                $jobPositions = $uniquejobPositions->whereIn('job_position', [
-                    'Sales Engineer Reg 3',
-                    'Sales Engineer Reg 4'
+                    'Accounting Staff & Kasir',
+                    'AR Staff',
+                    'Invoicing Staff',
+                    'Accounting Staff', //Tidak ada di db
                 ])->unique('job_position');
-            } elseif ($userName == 'HARDI SAPUTRA') {
+            } elseif ($userName == 'RICHARDUS CHRISTIAN') {
                 $jobPositions = $uniquejobPositions->whereIn('job_position', [
-                    'Sales Engineer Reg 1',
-                    'Sales Engineer Reg 2',
-                    'Sales Admin',
-                    'SOH Region 1',
-                    'SOH Region 2',
-                    'SOH Region 3',
-                    'SOH Region 4',
-                    'Sales Engineer Reg 3',
-                    'Sales Engineer Reg 4'
+                    'Accounting Staff & Kasir',
+                    'AR Staff',
+                    'Invoicing Staff',
+                    'Accounting Staff', //Tidak ada di db
+                ])->unique('job_position');
+            } elseif ($userName == 'JESSICA PAUNE') {
+                $jobPositions = $uniquejobPositions->whereIn('job_position', [
+                    'Inventory Staff', //tidak ada di db
+                    'HR, GA, Legal, PDCA, Procurement & IT Se. Head',
+                    'IT Staff',
+                    'PDCA, Procurement Staff',//tidak ada di db
+                    'Purchasing Import Staff',
                 ])->unique('job_position');
             } else {
                 // Jika nama user tidak cocok dengan yang ditentukan, tampilkan semua data job_position
