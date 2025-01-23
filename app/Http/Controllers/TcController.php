@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log; // Import the DB facade
 use Illuminate\Support\Facades\Validator;
 
+use function PHPSTORM_META\map;
+
 class TcController extends Controller
 {
     public function tcShow()
@@ -34,74 +36,108 @@ class TcController extends Controller
             $additionalData = MstAdditionals::with(['jobPosition'])->get()->unique('id_job_position');
         } else {
             // Tentukan data yang ditampilkan berdasarkan nama user
-            if ($userName == 'VITRI HANDAYANI') {
+            if ($userName == 'HARDI SAPUTRA') {
                 $jobPositions = [
-                    'Purchasing & Logistics Sec. Head',
-                    'Logistic Foreman',
-                    'Feeder',
-                    'Delivery Staff',
+                    'Warehouse Foreman', //tidak ada di db
                     'Admin Cutting Sheet (ACS)',
-                    'Logistic Admin'
+                    'Delivery Staff',
+                    'Feeder',
+                    'Warehouse Admin', //tidak ada di db
+                    'PPIC Staff'
+
                 ];
-            } elseif ($userName == 'ARY RODJO PRASETYO' || $userName == 'MUGI PRAMONO' || $userName == 'ABDUR RAHMAN AL FAAIZ' || $userName == 'RAGIL ISHA RAHMANTO') {
+            } elseif ($userName == 'ABDUR RAHMAN AL FAAIZ') {
                 $jobPositions = [
-                    'Machining Custom Sec. Head',
-                    'Produksi HT Sec. Head',
-                    'Produksi CT & MC Sec. Head',
-                    'Foreman CT & MC',
-                    'Leader CT',
-                    'PPIC Staff',
-                    'Operator CT',
-                    'Foreman Machining Custom',
+                    'Warehouse Foreman', //tidak ada di db
+                    'Admin Cutting Sheet (ACS)',
+                    'Delivery Staff',
+                    'Feeder',
+                    'Warehouse Admin', //tidak ada di db
+                    'PPIC Staff'
+                ];
+            } elseif ($userName == 'ARYA RODJO PRASETYO') {
+                $jobPositions = [
+                    'Cutting Leader',
+                    'Cutting Operator',
                     'Foreman QC',
-                    'Leader MC',
-                    'Operator Bubut',
-                    'Operator Mc. Custom',
-                    'MC Custom Staff',
-                    'Operator Machining',
-                    'Leader HT',
-                    'Operator HT',
+                    'Production HT Leader', //tidak ada di db
+                    'production HT Admin', //tidak ada di db
                     'Admin HT & PPC',
-                    'Operator MTN'
+                    'Production HT Operator', //tidak ada di db
+                    'Maintenance Operator', //tidak ada di db
+
+                    'MC Custom & Bubut Leader', //tidak ada di db
+                    'MC Custom Staff',
+                    'Operator Mc. Custom',
+                    'Operator Machining',
+                    'Leader MC',
+                    'MC Operator', //tidak ada di db
+                    'Bubut Operator', //tidak ada di db
+
+                    
+                ];
+            } elseif ($userName == 'MUGI PRAMONO') {
+                $jobPositions = [
+                    'Cutting Leader',
+                    'Cutting Operator',
+                    'Foreman QC',
+                    'Production HT Leader', //tidak ada di db
+                    'production HT Admin', //tidak ada di db
+                    'Admin HT & PPC',
+                    'Production HT Operator', //tidak ada di db
+                    'Maintenance Operator', //tidak ada di db
+                ];
+            } elseif ($userName == 'RAGIL ISHA') {
+                $jobPositions = [
+                    'MC Custom & Bubut Leader', //tidak ada di db
+                    'MC Custom Staff',
+                    'Operator Mc. Custom',
+                    'Operator Machining',
+                    'Leader MC',
+                    'MC Operator', //tidak ada di db
+                    'Bubut Operator', //tidak ada di db
                 ];
             } elseif ($userName == 'MARTINUS CAHYO RAHASTO') {
                 $jobPositions = [
-                    'Finance & Accounting Sec. Head',
-                    'Finance & Treasury Sec. Head',
-                    'HRGA & CSR Staff',
-                    'HR & Legal Staff',
-                    'HR, GA, Legal, PDCA, Procurement & IT Se. Head',
-                    'IT Staff',
-                    'Procurement Staff',
                     'Accounting Staff & Kasir',
                     'AR Staff',
                     'Invoicing Staff',
-                    'Kurir'
+                    'Accounting Staff', //Tidak ada di db
+
+                    'Inventory Staff', //tidak ada di db
+                    'HR, GA, Legal, PDCA, Procurement & IT Se. Head',
+                    'IT Staff',
+                    'PDCA, Procurement Staff',//tidak ada di db
+                    'Purchasing Import Staff',
+
+                    'GA & CSR Staff',
+                    'HRGA & Legal Staff'
                 ];
-            } elseif ($userName == 'YULMAI RIDO WINANDA' || $userName == 'ILHAM CHOLID') {
+            }elseif ($userName == 'ADHI PRASETYO') {
                 $jobPositions = [
-                    'SOH Region 1',
-                    'SOH Region 2',
-                    'Sales Engineer Reg 1',
-                    'Sales Engineer Reg 2',
-                    'Sales Admin'
+                    'Accounting Staff & Kasir',
+                    'AR Staff',
+                    'Invoicing Staff',
+                    'Accounting Staff', //Tidak ada di db
+
+                    
                 ];
-            } elseif ($userName == 'ANDIK TOTOK SISWOYO') {
+            }elseif ($userName == 'RICHARDUS CHRISTIAN') {
                 $jobPositions = [
-                    'Sales Engineer Reg 3',
-                    'Sales Engineer Reg 4'
+                    'Accounting Staff & Kasir',
+                    'AR Staff',
+                    'Invoicing Staff',
+                    'Accounting Staff', //Tidak ada di db
+
+                    
                 ];
-            } elseif ($userName == 'HARDI SAPUTRA') {
+            }elseif ($userName == 'JESSICA PAUNE') {
                 $jobPositions = [
-                    'Sales Engineer Reg 1',
-                    'Sales Engineer Reg 2',
-                    'Sales Admin',
-                    'SOH Region 1',
-                    'SOH Region 2',
-                    'SOH Region 3',
-                    'SOH Region 4',
-                    'Sales Engineer Reg 3',
-                    'Sales Engineer Reg 4'
+                    'Inventory Staff', //tidak ada di db
+                    'HR, GA, Legal, PDCA, Procurement & IT Se. Head',
+                    'IT Staff',
+                    'PDCA, Procurement Staff',//tidak ada di db
+                    'Purchasing Import Staff'
                 ];
             } else {
                 // Jika nama user tidak cocok dengan yang ditentukan, tampilkan semua data
