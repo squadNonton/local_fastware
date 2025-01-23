@@ -272,7 +272,7 @@ class TcController extends Controller
                     'Invoicing Staff',
                     'Accounting Staff', //Tidak ada di db
                 ])->unique('job_position');
-            } elseif ($userName == 'RICHARDUS CHRISTIAN') {
+            } elseif ($userName == 'RICHARDUS') {
                 $jobPositions = $uniquejobPositions->whereIn('job_position', [
                     'Accounting Staff & Kasir',
                     'AR Staff',
@@ -289,7 +289,7 @@ class TcController extends Controller
                 ])->unique('job_position');
             } else {
                 // Jika nama user tidak cocok dengan yang ditentukan, tampilkan semua data job_position
-                $jobPositions = $uniquejobPositions->unique('job_position');
+                null;
             }
         }
 
