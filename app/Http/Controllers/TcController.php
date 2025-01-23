@@ -122,7 +122,7 @@ class TcController extends Controller
 
                     
                 ];
-            }elseif ($userName == 'RICHARDUS CHRISTIAN') {
+            }elseif ($userName == 'RICHARDUS') {
                 $jobPositions = [
                     'Accounting Staff & Kasir',
                     'AR Staff',
