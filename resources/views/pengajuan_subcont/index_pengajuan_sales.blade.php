@@ -143,6 +143,19 @@
                 </div>
             </div>
         </section>
+                        <!-- jQuery -->
+                        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+                        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
+                        <script>
+                            $(document).ready(function() {
+                                // Hover function for dropdowns
+                                $('.nav-item.dropdown').hover(function() {
+                                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+                                }, function() {
+                                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
+                                });
+                            });
+                            </script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
