@@ -222,8 +222,6 @@
                                     <ul class="dropdown-menu" aria-labelledby="childDropdown">
                                         <li><a class="dropdown-item" href="{{ route('createinquiry') }}">Form Inquiry
                                                 Material</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('konfirmInquiry') }}">Persetujuan
-                                                Inquiry</a></li>
                                     </ul>
                                 </li>
                             </ul>
