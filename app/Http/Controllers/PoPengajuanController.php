@@ -114,6 +114,201 @@ class PoPengajuanController extends Controller
         return view('po_pengajuan.index_po_pengajuan', compact('data'));
     }
 
+    public function dashboardFPB(Request $request)
+    {
+        $year = $request->input('year'); // Mengambil input tahun
+    
+        $query = MstPoPengajuan::query();
+        if ($year) {
+            $query->whereYear('created_at', $year);
+        }
+        $mstPoPengajuans = $query->get();
+    
+        $uniqueFPB = $mstPoPengajuans->unique('no_fpb');
+    
+        // Inisialisasi FPB Open dan Finish
+        $fpbOpen = 0;
+        $fpbFinish = 0;
+        $processedFPB = []; // Menyimpan FPB yang sudah dihitung
+        $submitConfirmFPB = 0; // FPB yang statusnya antara 6-8 (Submit - Confirm)
+        $confirmFinishFPB = 0; // FPB yang statusnya 9 (Confirm - Finish)
+    
+        // Menghitung FPB Finish dan FPB Open
+        foreach ($uniqueFPB as $fpb) {
+            // FPB Finish berdasarkan status 9
+            $trsPoFinishJob = TrsPoPengajuan::where('id_fpb', $fpb->id)
+                ->where('status', 9) // Status 9 untuk Finish
+                ->orderBy('updated_at', 'desc')
+                ->first();
+    
+            if ($trsPoFinishJob && !in_array($fpb->id, $processedFPB)) {
+                $fpbFinish++;
+                $confirmFinishFPB++; // Menambah jumlah FPB yang selesai (status 9)
+                $processedFPB[] = $fpb->id; // Tandai FPB ini sudah dihitung
+            } else {
+                // FPB Open berdasarkan status 6, 7, atau 8 (Open)
+                $trsPoOpenJobs = TrsPoPengajuan::where('id_fpb', $fpb->id)
+                    ->whereIn('status', [6]) // Status 6, 7, 8 untuk Open
+                    ->orderBy('updated_at', 'desc')
+                    ->get()
+                    ->unique('status'); // Menghindari duplikasi berdasarkan status
+    
+                foreach ($trsPoOpenJobs as $trsPoOpenJob) {
+                    if (!in_array($fpb->id, $processedFPB)) {
+                        $fpbOpen++;
+                        $submitConfirmFPB++; // Menambah jumlah FPB yang masih dalam status 6-8 (Submit - Confirm)
+                        $processedFPB[] = $fpb->id; // Tandai FPB ini sudah dihitung
+                        break; // Hanya menghitung sekali per FPB
+                    }
+                }
+            }
+        }
+        $monthlyData = [
+            'open' => array_fill(0, 12, 0),
+            'finish' => array_fill(0, 12, 0)
+        ];
+        
+        $currentMonth = Carbon::now()->month - 1; // Bulan berjalan (0-indexed, Januari = 0)
+        
+        foreach ($uniqueFPB as $fpb) {
+            // Ambil bulan pembuatan FPB (0-indexed)
+            $createdMonth = Carbon::parse($fpb->created_at)->month - 1;
+            
+            // Ambil record terakhir FPB di tabel TrsPoPengajuan
+            $lastRecord = TrsPoPengajuan::where('id_fpb', $fpb->id)
+                            ->orderBy('updated_at', 'desc')
+                            ->first();
+        
+            if ($lastRecord) {
+                if ($lastRecord->status == 9) {
+                    // FPB finish
+                    $finishMonth = Carbon::parse($lastRecord->updated_at)->month - 1;
+                    // FPB dihitung sebagai open di setiap bulan dari bulan dibuat hingga bulan finish (termasuk bulan finish)
+                    for ($m = $createdMonth; $m <= $finishMonth; $m++) {
+                        $monthlyData['open'][$m]++;
+                    }
+                    // Di bulan finish, FPB dihitung sebagai finish
+                    $monthlyData['finish'][$finishMonth]++;
+                } elseif (in_array($lastRecord->status, [6, 7, 8])) {
+                    // FPB masih open: dihitung sebagai open dari bulan dibuat hingga bulan berjalan
+                    for ($m = $createdMonth; $m <= $currentMonth; $m++) {
+                        $monthlyData['open'][$m]++;
+                    }
+                }
+            } else {
+                // Jika tidak ada record, anggap FPB masih open
+                for ($m = $createdMonth; $m <= $currentMonth; $m++) {
+                    $monthlyData['open'][$m]++;
+                }
+            }
+        }
+        
+    
+        $totalFPB = $fpbOpen + $fpbFinish; // Total FPB adalah jumlah FPB Open dan Finish
+    
+        // Menghitung persentase
+        $fpbOpenPercentage = $totalFPB > 0 ? round(($fpbOpen / $totalFPB) * 100) : 0;
+        $fpbFinishPercentage = $totalFPB > 0 ? round(($fpbFinish / $totalFPB) * 100) : 0;
+    
+        // Kategori dan lead time
+        $categories = ['IT', 'Spareparts', 'Consumable', 'GA', 'Subcont'];
+        $leadTimeData = [];
+        $totalPercentage = 0;
+    
+        foreach ($categories as $category) {
+            $filteredMst = $uniqueFPB->where('kategori_po', $category);
+            $categoryTotal = $filteredMst->count();
+    
+            $categoryLeadDaysFirstJob = [];
+            $categoryLeadDaysSecondJob = [];
+            $categorySubmitConfirm = 0; // FPB yang statusnya 6-8
+            $categoryConfirmFinish = 0; // FPB yang statusnya 9
+    
+            foreach ($filteredMst as $fpb) {
+                $fpbStartDate = $fpb->created_at;
+                $trsPoFirstJob = TrsPoPengajuan::where('id_fpb', $fpb->id)
+                    ->whereBetween('status', [2, 6]) // Status 2-6 untuk First Job
+                    ->orderBy('updated_at', 'desc')
+                    ->first();
+                $trsPoSecondJob = TrsPoPengajuan::where('id_fpb', $fpb->id)
+                    ->whereBetween('status', [7, 9]) // Status 7-9 untuk Second Job
+                    ->orderBy('updated_at', 'desc')
+                    ->first();
+    
+                if ($trsPoFirstJob && $trsPoFirstJob->status >= 6) { // Hanya menghitung jika status >=6
+                    $leadDaysFirstJob = $trsPoFirstJob->updated_at->diffInDays($fpbStartDate);
+                    $categoryLeadDaysFirstJob[] = $leadDaysFirstJob;
+                }
+                if ($trsPoSecondJob && $trsPoSecondJob->status >= 6) { // Hanya menghitung jika status >=6
+                    $leadDaysSecondJob = $trsPoSecondJob->updated_at->diffInDays($trsPoFirstJob ? $trsPoFirstJob->updated_at : $fpbStartDate);
+                    $categoryLeadDaysSecondJob[] = $leadDaysSecondJob;
+                }
+    
+                if ($trsPoSecondJob && in_array($trsPoSecondJob->status, [10, 9])) { // Prioritaskan status 9
+                    $leadDaysSecondJob = $trsPoSecondJob->updated_at->diffInDays($trsPoFirstJob ? $trsPoFirstJob->updated_at : $fpbStartDate);
+                    $categoryLeadDaysSecondJob[] = $leadDaysSecondJob;
+                    $categoryConfirmFinish++;
+                } elseif ($trsPoFirstJob && in_array($trsPoFirstJob->status, [6, 7, 8])) { // Sisanya untuk status 6, 7, 8
+                    $leadDaysFirstJob = $trsPoFirstJob->updated_at->diffInDays($fpbStartDate);
+                    $categoryLeadDaysFirstJob[] = $leadDaysFirstJob;
+                    $categorySubmitConfirm++;
+                }
+            }
+    
+            $averageLeadDaysFirstJob = count($categoryLeadDaysFirstJob) > 0 ? round(array_sum($categoryLeadDaysFirstJob) / count($categoryLeadDaysFirstJob)) : 0;
+            $averageLeadDaysSecondJob = count($categoryLeadDaysSecondJob) > 0 ? round(array_sum($categoryLeadDaysSecondJob) / count($categoryLeadDaysSecondJob)) : 0;
+    
+            $categoryPercentage = $totalFPB > 0 ? round(($categoryTotal / $totalFPB) * 100) : 0;
+            $totalPercentage += $categoryPercentage;
+    
+            $leadTimeData[$category] = [
+                'average_lead_days_first' => $averageLeadDaysFirstJob,
+                'average_lead_days_second' => $averageLeadDaysSecondJob,
+                'total' => $categoryTotal,
+                'percentage' => $categoryPercentage,
+                'submit_confirm' => $categorySubmitConfirm, // FPB status 6-8
+                'confirm_finish' => $categoryConfirmFinish, // FPB status 9
+            ];
+        }
+    
+        if ($totalPercentage > 100) {
+            $leadTimeData = array_map(function ($data) use ($totalPercentage) {
+                $data['percentage'] = round(($data['percentage'] / $totalPercentage) * 100);
+                return $data;
+            }, $leadTimeData);
+        }
+    
+        $leadTimeData['Total'] = [
+            'average_lead_days_first' => round(array_sum(array_column($leadTimeData, 'average_lead_days_first')) / count($categories)),
+            'average_lead_days_second' => round(array_sum(array_column($leadTimeData, 'average_lead_days_second')) / count($categories)),
+            'total' => $totalFPB,
+            'percentage' => 100,
+            'submit_confirm' => $submitConfirmFPB,
+            'confirm_finish' => $confirmFinishFPB,
+        ];
+    
+        $leadTimeData[$category] = [
+            'average_lead_days_first' => $averageLeadDaysFirstJob,
+            'average_lead_days_second' => $averageLeadDaysSecondJob,
+            'total' => $categoryTotal,
+            'percentage' => $categoryPercentage,
+            'submit_confirm' => $categorySubmitConfirm, // FPB status 6-8
+            'confirm_finish' => $categoryConfirmFinish, // FPB status 9
+            'total_submit_confirm' => $categorySubmitConfirm, // Tambahkan total submit-confirm
+            'total_confirm_finish' => $categoryConfirmFinish, // Tambahkan total confirm-finish
+        ];
+        
+        return view('dashboard.dashboardFPB', [
+            'fpbOpenPercentage' => $fpbOpenPercentage,
+            'fpbFinishPercentage' => $fpbFinishPercentage,
+            'fpbOpen' => $fpbOpen,
+            'fpbFinish' => $fpbFinish,
+            'totalFPB' => $totalFPB,
+            'leadTimeData' => $leadTimeData,
+            'monthlyData' => $monthlyData
+        ]);
+    }
+
     public function indexPoDeptHead()
     {
         // Mendapatkan role_id dari pengguna yang sedang login

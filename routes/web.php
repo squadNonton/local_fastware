@@ -454,6 +454,8 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/download-file/{id}', [PoPengajuanController::class, 'downloadFile'])->name('download.file');
     Route::get('/get-data', [PoPengajuanController::class, 'getData'])->name('getData');
 
+    Route::get('/dashboardFPB', [PoPengajuanController::class, 'dashboardFPB'])->name('dashboardFPB');
+
 
     //E-Mading Adasi
     Route::get('/ds-E-Mading-Adasi', [MadingController::class, 'dsMading'])->name('dsMading');
