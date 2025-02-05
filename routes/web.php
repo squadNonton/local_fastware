@@ -265,7 +265,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/inquiry/update', [InquirySalesController::class, 'updateInquiry'])->name('updateInquiry');
     Route::post('/inquiry/upload-file', [InquirySalesController::class, 'uploadFile'])->name('uploadFile');
     Route::post('/save-inquiry', [InquirySalesController::class, 'saveInquiry'])->name('saveInquiry');
-    // Route::get('/inquiry/overview-purchase', [InquirySalesController::class, 'overviewPurchase'])->name('overviewPurchase');
+    Route::get('/inquiry/overview-inquiry', [InquirySalesController::class, 'overviewInquiry'])->name('overviewInquiry');
     // Route::post('/inquiry/confirm-purchase/{id}', [InquirySalesController::class, 'confirmPurchase'])->name('confirmPurchase');
     // Route::post('/inquiry/progress', [InquirySalesController::class, 'storeProgressPurchase'])->name('storeProgressPurchase');
     Route::post('/inquiry/finish/{id}', [InquirySalesController::class, 'finishInquiry'])->name('finishInquiry');

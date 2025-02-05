@@ -19,7 +19,6 @@
                 font-family: 'Cambria', serif;
                 width: 400px;
                 max-width: 90%;
-                font-weight: bold;
                 color: #000000;
                 background-color: rgb(114, 114, 114);
             }
@@ -99,6 +98,7 @@
                 max-height: 200px;
                 overflow-y: auto;
                 display: none;
+                padding: 10px;
             }
 
             /* Style for each item */
@@ -315,7 +315,7 @@
             .btn-custom-form {
                 background-color: #4df300;
                 /* Merah untuk show form */
-                font-size: 9pt;
+                font-size: 8pt;
                 font-family: 'Cambria', serif;
                 font-weight: bold;
             }
@@ -323,7 +323,7 @@
             .btn-custom-show {
                 background-color: #f300a2;
                 /* Merah untuk show form */
-                font-size: 9pt;
+                font-size: 8pt;
                 font-family: 'Cambria', serif;
                 font-weight: bold;
             }
@@ -331,7 +331,7 @@
             .btn-custom-edit {
                 background-color: #3564ff;
                 /* Merah untuk show form */
-                font-size: 9pt;
+                font-size: 8pt;
                 font-family: 'Cambria', serif;
                 font-weight: bold;
             }
@@ -339,7 +339,7 @@
             .btn-custom-view {
                 background-color: #fffb00;
                 /* Merah untuk show form */
-                font-size: 9pt;
+                font-size: 8pt;
                 font-family: 'Cambria', serif;
                 font-weight: bold;
             }
@@ -347,7 +347,7 @@
             .btn-custom-delete {
                 background-color: #ff0000;
                 /* Merah untuk show form */
-                font-size: 9pt;
+                font-size: 8pt;
                 font-family: 'Cambria', serif;
                 font-weight: bold;
             }
@@ -355,7 +355,7 @@
             .btn-custom-form:hover {
                 background-color: #34a500;
                 /* Merah untuk show form */
-                font-size: 9pt;
+                font-size: 8pt;
                 font-family: 'Cambria', serif;
                 font-weight: bold;
             }
@@ -363,7 +363,7 @@
             .btn-custom-show:hover {
                 background-color: #b10076;
                 /* Merah untuk show form */
-                font-size: 9pt;
+                font-size: 8pt;
                 font-family: 'Cambria', serif;
                 font-weight: bold;
             }
@@ -371,7 +371,7 @@
             .btn-custom-edit:hover {
                 background-color: #0026a3;
                 /* Merah untuk show form */
-                font-size: 9pt;
+                font-size: 8pt;
                 font-family: 'Cambria', serif;
                 font-weight: bold;
             }
@@ -379,7 +379,7 @@
             .btn-custom-view:hover {
                 background-color: #ffd000;
                 /* Merah untuk show form */
-                font-size: 9pt;
+                font-size: 8pt;
                 font-family: 'Cambria', serif;
                 font-weight: bold;
             }
@@ -387,7 +387,7 @@
             .btn-custom-delete:hover {
                 background-color: #be0000;
                 /* Merah untuk show form */
-                font-size: 9pt;
+                font-size: 8pt;
                 font-family: 'Cambria', serif;
                 font-weight: bold;
             }
@@ -413,6 +413,11 @@
                 border-radius: 10px;
                 color: #be0000;
                 font-style: italic;
+            }
+
+            .disabledform {
+                font-size: 8pt;
+                color: red;
             }
         </style>
 
@@ -450,12 +455,12 @@
                                         <th scope="col">Category</th>
                                         <th scope="col">Supplier</th>
                                         <th scope="col">Customer</th>
-                                        <th scope="col">State</th>
+                                        <th scope="col">Status</th>
                                         <th scope="col">Ship to</th>
                                         <th scope="col">Last Update</th>
                                         <th scope="col">Est. Date</th>
-                                        {{-- <th scope="col">is Active</th> --}}
                                         <th scope="col">Actions</th>
+                                        {{-- <th scope="col">is Active</th> --}}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -513,9 +518,18 @@
                                             </td>
                                             <td>
                                                 @if ($inquiry->details->isNotEmpty())
-                                                    @foreach ($inquiry->details as $detail)
-                                                        <p>{{ $detail->ship }}</p>
-                                                    @endforeach
+                                                    @php
+                                                        // Ambil semua nilai ship dari detail
+                                                        $ships = $inquiry->details->pluck('ship')->unique(); // Mengambil nilai unik
+                                                    @endphp
+
+                                                    @if ($ships->count() === 1)
+                                                        <p>{{ $ships->first() }}</p>
+                                                    @else
+                                                        @foreach ($ships as $ship)
+                                                            <p>{{ $ship }}</p>
+                                                        @endforeach
+                                                    @endif
                                                 @else
                                                     --- No Shipping Options ---
                                                 @endif
@@ -615,17 +629,17 @@
                                 <form action="{{ route('storeinquiry') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
                                     <div class="mb-3">
-                                        <label for="jenis_inquiry" class="form-label">Jenis Inquiry</label>
+                                        <label for="loc_imp" class="form-label fw-bold">Category <span
+                                                class="disabledform">
+                                                [*Form Disabled]</span></label>
+                                        <input type="text" class="form-control" id="loc_imp" name="loc_imp"
+                                            value="Local" disabled required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="jenis_inquiry" class="form-label fw-bold">Jenis Inquiry</label>
                                         <select class="form-select" id="jenis_inquiry" name="jenis_inquiry" required>
                                             <option value="RO">Reguler Order</option>
                                             <option value="SPOR">Spesial Order</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="loc_imp" class="form-label">Category</label>
-                                        <select class="form-select" id="loc_imp" name="loc_imp" required>
-                                            <option value="Local">Local</option>
-                                            <option value="Import">Import</option>
                                         </select>
                                     </div>
                                     {{-- <div class="mb-3">
@@ -643,7 +657,7 @@
                                     </div> --}}
 
                                     <div class="mb-3">
-                                        <label for="id_customer" class="form-label">Order from</label>
+                                        <label for="id_customer" class="form-label fw-bold">Order from</label>
                                         <div class="searchable-dropdown">
                                             <input type="text" id="search_customer">
                                             <div class="dropdown-items" id="customer_list" style="display: none;">
@@ -699,10 +713,8 @@
                                     </div>
                                     <div class="mb-3">
                                         <label for="editloc_imp" class="form-label">Category</label>
-                                        <select class="form-select" id="editloc_imp" name="loc_imp" required>
-                                            <option value="Local">Local</option>
-                                            <option value="Import">Import</option>
-                                        </select>
+                                        <input type="text" class="form-control" id="editloc_imp" name="loc_imp"
+                                            value="Local" disabled required>
                                     </div>
                                     <div class="mb-3 edit-searchable-dropdown">
                                         <label for="search_edit_customer" class="form-label">Order from</label>
@@ -770,20 +782,6 @@
             </div>
         </div>
 
-                        <!-- jQuery -->
-                        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-                        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
-                        <script>
-                            $(document).ready(function() {
-                                // Hover function for dropdowns
-                                $('.nav-item.dropdown').hover(function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
-                                }, function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
-                                });
-                            });
-                            </script>
-
         <!-- jQuery -->
         <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
         {{-- excel --}}
@@ -806,21 +804,15 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const locImpSelect = document.getElementById('loc_imp');
+                const locImpSelect = document.getElementById('loc_imp'); // Dropdown, tetapi hanya untuk Local
                 const searchInput = document.getElementById('search_customer');
                 const customerList = document.getElementById('customer_list');
                 const hiddenInput = document.getElementById('id_customer');
                 const selectedCustomersList = document.getElementById('selected_customers_list');
-                let selectedCustomers = [];
 
                 // Tampilkan dropdown dan menangani perubahan kategori
-                locImpSelect.addEventListener('change', function() {
-                    customerList.style.display = 'block'; // Selalu tampilkan dropdown
-                    searchInput.value = ''; // Kosongkan input saat berpindah kategori
-                    selectedCustomers = []; // Reset pilihan
-                    hiddenInput.value = ''; // Reset hidden input
-                    selectedCustomersList.innerHTML = ''; // Kosongkan daftar yang terpilih
-                });
+                locImpSelect.value = 'Local'; // Set default ke Local
+                customerList.style.display = 'block'; // Selalu tampilkan daftar customer
 
                 // Mencari customer berdasarkan input
                 searchInput.addEventListener('input', function() {
@@ -839,39 +831,13 @@
                         const selectedValue = e.target.getAttribute('data-value');
                         const selectedText = e.target.textContent;
 
-                        if (locImpSelect.value === 'Local') {
-                            // Untuk Local, set satu customer dan tidak mengizinkan pemilihan lebih
-                            selectedCustomers = [selectedValue];
-                            searchInput.value = selectedText; // Tampilkan nama customer
-                            hiddenInput.value = selectedValue; // Set ID customer
-                            customerList.style.display = 'none'; // Sembunyikan daftar
-                            selectedCustomersList.innerHTML = ''; // Kosongkan daftar, hanya satu yang terpilih
-                        } else {
-                            // Untuk Import, tambah atau hapus dari pilihan
-                            const index = selectedCustomers.indexOf(selectedValue);
-                            if (index > -1) {
-                                // Hapus jika sudah ada
-                                selectedCustomers.splice(index, 1);
-                            } else {
-                                // Tambah jika belum ada
-                                selectedCustomers.push(selectedValue);
-                            }
-
-                            // Perbaharui input hidden
-                            hiddenInput.value = selectedCustomers.join(','); // Set dengan ID yang terpilih
-                            // Tampilkan semua nama customer yang terpilih
-                            searchInput.value = selectedCustomers.map(id => {
-                                const item = customerList.querySelector(`div[data-value="${id}"]`);
-                                return item ? item.textContent : '';
-                            }).join(', '); // Gabungkan nama dengan koma
-
-                            // Perbaharui daftar yang ditampilkan
-                            selectedCustomersList.innerHTML = selectedCustomers.map(id => {
-                                const item = customerList.querySelector(`div[data-value="${id}"]`);
-                                return '<span class="selected-customer">' + (item ? item.textContent :
-                                    '') + '</span>';
-                            }).join(', ');
-                        }
+                        // Untuk Local, set satu customer dan tidak mengizinkan pemilihan lebih
+                        searchInput.value = selectedText; // Tampilkan nama customer
+                        hiddenInput.value = selectedValue; // Set ID customer
+                        customerList.style.display = 'none'; // Sembunyikan daftar
+                        selectedCustomersList.innerHTML = ''; // Kosongkan daftar, hanya satu yang terpilih
+                        selectedCustomersList.innerHTML = '<span class="selected-customer">' + selectedText +
+                            '</span>'; // Tampilkan customer terpilih
                     }
                 });
 

@@ -80,6 +80,7 @@
                 text-align: center;
             }
 
+
             .dataTable-pagination {
                 padding: 0.25rem;
                 /* Padding lebih kecil untuk pagination */
@@ -90,7 +91,6 @@
             .dataTable-pagination .dataTable-info,
             .dataTable-pagination .dataTable-pagination-button {
                 margin: 0;
-                font-size: 0.8rem;
                 /* Hapus margin untuk elemen info dan tombol pagination */
             }
 
@@ -142,6 +142,22 @@
                 margin-bottom: 0.5rem;
                 /* Jarak antara input pencarian dan tabel */
                 font-family: 'Cambria', serif;
+            }
+
+            .modal {
+                font-family: 'Cambria', serif;
+                font-size: 0.9rem;
+                font-weight: bold;
+            }
+
+            .modal-header {
+                font-family: 'Cambria', serif;
+                font-size: 0.7rem;
+            }
+
+            .testfont {
+                font-family: 'Cambria', serif;
+                font-size: 1rem;
             }
 
             .btn-custom-draft {
@@ -233,6 +249,15 @@
                 /* Merah untuk show form */
             }
 
+            .btn-custom-confirm-purchasing {
+                background-color: #ffb300;
+                color: #000000;
+                border: none;
+                font-size: 8pt;
+                font-family: 'Cambria', serif;
+                font-weight: bold;
+            }
+
             .btn-custom-form {
                 background-color: #4df300;
                 /* Merah untuk show form */
@@ -321,45 +346,39 @@
         <section class="section">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title font-sii">Ka. Sie - Persetujuan Inquiry</h5>
-                    {{-- <nav>
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item active"><a href="{{ route('createinquiry') }}">Menu Inquiry Sales</a>
-                            </li>
-                            <li class="breadcrumb-item active">Persetujuan Ka.Sie</li>
-                        </ol>
-                    </nav> --}}
+                    <h5 class="card-title font-sii text-center">Overview Inquiry Order</h5>
                 </div>
 
                 <section class="section">
                     <div class="card">
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-1" id="inquiryTableKaSie">
+                                <table class="table table-1" id="overviewTable">
                                     <thead>
                                         <tr>
-                                            <th scope="col">No</th>
-                                            <th scope="col">Create By</th>
-                                            <th scope="col">Reference</th>
-                                            <th scope="col">Category</th>
-                                            <th scope="col">Supplier</th>
-                                            <th scope="col">Customer</th>
-                                            <th scope="col">State</th>
-                                            <th scope="col">Ship to</th>
-                                            <th scope="col">Last Update</th>
-                                            <th scope="col">Est.Date</th>
-                                            <th scope="col">Actions</th>
+                                            <th>No</th>
+                                            <th class="text-center">Create By</th>
+                                            <th class="text-center">Reference</th>
+                                            <th class="text-center">Category</th>
+                                            <th class="text-center">Supplier</th>
+                                            <th class="text-center">Customer</th>
+                                            <th>Status</th>
+                                            <th>Ship-to</th>
+                                            <th>Last Update</th>
+                                            <th>Est. Date</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($inquiries as $index => $inquiry)
+                                        @foreach ($draftInquiries as $index => $inquiry)
                                             <tr>
                                                 <td>{{ $index + 1 }}</td>
-                                                <td>{{ $inquiry->create_by }}</td>
-                                                <td>{{ $inquiry->kode_inquiry }}</td>
-                                                <td>{{ $inquiry->loc_imp }}</td>
-                                                <td>{{ $inquiry->supplier }}</td>
-                                                <td>{{ $inquiry->customer ? $inquiry->customer->name_customer : 'N/A' }}
+                                                <td class="text-center">{{ $inquiry->create_by }}</td>
+                                                <td class="text-center">{{ $inquiry->kode_inquiry }}</td>
+                                                <td class="text-center">{{ $inquiry->loc_imp }}</td>
+                                                <td class="text-center">{{ $inquiry->supplier }}</td>
+                                                <td class="text-center">
+                                                    {{ $inquiry->customer ? $inquiry->customer->name_customer : 'N/A' }}
                                                 </td>
                                                 @php
                                                     $statusDescriptions = [
@@ -371,6 +390,7 @@
                                                         6 => 'Finished',
                                                         7 => 'Rejected',
                                                         8 => 'Approve Inventory',
+                                                        9 => 'Confirm Purchasing',
                                                     ];
 
                                                     // Mendefinisikan kelas tombol berdasarkan status
@@ -383,6 +403,7 @@
                                                         6 => 'btn-primary', // Finished
                                                         7 => 'btn-danger', // Rejected
                                                         8 => 'btn-danger', // Approve Inventory
+                                                        9 => 'btn-warning', // Confirm Purchasing
                                                     ];
                                                 @endphp
                                                 <td>
@@ -396,7 +417,8 @@
                                                         {{ $inquiry->status == 5 ? 'btn-custom-in-progress' : '' }}
                                                         {{ $inquiry->status == 6 ? 'btn-custom-finished' : '' }}
                                                         {{ $inquiry->status == 7 ? 'btn-custom-rejected' : '' }}
-                                                        {{ $inquiry->status == 8 ? 'btn-custom-inventory' : '' }}">
+                                                        {{ $inquiry->status == 8 ? 'btn-custom-inventory' : '' }}
+                                                        {{ $inquiry->status == 9 ? 'btn-custom-confirm-purchasing' : '' }}">
                                                         {{ $statusDescriptions[$inquiry->status] ?? 'Unknown' }}
                                                     </button>
                                                 </td>
@@ -420,7 +442,6 @@
                                                 </td>
                                                 <td>
                                                     @php
-                                                        // Ambil update progress jika ada
                                                         $progress = App\Models\TrxDboProgPurchase::where(
                                                             'inquiry_id',
                                                             $inquiry->id,
@@ -430,20 +451,11 @@
                                                     @endphp
                                                     {{ $progress ? $progress->description : 'No updates yet' }}
                                                 </td>
-
                                                 <td>{{ $inquiry->est_date }}</td>
                                                 <td>
                                                     <a href="#" class="btn btn-warning btn-sm"
                                                         onclick="showInquiry({{ $inquiry->id }}); return false;">
                                                         <i class="bi bi-eye-fill"></i>
-                                                    </a>
-                                                    <a href="#" class="btn btn-primary btn-sm"
-                                                        onclick="approveInquiry({{ $inquiry->id }}); return false;">
-                                                        <i class="bi bi-check-square-fill"></i>
-                                                    </a>
-                                                    <a href="#" class="btn btn-danger btn-sm"
-                                                        onclick="rejectInquiry({{ $inquiry->id }}); return false;">
-                                                        <i class="bi bi-file-x-fill"></i>
                                                     </a>
                                                 </td>
                                             </tr>
@@ -453,27 +465,81 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Modal for Edit Supplier, Last Update, and Est. Date -->
+                    <div class="modal fade" id="editDataModal" tabindex="-1" aria-labelledby="editDataModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title testfont" id="editDataModalLabel">Edit Inquiry Details</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="editDataForm">
+                                        @csrf
+                                        <input type="hidden" id="inquiryId" name="inquiry_id">
+
+                                        <!-- Field Supplier (Dropdown List) -->
+                                        <div class="mb-3">
+                                            <label for="supplier" class="form-label">Supplier</label>
+                                            <select class="form-select" id="supplier" name="supplier" required>
+                                                <option value="">Select Supplier</option>
+                                                <option value="PT. SINAR PUTRA METALINDO">
+                                                    PT. SINAR PUTRA METALINDO</option>
+                                                <option value="PT. TRUST STEEL INDO">
+                                                    PT. TRUST STEEL INDO</option>
+                                                <option value="PT. LUKWINDO NUSA DWIPA">
+                                                    PT. LUKWINDO NUSA DWIPA</option>
+                                                <option value="CV. BAJA MAKMUR">
+                                                    CV. BAJA MAKMUR</option>
+                                                <option value="CV. REIHAI ABADI METAL INDONESIA">
+                                                    CV. REIHAI ABADI METAL INDONESIA</option>
+                                                <option value="PT. SAMUDRA BAJA NUSANTARA">
+                                                    PT. SAMUDRA BAJA NUSANTARA</option>
+                                                <option value="PT. SURYA SEJAHTERA METALINDO LESTARI">
+                                                    PT. SURYA SEJAHTERA METALINDO LESTARI</option>
+                                                <option value="CV. DIMA RAMA SAKTI">
+                                                    CV. DIMA RAMA SAKTI</option>
+                                                <!-- Tambahkan opsi lain jika diperlukan -->
+                                            </select>
+                                        </div>
+
+                                        <!-- Field Last Update (Free Text) -->
+                                        <div class="mb-3">
+                                            <label for="progress" class="form-label">Last Update</label>
+                                            <input type="text" class="form-control" id="progress" name="progress"
+                                                required>
+                                        </div>
+
+                                        <!-- Field Est. Date (Date Picker) -->
+                                        <div class="mb-3">
+                                            <label for="estDate" class="form-label">Est. Date <span>
+                                                    (Incoming Shipment)</span></label>
+                                            <input type="date" class="form-control" id="estDate" name="est_date"
+                                                required>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary btn-sm"
+                                        data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary btn-sm"
+                                        onclick="submitEditDataForm()">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </section>
             </div>
         </section>
 
-        <!-- jQuery -->
-        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
-        <script>
-            $(document).ready(function() {
-                // Hover function for dropdowns
-                $('.nav-item.dropdown').hover(function() {
-                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
-                }, function() {
-                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
-                });
-            });
-        </script>
+
         <!-- jQuery -->
         <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
         <!-- SimpleDataTables JS -->
         <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
+
         <script>
             $(document).ready(function() {
                 // Hover function for dropdowns
@@ -484,8 +550,9 @@
                 });
             });
 
+            $.noConflict();
             jQuery(document).ready(function($) {
-                const dataTable = new simpleDatatables.DataTable("#inquiryTableKaSie", {
+                const dataTable = new simpleDatatables.DataTable("#overviewTable", {
                     searchable: true, // Aktifkan fitur pencarian
                     perPage: 10, // Jumlah entri data per halaman
                     perPageSelect: [5, 10, 20, 150], // Opsi jumlah entri data per halaman
@@ -513,47 +580,14 @@
             });
         </script>
 
+
+
         <script>
-            function approveInquiry(id) {
-                $.ajax({
-                    url: '{{ route('approveKaSie', '') }}/' + id,
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-                        Swal.fire('Success!', 'Inquiry approved successfully.', 'success').then(() => {
-                            location.reload(); // Reload halaman
-                        });
-                    },
-                    error: function(xhr) {
-                        console.error(xhr.responseText);
-                    }
-                });
-            }
-
-            function rejectInquiry(id) {
-                $.ajax({
-                    url: '{{ route('rejectKaSie', '') }}/' + id, // Buat route untuk reject
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-                        Swal.fire('Success!', 'Inquiry rejected successfully.', 'success').then(() => {
-                            location.reload(); // Reload halaman
-                        });
-                    },
-                    error: function(xhr) {
-                        console.error(xhr.responseText);
-                    }
-                });
-            }
-
             function showInquiry(id) {
                 // Tampilkan detail inquiry dan tambahkan parameter query
                 window.location.href = '{{ route('showFormSS', '') }}/' + id + '?source=approval';
             }
         </script>
+
     </main>
 @endsection

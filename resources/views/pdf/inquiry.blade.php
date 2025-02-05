@@ -83,7 +83,7 @@
         table th,
         table td {
             border: 1px solid #000;
-            padding: 6px;
+            padding: 2px;
             /* Mengurangi padding untuk memperkecil tabel */
             text-align: left;
         }
@@ -152,19 +152,20 @@
                     <th style="width: 25px;">No</th>
                     <th style="width: 100px;">Raw Material</th>
                     <th style="width: 50px;">Shapes</th>
-                    <th style="width: 40px;">Thickness</th>
-                    <th style="width: 40px;">Weight</th>
+                    <th style="width: 40px;text-align:center;">Thickness</th>
+                    <th style="width: 40px;text-align:center;">Width</th>
                     <th style="width: 40px; text-align:center;">Inner Dia</th>
                     <th style="width: 40px; text-align:center;">Outer Dia</th>
-                    <th style="width: 50px;">Lenght</th>
+                    <th style="width: 50px;text-align:center;">Length</th>
                     <th style="width: 50px; text-align:center;">Qty
                         <p style="font-size: 9pt; text-align:center;">(in Pcs)</p>
                     </th>
-                    <th style="width: 50px; text-align:center;">Forecast Mounth 1</th>
-                    <th style="width: 50px; text-align:center;">Forecast Mounth 2</th>
-                    <th style="width: 50px; text-align:center;">Forecast Mounth 3</th>
+                    <th style="width: 50px; text-align:center;">Forecast Month 1</th>
+                    <th style="width: 50px; text-align:center;">Forecast Month 2</th>
+                    <th style="width: 50px; text-align:center;">Forecast Month 3</th>
                     <th style="width: 70px; text-align:center;">Ship-to</th>
                     <th style="width: 50px; text-align:center;">Sales Order</th>
+                    {{-- <th style="width: 50px; text-align:center;">PO Number</th> --}}
                     <th style="width: 50px;">Remark</th>
                 </tr>
             </thead>
@@ -174,22 +175,23 @@
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $material->type_materials ? $material->type_materials->type_name : 'N/A' }}</td>
                         <td>{{ $material['jenis'] }}</td>
-                        <td>{{ $material['thickness'] }}</td>
-                        <td>{{ $material['weight'] }}</td>
-                        <td>{{ $material['inner_diameter'] }}</td>
-                        <td>{{ $material['outer_diameter'] }}</td>
-                        <td>{{ $material['length'] }}</td>
-                        <td>{{ $material['qty'] }}</td>
-                        <td>{{ $material['m1'] }}</td>
-                        <td>{{ $material['m2'] }}</td>
-                        <td>{{ $material['m3'] }}</td>
-                        <td>{{ $material['ship'] }}</td>
+                        <td style="text-align:center;">{{ $material['thickness'] }}</td>
+                        <td style="text-align:center;">{{ $material['weight'] }}</td>
+                        <td style="text-align:center;">{{ $material['inner_diameter'] }}</td>
+                        <td style="text-align:center;">{{ $material['outer_diameter'] }}</td>
+                        <td style="text-align:center;">{{ $material['length'] }}</td>
+                        <td style="text-align:center;">{{ $material['qty'] }}</td>
+                        <td style="text-align:center;">{{ $material['m1'] }}</td>
+                        <td style="text-align:center;">{{ $material['m2'] }}</td>
+                        <td style="text-align:center;">{{ $material['m3'] }}</td>
+                        <td style="text-align:center;">{{ $material['ship'] }}</td>
                         <td>{{ $material['so'] }}</td>
+                        {{-- <td>{{ $material['nopo'] }}</td> --}}
                         <td>{{ $material['note'] }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="15" style="text-align: center;">Data tidak ditemukan</td>
+                        <td colspan="16" style="text-align: center;">Data tidak ditemukan</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -210,19 +212,34 @@
                 {{-- <td class="table-n1">{{ $inquiry->create_by }}</td> --}}
                 <tr class="table-n1">
                     <td class="table-n1">
-                        <p>Approved</p>{{ $signatures['submitted'] }}
+                        <p style="color: crimson;">Proposed</p>
+
+                        <p style="font-size: 8pt;">{{ $signatures['submitted'] }}</p>
+                        <small>Date : {{ now()->format('d/m/Y H:i') }}</small>
                     </td>
                     <td class="table-n1">
-                        <p>Approved</p> {{ $signatures['approved_kasie'] }}
+                        <p style="color: crimson;">Approved</p>
+
+                        <p style="font-size: 8pt;">{{ $signatures['approved_kasie'] }}</p>
+                        <small>Date : {{ now()->format('d/m/Y H:i') }}</small>
                     </td>
                     <td class="table-n1">
-                        <p>Approved</p>{{ $signatures['approved_kadept'] }}
+                        <p style="color: crimson;">Approved</p>
+
+                        <p style="font-size: 8pt;">{{ $signatures['approved_kadept'] }}</p>
+                        <small>Date : {{ now()->format('d/m/Y H:i') }}</small>
                     </td>
                     <td class="table-n1">
-                        <p>Approved</p>{{ $signatures['approved_inventory'] }}
+                        <p style="color: crimson;">Approved</p>
+
+                        <p style="font-size: 8pt;">{{ $signatures['approved_inventory'] }}</p>
+                        <small>Date : {{ now()->format('d/m/Y H:i') }}</small>
                     </td>
                     <td class="table-n1">
-                        <p>Confirmed</p>{{ $signatures['confirmed_purchasing'] }}
+                        <p style="color: crimson;">Confirmed</p>
+
+                        <p style="font-size: 8pt;">{{ $signatures['confirmed_purchasing'] }}</p>
+                        <small>Date : {{ now()->format('d/m/Y H:i') }}</small>
                     </td>
                 </tr>
             </tbody>

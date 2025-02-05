@@ -398,9 +398,18 @@
                                                 </td>
                                                 <td>
                                                     @if ($inquiry->details->isNotEmpty())
-                                                        @foreach ($inquiry->details as $detail)
-                                                            <p>{{ $detail->ship }}</p>
-                                                        @endforeach
+                                                        @php
+                                                            // Ambil semua nilai ship dari detail
+                                                            $ships = $inquiry->details->pluck('ship')->unique(); // Mengambil nilai unik
+                                                        @endphp
+
+                                                        @if ($ships->count() === 1)
+                                                            <p>{{ $ships->first() }}</p>
+                                                        @else
+                                                            @foreach ($ships as $ship)
+                                                                <p>{{ $ship }}</p>
+                                                            @endforeach
+                                                        @endif
                                                     @else
                                                         --- No Shipping Options ---
                                                     @endif

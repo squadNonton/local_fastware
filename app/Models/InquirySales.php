@@ -22,9 +22,10 @@ class InquirySales extends Model
         'est_date',
         'supplier',
         'create_by',
-        'to_approve',
-        'to_validate',
-        'note',
+        // 'to_approve',
+        // 'to_validate',
+        'progress',
+        'refnopo',
         'attach_file',
         'status',
         'kasie_id',
@@ -32,6 +33,8 @@ class InquirySales extends Model
         'inventory_id',
         'purchasing_id',
         'is_active',
+        'created_at',
+        'updated_at',
         'modified_by',
     ];
 

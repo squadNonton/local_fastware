@@ -122,6 +122,7 @@
                             <div class="form-value">{{ $inquiry->created_at }}</div>
                         </div>
                     </div>
+
                     <script>
                         var typeMaterials = {!! json_encode($typeMaterials) !!};
                         console.log(typeMaterials); // Untuk memastikan data benar
@@ -135,18 +136,19 @@
                                     <th style="width: 100px;">Raw Material</th>
                                     <th style="width: 50px;">Shapes</th>
                                     <th style="width: 30px;">Thinkness</th>
-                                    <th style="width: 30px;">Weight</th>
+                                    <th style="width: 30px;">Width</th>
                                     <th style="width: 30px;">Inner-Diameter</th>
                                     <th style="width: 30px;">Outer-Diameter</th>
-                                    <th style="width: 50px;">Lenght</th>
+                                    <th style="width: 50px;">Length</th>
                                     <th style="width: 50px; text-align:center;">Qty
                                         <p style="font-size: 9pt; text-align:center;">(in Pcs)</p>
                                     </th>
-                                    <th style="width: 30px;">Forecast Mounth 1</th>
-                                    <th style="width: 30px;">Forecast Mounth 2</th>
-                                    <th style="width: 30px;">Forecast Mounth 3</th>
+                                    <th style="width: 30px;">Forecast Month 1</th>
+                                    <th style="width: 30px;">Forecast Month 2</th>
+                                    <th style="width: 30px;">Forecast Month 3</th>
                                     <th style="width: 60px;">Ship-to</th>
                                     <th style="width: 60px;">Sales Order</th>
+                                    {{-- <th style="width: 60px;">PO Number</th> --}}
                                     <th style="width: 50px;">Remark</th>
                                 </tr>
                             </thead>
@@ -166,6 +168,7 @@
                                                     empty($material['m3']) &&
                                                     empty($material['ship']) &&
                                                     empty($material['so']) &&
+                                                    // empty($material['nopo']) &&
                                                     empty($material['note']))
                                                 <input type="checkbox" name="record">
                                             @endif
@@ -227,6 +230,11 @@
                                         <td>
                                             <input type="text" name="so" value="{{ $material['so'] }}"
                                                 size="10" required>
+                                        </td>
+                                        {{-- <td>
+                                            <input type="text" name="nopo" value="{{ $material['nopo'] }}"
+                                                size="10" required>
+                                        </td> --}}
                                         <td>
                                             <input type="text" name="note" value="{{ $material['note'] }}"
                                                 size="10" required>
@@ -242,19 +250,19 @@
                 </div>
             </div>
         </section>
-                        <!-- jQuery -->
-                        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-                        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
-                        <script>
-                            $(document).ready(function() {
-                                // Hover function for dropdowns
-                                $('.nav-item.dropdown').hover(function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
-                                }, function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
-                                });
-                            });
-                            </script>
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
+        <script>
+            $(document).ready(function() {
+                // Hover function for dropdowns
+                $('.nav-item.dropdown').hover(function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+                }, function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
+                });
+            });
+        </script>
 
         <!-- Modal for Uploading File -->
         <div class="modal fade" id="uploadFileModal" tabindex="-1" aria-labelledby="uploadFileModalLabel"
@@ -331,6 +339,7 @@
                 var cell13 = newRow.insertCell(12);
                 var cell14 = newRow.insertCell(13);
                 var cell15 = newRow.insertCell(14);
+                // var cell16 = newRow.insertCell(15);
                 var cell16 = newRow.insertCell(15);
 
                 cell1.innerHTML = '<input type="checkbox" name="record">';
@@ -363,6 +372,7 @@
                                         <option value="DS8">DS8</option>
                                     </select>`;
                 cell15.innerHTML = '<input type="text" name="so" size="10" required>';
+                // cell16.innerHTML = '<input type="text" name="nopo" size="10" required>';
                 cell16.innerHTML = '<input type="text" name="note" size="10" required>';
 
 
@@ -521,6 +531,7 @@
                     var m3Element = row.querySelector('input[name="m3"]');
                     var shipElement = row.querySelector('select[name="ship"]'); // Pastikan ini adalah select
                     var soElement = row.querySelector('input[name="so"]');
+                    // var nopoElement = row.querySelector('input[name="nopo"]');
                     var noteElement = row.querySelector('input[name="note"]');
 
                     // Pastikan semua elemen memiliki nilai
@@ -539,6 +550,7 @@
                             m3: m3Element ? m3Element.value : null,
                             ship: shipElement ? shipElement.value : null,
                             so: soElement ? soElement.value : null,
+                            // nopo: nopoElement ? nopoElement.value : null,
                             note: noteElement ? noteElement.value : null
                         };
                         data.materials.push(rowData); // Push ke materials

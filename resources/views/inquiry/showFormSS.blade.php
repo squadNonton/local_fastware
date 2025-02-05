@@ -120,7 +120,8 @@
                         </div>
                         <div class="form-group">
                             <label>Customer :</label>
-                            <div class="form-value">{{ $inquiry->customer ? $inquiry->customer->name_customer : 'N/A' }}
+                            <div class="form-value">
+                                <td>{{ $inquiry->customer ? $inquiry->customer->name_customer : 'N/A' }}</td>
                             </div>
                         </div>
                         <div class="form-group">
@@ -141,19 +142,20 @@
                                     <th style="width: 100px;">Raw Material</th>
                                     <th style="width: 50px;">Shapes</th>
                                     <th style="width: 40px;">Thickness</th>
-                                    <th style="width: 40px;">Weight</th>
-                                    <th style="width: 40px;">Inner Dia</th>
-                                    <th style="width: 40px;">Outer Dia</th>
-                                    <th style="width: 50px;">Lenght</th>
+                                    <th style="width: 40px;">Width</th>
+                                    <th style="width: 40px; text-align:center;"">Inner Dia</th>
+                                    <th style="width: 40px; text-align:center;"">Outer Dia</th>
+                                    <th style="width: 50px;">Length</th>
                                     <th style="width: 50px; text-align:center;">Qty
                                         <p style="font-size: 9pt; text-align:center;">(in Pcs)</p>
                                     </th>
-                                    <th style="width: 50px; text-align:center;">Forecast Mounth 1</th>
-                                    <th style="width: 50px; text-align:center;">Forecast Mounth 2</th>
-                                    <th style="width: 50px; text-align:center;">Forecast Mounth 3</th>
+                                    <th style="width: 50px; text-align:center;">Forecast Month 1</th>
+                                    <th style="width: 50px; text-align:center;">Forecast Month 2</th>
+                                    <th style="width: 50px; text-align:center;">Forecast Month 3</th>
                                     <th style="width: 90px; text-align:center;">Ship-to</th>
                                     <th style="width: 50px; text-align:center;">Sales Order</th>
-                                    <th style="width: 50px;">Remark</th>
+                                    {{-- <th style="width: 50px; text-align:center;">PO Number</th> --}}
+                                    <th style="width: 50px; text-align:center;"">Remark</th>
                                 </tr>
                             </thead>
                             <tbody id="table-body">
@@ -175,6 +177,7 @@
                                         <td>{{ $material['m3'] }}</td>
                                         <td>{{ $material['ship'] }}</td>
                                         <td>{{ $material['so'] }}</td>
+                                        {{-- <td>{{ $material['nopo'] }}</td> --}}
                                         <td>{{ $material['note'] }}</td>
                                         {{-- <td>{{ $material['file'] }}</td> --}}
                                     </tr>
@@ -190,96 +193,136 @@
                         @if ($isFromApproval)
                             <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm m-1">Kembali</a>
                         @else
-                            <a href="{{ route('formulirInquiry', $inquiry->id) }}"
-                                class="btn btn-secondary add-row-button btn-sm m-1">Correction</a>
+                            {{-- <a href="{{ route('formulirInquiry', $inquiry->id) }}"
+                                class="btn btn-secondary add-row-button btn-sm m-1">Correction</a> --}}
                             <a href="{{ route('createinquiry') }}"
                                 class="btn btn-primary delete-row-button btn-sm m-1">Submit</a>
                         @endif
                     @endif
-                    <a class="btn btn-secondary add-row-button btn-sm" onclick="goBack()">Kembali</a>
+                    {{-- <a class="btn btn-secondary add-row-button btn-sm" onclick="goBack()">Kembali</a> --}}
                     <a href="{{ route('showFormSS.pdf', $inquiry->id) }}" class="btn btn-danger btn-sm m-1">
                         <i class="bi bi-file-earmark-pdf"></i> Download PDF
                     </a>
-                </div>
 
-                {{-- Uploaded File --}}
-                <div class="card p-2 m-4">
-                    <div class="card-body">
-                        <div class="form-group mb-4">
-                            <button type="button" class="btn btn-primary btn-sm mb-2" style="background-color: orangered"
-                                onclick="submitUploadForm()"><i class="ri-hail-fill fs-6"></i>
-                            </button>
-
-                            <label for="attachments" class="ms-2">Upload Attachments (PDF, PNG, JPG, JPEG)</label>
-                            <input type="file" id="attachments" name="attachments[]" multiple
-                                accept=".pdf,.png,.jpg,.jpeg" class="form-control">
-                        </div>
-
-
-                        <h5 class="fotext">Uploaded Files:</h5>
-                        <ul id="uploaded-files-list">
-                            @if (!empty($uploadedFiles))
-                                @foreach ($uploadedFiles as $file)
-                                    <li>
-                                        <a href="{{ asset('assets/inquiry/' . $file) }}"
-                                            target="_blank">{{ $file }}</a>
-                                    </li>
-                                @endforeach
-                            @else
-                                <li>No files uploaded.</li>
-                            @endif
-                        </ul>
+                    {{-- Action User Inventory --}}
+                    <div class="d-flex justify-content-end">
+                        @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'RANGGA FADILLAH']))
+                            <a href="#" class="btn btn-primary btn-sm m-1"
+                                onclick="approveInventory({{ $inquiry->id }}); return false;">
+                                <i class="bi bi-check-square-fill fs-6"> Approve</i>
+                            </a>
+                            <a href="#" class="btn btn-danger btn-sm m-1"
+                                onclick="rejectInventory({{ $inquiry->id }}); return false;">
+                                <i class="bi bi-file-x-fill fs-6"> Reject</i>
+                            </a>
+                        @endif
                     </div>
+                    {{-- End-Code --}}
                 </div>
             </div>
+
             <section class="section">
-                <div class="container">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table>
-                                    <h5 class="card-title text-center">Inquiry Reference: {{ $inquiry->kode_inquiry }}</h5>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            {{-- Start Uploaded Files --}}
+                            <div class="col-lg-4">
+                                <div class="form-group mb-3 mt-2">
+                                    <label for="attachments" class="fw-bold mt-2">Upload Attachments (PDF, PNG, JPG,
+                                        JPEG)</label>
+                                    <input type="file" id="attachments" name="attachments[]" multiple
+                                        accept=".pdf,.png,.jpg,.jpeg" class="form-control mt-2" onchange="updateFileList()">
+
+                                    <button type="button" class="btn btn-success mt-3 btn-sm"
+                                        onclick="uploadFiles({{ $inquiry->id }})"
+                                        @if (in_array(Auth::user()->name, [
+                                                'NURSALIM',
+                                                'FAIZAL AFDAU',
+                                                'DIAMAN DARMAWINATA',
+                                                'MAMIK ABIDIN',
+                                                'ABDUR RAHMAN AL FAAIZ',
+                                                'FAJAR BAGASKARA',
+                                            ])) disabled @endif>
+                                        Upload Files
+                                    </button>
+                                </div>
+
+                                <table class="table-responsive">
                                     <thead>
                                         <tr>
-                                            <th style="width : 60px">No</th>
-                                            <th class="text-center" style="width : 300px">Date</th>
-                                            <th class="text-center" style="width : 250px">User</th>
-                                            <th class="text-center">Progress Description</th>
+                                            <th>File Name Attachment</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                    <tbody>
-                                        @foreach ($progressUpdates as $index => $progress)
+                                    <tbody id="uploaded-files-list">
+                                        @if (count($uploadedFiles) > 0)
+                                            @foreach ($uploadedFiles as $index => $file)
+                                                <tr>
+                                                    <td>
+                                                        <a href="{{ asset('assets/inquiry/' . $file) }}"
+                                                            target="_blank">{{ $file }}</a>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @else
                                             <tr>
-                                                <td>{{ $index + 1 }}</td>
-                                                <td>{{ $progress->created_at->format('d/m/Y H:i') }}</td>
-                                                <td>{{ $progress->user ? $progress->user->name : 'Purchase has not been updated' }}
-                                                </td>
-                                                <td>{{ $progress->description }}</td>
+                                                <td colspan="2">No files uploaded.</td>
                                             </tr>
-                                        @endforeach
-                                    </tbody>
+                                        @endif
                                     </tbody>
                                 </table>
                             </div>
+                            <div class="col-lg-8">
+                                <div class="table-responsive">
+                                    <table>
+                                        <h5 class="card-title text-center mt-4 mb-5" style="font-family: Cambria, serif">
+                                            History Progress Inquiry Local
+                                            <br>
+                                            <small class="fw-bold"> "{{ $inquiry->kode_inquiry }}" </small>
+                                        </h5>
+                                        <thead>
+                                            <tr>
+                                                <th style="width : 60px">No</th>
+                                                <th class="text-center" style="width : 300px">Date</th>
+                                                <th class="text-center" style="width : 250px">User</th>
+                                                <th class="text-center">Progress Description</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($progressUpdates as $index => $progress)
+                                                <tr>
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td style="width: 100px; text-align: center;">
+                                                        {{ $progress->created_at->format('d/m/Y H:i') }}</td>
+                                                    <td style="width: 400px">
+                                                        {{ $progress->user ? $progress->user->name : '--- Procurement has not been updated ---' }}
+                                                    </td>
+                                                    <td>{{ $progress->description }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
+                        {{-- End Code --}}
+
                     </div>
                 </div>
             </section>
         </section>
-                        <!-- jQuery -->
-                        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-                        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
-                        <script>
-                            $(document).ready(function() {
-                                // Hover function for dropdowns
-                                $('.nav-item.dropdown').hover(function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
-                                }, function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
-                                });
-                            });
-                            </script>
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
+        <script>
+            $(document).ready(function() {
+                // Hover function for dropdowns
+                $('.nav-item.dropdown').hover(function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+                }, function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
+                });
+            });
+        </script>
 
         <!-- jQuery -->
         <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
@@ -291,33 +334,50 @@
             }
         </script>
 
-        <script>
-            function submitUploadForm() {
-                var formData = new FormData();
-                var attachments = document.getElementById('attachments').files;
 
-                // Pastikan ada file yang diupload
-                if (attachments.length === 0) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'ERROR..!!',
-                        text: 'Please select the file to upload.',
-                        iconHtml: '<i class="ri-emotion-sad-fill"></i>',
-                        customClass: {
-                            popup: 'my-popup'
-                        }
-                    });
+
+        <script>
+            function updateFileList() {
+                var fileInput = document.getElementById('attachments');
+                var fileListContainer = document.getElementById('uploaded-files-list');
+
+                // Kosongkan daftar jika belum ada file
+                if (fileInput.files.length === 0) {
+                    fileListContainer.innerHTML = '<li>No files uploaded.</li>';
                     return;
                 }
 
-                formData.append('id_inquiry', '{{ $inquiry->id }}');
+                // Kosongkan daftar sebelumnya
+                fileListContainer.innerHTML = '';
 
-                // Tambahkan file ke formData
-                for (var i = 0; i < attachments.length; i++) {
-                    formData.append('attachments[]', attachments[i]);
+                // Tampilkan semua file yang dipilih
+                Array.from(fileInput.files).forEach((file, index) => {
+                    var li = document.createElement('li'); // Buat item list baru
+                    var link = document.createElement('a'); // Buat elemen link
+
+                    // Buat URL objek untuk preview
+                    link.href = URL.createObjectURL(file);
+                    link.target = '_blank'; // Buka tautan di tab baru
+                    link.textContent = file.name; // Nama file
+                    li.textContent = `${index + 1}. `; // Menambahkan nomor urut
+                    li.appendChild(link); // Tambahkan link ke item list
+
+                    fileListContainer.appendChild(li); // Tambahkan item list ke dalam daftar
+                });
+            }
+
+            function uploadFiles(id_inquiry) {
+                var fileInput = document.getElementById('attachments');
+                var formData = new FormData();
+
+                // Tambahkan semua file yang dipilih ke formData
+                for (var i = 0; i < fileInput.files.length; i++) {
+                    formData.append('attachments[]', fileInput.files[i]);
                 }
 
-                // Kirim data ke server menggunakan AJAX
+                formData.append('id_inquiry', id_inquiry); // Tambahkan ID inquiry
+
+                // Kirim data ke route 'uploadFile'
                 $.ajax({
                     url: '{{ route('uploadFile') }}',
                     method: 'POST',
@@ -328,51 +388,64 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     success: function(response) {
-                        Swal.fire({
-                            title: 'Success!',
-                            text: 'Files uploaded successfully.',
-                            iconHtml: '<i class="ri-emotion-laugh-fill"></i>', // Ganti dengan ikon kustom Anda
-                            showCloseButton: true, // Menampilkan ikon tutup jika diinginkan
-                            customClass: {
-                                popup: 'my-popup-class' // Misalnya, kelas khusus untuk pop-up
-                            }
-                        }).then(() => {
-                            // Tampilkan daftar file yang di-upload
-                            showUploadedFiles(response.uploadedFiles);
+                        alert('Files uploaded successfully');
+                        updateFileList(); // Kembali update daftar
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        alert('Error while uploading files');
+                    }
+                });
+            }
+        </script>
+
+        <script>
+            function approveInventory(id) {
+                $.ajax({
+                    url: '{{ route('approveInventory', '') }}/' + id,
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}' // Sertakan CSRF token
+                    },
+                    success: function(response) {
+                        Swal.fire('Success!', 'Inquiry approved successfully.', 'success').then(() => {
+                            // location.reload();
+                            $('a.btn-approve, a.btn-reject').attr('disabled', true);
+
+                            // Alihkan ke halaman approval inventory
+                            window.location.href = '{{ route('showApprovalInventory') }}';
                         });
                     },
                     error: function(xhr) {
                         console.error(xhr.responseText);
-                        Swal.fire('Error!', 'An error occurred while uploading files.', 'error');
+                        Swal.fire('Error!', 'An error occurred while approving the inquiry.', 'error');
                     }
                 });
             }
 
-            // function showUploadedFiles(files) {
-            //     var fileListContainer = document.getElementById('uploaded-files-list'); // Buat elemen ini di HTML
+            function rejectInventory(id) {
+                $.ajax({
+                    url: '{{ route('rejectInventory', '') }}/' + id,
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}' // Sertakan CSRF token
+                    },
+                    success: function(response) {
+                        Swal.fire('Success!', 'Inquiry rejected successfully.', 'success').then(() => {
+                            // location.reload();
+                            $('a.btn-approve, a.btn-reject').attr('disabled', true);
 
-            //     fileListContainer.innerHTML = ''; // Kosongkan daftar sebelumnya
-            //     files.forEach(function(file) {
-            //         var li = document.createElement('li');
-            //         li.textContent = file; // Nama file yang di-upload
-            //         fileListContainer.appendChild(li); // Tambahkan ke dalam daftar
-            //     });
-            // }
-
-            function showUploadedFiles(files) {
-                var fileListContainer = document.getElementById('uploaded-files-list');
-
-                // Hanya tambahkan file yang baru saja di-upload
-                files.forEach(function(file) {
-                    var li = document.createElement('li');
-                    var link = document.createElement('a');
-                    link.href = '{{ asset('assets/inquiry') }}/' + file; // Sesuaikan path
-                    link.target = '_blank'; // Buka di tab baru
-                    link.textContent = file; // Nama file
-                    li.appendChild(link); // Tambahkan tautan ke elemen list
-                    fileListContainer.appendChild(li); // Tambahkan ke daftar
+                            // Alihkan ke halaman approval inventory
+                            window.location.href = '{{ route('showApprovalInventory') }}';
+                        });
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        Swal.fire('Error!', 'An error occurred while rejecting the inquiry.', 'error');
+                    }
                 });
             }
         </script>
+
     </main><!-- End #main -->
 @endsection

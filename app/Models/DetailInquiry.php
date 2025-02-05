@@ -27,7 +27,7 @@ class DetailInquiry extends Model
         'm3',
         'so',
         'konfirmasi',
-        'no_po',
+        'nopo',
         'ship',
         'note',
         'file',

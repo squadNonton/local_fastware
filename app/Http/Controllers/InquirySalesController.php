@@ -36,7 +36,6 @@ class InquirySalesController extends Controller
         $request->validate([
             'jenis_inquiry' => 'required',
             'id_customer' => 'required',
-            'loc_imp' => 'required',
             // 'supplier' => 'required',
 
         ]);
@@ -66,7 +65,7 @@ class InquirySalesController extends Controller
         $inquiry->kode_inquiry = $kodeInquiry;
         $inquiry->jenis_inquiry = $jenisInquiry;
         $inquiry->id_customer = $request->id_customer;
-        $inquiry->loc_imp = $request->loc_imp;
+        $inquiry->loc_imp = 'Local';
         // $inquiry->supplier = $request->supplier;
         // $inquiry->to_approve = 'Waiting';
         // $inquiry->to_validate = 'Waiting';
@@ -80,6 +79,13 @@ class InquirySalesController extends Controller
         $progress->inquiry_id = $inquiry->id;
         $progress->description = '---- No updates yet ----'; // Set default
         $progress->save();
+
+        // Ketika membuat Inquiry
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $inquiry->id,
+            'user_id' => auth()->id(),
+            'description' => 'Inquiry created.'
+        ]);
 
         return redirect()->route('createinquiry')->with('success', 'Inquiry successfully saved.');
     }
@@ -183,15 +189,18 @@ class InquirySalesController extends Controller
         $id_inquiry = $request->id_inquiry;
         Log::info('ID Inquiry:', ['id_inquiry' => $id_inquiry]);
 
+        // Ambil entri detail yang ada untuk inquiry
+        $existingMaterials = DetailInquiry::where('id_inquiry', $id_inquiry)->get();
+
         // Iterasi dan simpan atau update material
         foreach ($request->materials as $material) {
 
-            DetailInquiry::updateOrCreate(
-                [
-                    'id_inquiry' => $id_inquiry,
-                    'id_type' => $material['id_type'],
-                ],
-                [
+            // Cek apakah material sudah ada
+            $existingMaterial = $existingMaterials->where('id_type', $material['id_type'])->first();
+
+            if ($existingMaterial) {
+                // Jika sudah ada, update entri
+                $existingMaterial->update([
                     'jenis' => $material['jenis'],
                     'thickness' => $material['thickness'],
                     'weight' => $material['weight'],
@@ -203,10 +212,29 @@ class InquirySalesController extends Controller
                     'm2' => $material['m2'],
                     'm3' => $material['m3'],
                     'ship' => $material['ship'],
-                    'so' => $material['so'], // Menyimpan so
+                    'so' => $material['so'],
                     'note' => $material['note']
-                ]
-            );
+                ]);
+            } else {
+                // Jika belum ada, simpan sebagai entri baru
+                DetailInquiry::create([
+                    'id_inquiry' => $id_inquiry,
+                    'id_type' => $material['id_type'],
+                    'jenis' => $material['jenis'],
+                    'thickness' => $material['thickness'],
+                    'weight' => $material['weight'],
+                    'inner_diameter' => $material['inner_diameter'],
+                    'outer_diameter' => $material['outer_diameter'],
+                    'length' => $material['length'],
+                    'qty' => $material['qty'],
+                    'm1' => $material['m1'],
+                    'm2' => $material['m2'],
+                    'm3' => $material['m3'],
+                    'ship' => $material['ship'],
+                    'so' => $material['so'],
+                    'note' => $material['note']
+                ]);
+            }
         }
 
         // Update status inquiry
@@ -220,10 +248,17 @@ class InquirySalesController extends Controller
             return response()->json(['message' => 'Inquiry not found'], 404);
         }
 
+        // Ketika Inquiry Submitted
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $inquiry->id,
+            'user_id' => auth()->id(),
+            'description' => 'Inquiry Submitted'
+        ]);
+
         return response()->json(['message' => 'Detail Inquiry saved successfully']);
     }
 
-    public function showFormSS($id)
+    public function showFormSS(Request $request, $id)
     {
         $inquiry = InquirySales::with('details.type_materials')->findOrFail($id);
 
@@ -232,10 +267,24 @@ class InquirySalesController extends Controller
 
         $typeMaterials = TypeMaterial::all(); // Ambil semua data TypeMaterial, sesuaikan dengan kebutuhan
 
-        $progressUpdates = TrxDboProgPurchase::where('inquiry_id', $id)->with('user')->get();
+
+        // Ambil semua nama file yang ter-upload
+        $uploadedFiles = DetailInquiry::where('id_inquiry', $inquiry->id)
+            ->pluck('file')
+            ->flatMap(function ($file) {
+                return json_decode($file) ?? []; // Kembalikan array kosong jika null
+            })
+            ->toArray();
+
+        // $progressUpdates = TrxDboProgPurchase::where('inquiry_id', $id)->with('user')->get();
+        $progressUpdates = TrxDboProgPurchase::where('inquiry_id', $id)
+            ->with('user')
+            ->orderBy('created_at', 'desc') // Urutkan berdasarkan created_at menurun
+            ->get();
+
         // Cek apakah berasal dari halaman approval
         $isFromApproval = request()->query('source') === 'approval';
-        return view('inquiry.showFormSS', compact('inquiry', 'materials', 'typeMaterials', 'progressUpdates', 'isFromApproval'));
+        return view('inquiry.showFormSS', compact('inquiry', 'materials', 'typeMaterials', 'progressUpdates', 'uploadedFiles', 'isFromApproval'));
     }
 
     public function approveKaSie($id)
@@ -249,6 +298,13 @@ class InquirySalesController extends Controller
         $inquiry->kasie_id = Auth::user()->id; // Ambil ID pengguna yang login
         $inquiry->save();
 
+        // Ketika menyetujui oleh Ka.Sie
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $inquiry->id,
+            'user_id' => auth()->id(),
+            'description' => 'Approved by Ka. Sie.'
+        ]);
+
         return redirect()->route('formulirInquiry', ['id' => $id])->with('success', 'Inquiry approved by Ka.Sie successfully.');
     }
 
@@ -259,6 +315,7 @@ class InquirySalesController extends Controller
             ->where('status', 2) // Hanya ambil yang berstatus Open
             ->where('is_active', 1) // Hanya yang aktif
             ->get();
+
 
         return view('inquiry.approvalKaSie', compact('inquiries'));
     }
@@ -297,6 +354,13 @@ class InquirySalesController extends Controller
         $inquiry->kadept_id = Auth::user()->id; // Ambil ID pengguna yang login
         $inquiry->save();
 
+        // Ketika menyetujui oleh Ka.Dept
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $inquiry->id,
+            'user_id' => auth()->id(),
+            'description' => 'Approved by Ka. Dept.'
+        ]);
+
         return redirect()->route('showApprovalKaDept')->with('success', 'Inquiry approved successfully by Ka.Dept.');
     }
 
@@ -334,6 +398,13 @@ class InquirySalesController extends Controller
         $inquiry->inventory_id = Auth::user()->id; // Ambil ID pengguna yang login
         $inquiry->save();
 
+        // Ketika menyetujui oleh Inventory
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $inquiry->id,
+            'user_id' => auth()->id(),
+            'description' => 'Approved by Inventory.'
+        ]);
+
         return redirect()->route('showApprovalInventory')->with('success', 'Inquiry approved successfully by Inventory.');
     }
 
@@ -355,6 +426,7 @@ class InquirySalesController extends Controller
         $inquiries = InquirySales::with('customer')
             ->whereIn('status', [5, 6, 8, 9]) // Mengambil status On Progress, Finished, etc.
             ->where('is_active', 1)
+            ->orderBy('created_at', 'desc')
             ->get();
 
         $draftInquiries = InquirySales::with('customer')
@@ -375,6 +447,13 @@ class InquirySalesController extends Controller
         $inquiry->purchasing_id = Auth::user()->id; // Ambil ID pengguna yang login
         $inquiry->save();
 
+        // Ketika Confirm by Procurement
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $inquiry->id,
+            'user_id' => auth()->id(),
+            'description' => 'Confirm Inquiry by Procurement.'
+        ]);
+
         // Mengembalikan response sukses
         return response()->json(['success' => 'Inquiry confirmed for purchasing successfully.']);
     }
@@ -386,6 +465,7 @@ class InquirySalesController extends Controller
             'inquiry_id' => 'required|integer|exists:inquiry_sales,id',
             'supplier' => 'required|string',
             'progress' => 'nullable|string',
+            'refnopo' => 'nullable|string',
             'est_date' => 'nullable|date',
         ]);
 
@@ -395,6 +475,7 @@ class InquirySalesController extends Controller
         // Update data inquiry
         $inquiry->supplier = $request->supplier;
         $inquiry->progress = $request->progress;
+        $inquiry->refnopo = $request->refnopo;
         $inquiry->est_date = $request->est_date;
         $inquiry->status = 5;
         $inquiry->save();
@@ -465,8 +546,14 @@ class InquirySalesController extends Controller
 
         // Ubah status inquiry menjadi "Finished" (status 6)
         $inquiry->status = 6; // Finished
-
         $inquiry->save();
+
+        // Ketika Finished by Procurement
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $inquiry->id,
+            'user_id' => auth()->id(),
+            'description' => 'Finished Inquiry by Procurement.'
+        ]);
 
         return response()->json(['success' => 'Inquiry marked as finished.']);
     }
@@ -515,9 +602,11 @@ class InquirySalesController extends Controller
         ]);
 
         // Simpan file yang di-upload
-        if ($request->hasfile('attachments')) {
+        if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $file) {
-                $filename = time() . '_' . $file->getClientOriginalName();
+                // Ambil nama asli file
+                $filename = $file->getClientOriginalName();
+                // Pindahkan file ke folder public/assets/inquiry
                 $file->move(public_path('assets/inquiry'), $filename);
 
                 // Cek apakah detail_inquiry dengan id_inquiry sudah ada
@@ -541,9 +630,12 @@ class InquirySalesController extends Controller
         }
 
         // Ambil semua file yang terkait dengan id_inquiry
-        $allFiles = DetailInquiry::where('id_inquiry', $request->id_inquiry)->pluck('file')->flatMap(function ($file) {
-            return json_decode($file);
-        })->toArray();
+        $allFiles = DetailInquiry::where('id_inquiry', $request->id_inquiry)
+            ->pluck('file')
+            ->flatMap(function ($file) {
+                return json_decode($file);
+            })
+            ->toArray();
 
         return response()->json(['message' => 'Files uploaded successfully', 'uploadedFiles' => $allFiles]);
     }
@@ -562,5 +654,18 @@ class InquirySalesController extends Controller
             })->toArray();
 
         return view('showFormSS', compact('inquiry', 'materials', 'uploadedFiles'));
+    }
+
+    public function overviewInquiry()
+    {
+
+        // Ambil semua inquiry dengan status relevan
+        $draftInquiries = InquirySales::with('customer')
+            ->whereIn('status', [1, 2, 3, 4, 5, 6, 8, 9]) // Draft for Finish Process
+            ->where('is_active', 1)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('inquiry.overviewInquiry', compact('draftInquiries'));
     }
 }

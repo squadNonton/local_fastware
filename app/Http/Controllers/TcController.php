@@ -29,7 +29,7 @@ class TcController extends Controller
         $additionalData = [];
 
         // Cek apakah role_id adalah 1, 14, atau 15
-        if (in_array($roleId, [1, 14, 15])) {
+        if (in_array($roleId, [1])) {
             // Jika ya, tampilkan semua data tanpa filter
             $technicalData = MstTc::with(['jobPosition'])->get()->unique('id_job_position');
             $softSkillsData = MstSoftSkill::with(['jobPosition'])->get()->unique('id_job_position');
@@ -44,7 +44,6 @@ class TcController extends Controller
                     'Feeder',
                     'Warehouse Admin', //tidak ada di db
                     'PPIC Staff'
-
                 ];
             } elseif ($userName == 'ABDUR RAHMAN AL FAAIZ') {
                 $jobPositions = [
@@ -73,8 +72,6 @@ class TcController extends Controller
                     'Leader MC',
                     'MC Operator', //tidak ada di db
                     'Bubut Operator', //tidak ada di db
-
-                    
                 ];
             } elseif ($userName == 'MUGI PRAMONO') {
                 $jobPositions = [
@@ -87,7 +84,7 @@ class TcController extends Controller
                     'Production HT Operator', //tidak ada di db
                     'Maintenance Operator', //tidak ada di db
                 ];
-            } elseif ($userName == 'RAGIL ISHA') {
+            } elseif ($userName == 'RAGIL ISHA RAHMANTO') {
                 $jobPositions = [
                     'MC Custom & Bubut Leader', //tidak ada di db
                     'MC Custom Staff',
@@ -107,37 +104,126 @@ class TcController extends Controller
                     'Inventory Staff', //tidak ada di db
                     'HR, GA, Legal, PDCA, Procurement & IT Se. Head',
                     'IT Staff',
-                    'PDCA, Procurement Staff',//tidak ada di db
+                    'PDCA, Procurement Staff', //tidak ada di db
                     'Purchasing Import Staff',
 
                     'GA & CSR Staff',
                     'HRGA & Legal Staff'
                 ];
-            }elseif ($userName == 'ADHI PRASETYO') {
+            } elseif ($userName == 'ADHI PRASETYO') {
                 $jobPositions = [
                     'Accounting Staff & Kasir',
                     'AR Staff',
                     'Invoicing Staff',
                     'Accounting Staff', //Tidak ada di db
-
-                    
                 ];
-            }elseif ($userName == 'RICHARDUS') {
+            } elseif ($userName == 'RICHARDUS') {
                 $jobPositions = [
                     'Accounting Staff & Kasir',
                     'AR Staff',
                     'Invoicing Staff',
                     'Accounting Staff', //Tidak ada di db
-
-                    
                 ];
-            }elseif ($userName == 'JESSICA PAUNE') {
+            } elseif ($userName == 'JESSICA PAUNE') {
                 $jobPositions = [
-                    'Inventory Staff', //tidak ada di db
-                    'HR, GA, Legal, PDCA, Procurement & IT Se. Head',
+                    // 'Inventory Staff', //tidak ada di db
+                    // 'PDCA, Procurement, Inventory & IT Section Head',
+                    // 'IT Staff',
+                    // 'PDCA, Procurement Staff', //tidak ada di db
+                    // 'Purchasing Import Staff'
+                    'Feeder',
+                    'Admin Cutting Sheet (ACS)',
+                    'Logistic Admin',
+                    'Delivery Staff',
+                    'Logistic Foreman',
+                    'Finance & Accounting Sec. Head',
+                    'HR & Legal Staff',
+                    'Finance & Treasury Sec. Head',
+                    'HRGA & CSR Staff',
+                    'Accounting Staff & Kasir',
+                    'Invoicing Staff',
+                    'SOH Region 1',
+                    'Sales Admin',
+                    'Machining Custom Sec. Head',
+                    'Produksi HT Sec. Head',
+                    'Foreman CT & MC',
+                    'Foreman QC',
+                    'PPIC Staff',
+                    'Leader MC',
+                    'Leader HT',
+                    'Operator CT',
+                    'Operator Bubut',
+                    'Operator Mc. Custom',
+                    'MC Custom Staff',
+                    'Operator Machining',
+                    'Admin HT & PPC',
+                    'Operator MTN',
+                    'Operator HT',
+                    'Procurement Material Staff',
+                    'Sales Engineer Reg 3',
+                    'Sales Engineer Reg 4',
+                    'Foreman Machining Custom',
+                    'Sales Engineer Reg 1',
+                    'SOH Region 2',
+                    'AR Staff',
                     'IT Staff',
-                    'PDCA, Procurement Staff',//tidak ada di db
-                    'Purchasing Import Staff'
+                    'Sales Engineer Reg 2',
+                    'SOH Region 3',
+                    'SOH Region 4',
+                    'HR, GA, Legal, PDCA, Procurement & IT Se. Head',
+                    'HR & GA Section Head',
+                    'Leader Cutting',
+                    'PDCA & Procurement Non Material Staff',
+                    'Procurement Administration',
+                    'Inventory Section Head',
+                ];
+            } elseif ($userName == 'SITI MARIA ULFA') {
+                $jobPositions = [
+                    'Feeder',
+                    'Admin Cutting Sheet (ACS)',
+                    'Logistic Admin',
+                    'Delivery Staff',
+                    'Logistic Foreman',
+                    'Finance & Accounting Sec. Head',
+                    'HR & Legal Staff',
+                    'Finance & Treasury Sec. Head',
+                    'HRGA & CSR Staff',
+                    'Accounting Staff & Kasir',
+                    'Invoicing Staff',
+                    'SOH Region 1',
+                    'Sales Admin',
+                    'Machining Custom Sec. Head',
+                    'Produksi HT Sec. Head',
+                    'Foreman CT & MC',
+                    'Foreman QC',
+                    'PPIC Staff',
+                    'Leader MC',
+                    'Leader HT',
+                    'Operator CT',
+                    'Operator Bubut',
+                    'Operator Mc. Custom',
+                    'MC Custom Staff',
+                    'Operator Machining',
+                    'Admin HT & PPC',
+                    'Operator MTN',
+                    'Operator HT',
+                    'Procurement Material Staff',
+                    'Sales Engineer Reg 3',
+                    'Sales Engineer Reg 4',
+                    'Foreman Machining Custom',
+                    'Sales Engineer Reg 1',
+                    'SOH Region 2',
+                    'AR Staff',
+                    'IT Staff',
+                    'Sales Engineer Reg 2',
+                    'SOH Region 3',
+                    'SOH Region 4',
+                    'HR, GA, Legal, PDCA, Procurement & IT Se. Head',
+                    'HR & GA Section Head',
+                    'Leader Cutting',
+                    'PDCA & Procurement Non Material Staff',
+                    'Procurement Administration',
+                    'Inventory Section Head',
                 ];
             } else {
                 // Jika nama user tidak cocok dengan yang ditentukan, tampilkan semua data
@@ -259,7 +345,7 @@ class TcController extends Controller
                     'Inventory Staff', //tidak ada di db
                     'HR, GA, Legal, PDCA, Procurement & IT Se. Head',
                     'IT Staff',
-                    'PDCA, Procurement Staff',//tidak ada di db
+                    'PDCA, Procurement Staff', //tidak ada di db
                     'Purchasing Import Staff',
 
                     'GA & CSR Staff',
@@ -284,7 +370,7 @@ class TcController extends Controller
                     'Inventory Staff', //tidak ada di db
                     'HR, GA, Legal, PDCA, Procurement & IT Se. Head',
                     'IT Staff',
-                    'PDCA, Procurement Staff',//tidak ada di db
+                    'PDCA, Procurement Staff', //tidak ada di db
                     'Purchasing Import Staff',
                 ])->unique('job_position');
             } else {

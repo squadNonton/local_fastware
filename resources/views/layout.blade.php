@@ -144,7 +144,7 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <!-- Dropdown Kelola Akun -->
-                        @if (in_array(Auth::user()->role_id, [1, 14, 15]))
+                        @if (in_array(Auth::user()->role_id, [1]))
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle font-si" href="#" id="navbarDropdown1"
                                     role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -168,62 +168,173 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown2">
                                 @php
-                                $allowedUsers = [
-                                    'ADMINSTRATOR', 'ANDI SIMPONI', 'MUGI PRAMONO', 'RANGGA FADILLAH', 'VITRI HANDAYANI',
-                                    'ADHI PRASETIYO', 'AHMAD RIDWAN', 'ANDIK TOTOK SISWOYO', 'ARY RODJO PRASETYO',
-                                    'DANIA ISNAWATI', 'DINA NIMAS AYU NAWAWULAN PRIHANTINI', 'DWI KUNTORO',
-                                    'HARDI SAPUTRA', 'HUSEIN ABDULLAH', 'ILHAM CHOLID', 'JESSICA PAUNE', 'JUN JOHAMIN PD',
-                                    'KUSTIONO', 'LINA UNIARSIH', 'M. RIDWAN GUNAWAN', 'MARTINUS CAHYO RAHASTO',
-                                    'MUHAMMAD MAHBUB', 'NUR DWITA SURA WIJAYA', 'PUTRI ANINDIA', 'RAGIL ISHA RAHMANTO',
-                                    'RICHARDUS', 'RISFAN FAISAL', 'SENDY PRABOWO', 'SITI MARIA ULFA', 'WULYO EKO PRASETYO',
-                                    'YAN WELEM MANGINSELA', 'YULMAI RIDO WINANDA', 'YUNASIS PALGUNADI', 
-                                    'ABDUR RAHMAN AL FAAIZ', 'Sony Stiawan'
-                                ];
-                                @endphp
-    
-                                @if(in_array(auth()->user()->name, $allowedUsers))
-                                    <li><a class="dropdown-item" href="{{ route('dashboardMaintenance') }}">Maintenance</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('dshandling') }}">Handling Klaim dan Komplain</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('dsCompetency') }}">People Development</a></li>
-                                @endif
-                                                                @php
-                                $allowedUsers = [
-                                    'ADMINSTRATOR', 'AFILIANDI', 'AGUNG PANGESTU YUSUF', 'AGUS PRIYANTO', 'AGUS ROSIDIN',
-                                    'ANDI SANTOSO', 'ANDI SIMPONI', 'ARRY SOEBHEKTI', 'AWING', 'DASUKI', 'DEDY SETIAWAN',
-                                    'DIAMAN DARMAWINATA', 'ELI HANDOYO', 'FAIZAL AFDAU', 'FATUL MUKMIN', 'HAERUL IKHSAN',
-                                    'HENDRIO', 'JAKA RARA SUKMA', 'JAKARIA', 'KARYA WIJAYA', 'LUKMAN AHMAD', 'MAMIK ABIDIN',
-                                    'MEDI KRISNANTO', 'MIFTAKHUROHMAN', 'MUGI PRAMONO', 'NUR SUPRIYANTO', 'NURSAID',
-                                    'NURSALIM', 'R.WAWAN HIMAWAN', 'RAHMAT NUGROHO', 'RANGGA FADILLAH', 'RIZKY ANDREA RAHMAWAN',
-                                    'RUKMAN', 'RUSITO', 'SABAR WASIRAN', 'SEPTIADI PRATOMO', 'SUDIYATNO', 'UMAR HADI',
-                                    'VITRI HANDAYANI', 'YANUARDIN SALEH SIREGAR', 'YUSUF SYAFAAT', 'ADHI PRASETIYO',
-                                    'AHMAD RIDWAN', 'ANDIK TOTOK SISWOYO', 'ARY RODJO PRASETYO', 'AVI SHENNA', 'BANGUN SUTOPO',
-                                    'CECEP ISKANDAR', 'DANIA ISNAWATI', 'DINA NIMAS AYU NAWAWULAN PRIHANTINI', 'DWI KUNTORO',
-                                    'FIKRI SYAHBANA', 'FRISILIA CLAUDIA HUTAMA', 'GUNAWAN', 'HARDI SAPUTRA', 'HARRY SUPRIYADI',
-                                    'HERLIANA', 'HERY HERMAWAN', 'HUSEIN ABDULLAH', 'ILHAM CHOLID', 'ILHAM SETIA DARMA',
-                                    'IMAM PRASETYO', 'IMAM SOPYAN', 'JEFRY WASTON E', 'JESSICA PAUNE', 'JONI SETIAWAN',
-                                    'JUN JOHAMIN PD', 'KUSTIONO', 'LINA UNIARSIH', 'M. RIDWAN GUNAWAN', 'MARTINUS CAHYO RAHASTO',
-                                    'MOCHAMMAD ANDRIANSYAH', 'MOHAMMAD FATKHURROHMAN', 'MUHAMMAD DINAR FARISI',
-                                    'MUHAMMAD MAHBUB', 'NUR DWITA SURA WIJAYA', 'PUTRI ANINDIA', 'RAGIL ISHA RAHMANTO',
-                                    'RIADUS SOLIHIN', 'RICHARDUS', 'RISFAN FAISAL', 'RUSLAN M.ALI', 'SENDY PRABOWO',
-                                    'SETIYAWAN', 'SITI MARIA ULFA', 'SUKIMIN', 'WULYO EKO PRASETYO', 'YAN WELEM MANGINSELA',
-                                    'YUDHI PRASETYO RAHMAWANTO', 'YULMAI RIDO WINANDA', 'YUNASIS PALGUNADI', 'ZAENAL ARIFIN',
-                                    'ABDUR RAHMAN AL FAAIZ', 'YAN WALEM MANGINSELA', 'VIVIAN ANGELIKA', 'Sony Stiawan',
-                                    'FAJAR BAGASKARA'
-                                ];
+                                    $allowedUsers = [
+                                        'ADMINSTRATOR',
+                                        'ANDI SIMPONI',
+                                        'MUGI PRAMONO',
+                                        'RANGGA FADILLAH',
+                                        'VITRI HANDAYANI',
+                                        'ADHI PRASETIYO',
+                                        'AHMAD RIDWAN',
+                                        'ANDIK TOTOK SISWOYO',
+                                        'ARY RODJO PRASETYO',
+                                        'DANIA ISNAWATI',
+                                        'DINA NIMAS AYU NAWAWULAN PRIHANTINI',
+                                        'DWI KUNTORO',
+                                        'HARDI SAPUTRA',
+                                        'HUSEIN ABDULLAH',
+                                        'ILHAM CHOLID',
+                                        'JESSICA PAUNE',
+                                        'JUN JOHAMIN PD',
+                                        'KUSTIONO',
+                                        'LINA UNIARSIH',
+                                        'M. RIDWAN GUNAWAN',
+                                        'MARTINUS CAHYO RAHASTO',
+                                        'MUHAMMAD MAHBUB',
+                                        'NUR DWITA SURA WIJAYA',
+                                        'PUTRI ANINDIA',
+                                        'RAGIL ISHA RAHMANTO',
+                                        'RICHARDUS',
+                                        'RISFAN FAISAL',
+                                        'SENDY PRABOWO',
+                                        'SITI MARIA ULFA',
+                                        'WULYO EKO PRASETYO',
+                                        'YAN WELEM MANGINSELA',
+                                        'YULMAI RIDO WINANDA',
+                                        'YUNASIS PALGUNADI',
+                                        'ABDUR RAHMAN AL FAAIZ',
+                                        'SONY STIAWAN',
+                                    ];
                                 @endphp
 
-                                @if(in_array(auth()->user()->name, $allowedUsers))
-                                    <li><a class="dropdown-item" href="{{ route('dashboardSS') }}">Sumbang Saran</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('dsKnowlege') }}">Knowledge Management</a></li>
+                                @if (in_array(auth()->user()->name, $allowedUsers))
+                                    <li><a class="dropdown-item"
+                                            href="{{ route('dashboardMaintenance') }}">Maintenance</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('dshandling') }}">Handling Klaim dan
+                                            Komplain</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('dsCompetency') }}">People
+                                            Development</a></li>
+                                @endif
+                                @php
+                                    $allowedUsers = [
+                                        'ADMINSTRATOR',
+                                        'AFILIANDI',
+                                        'AGUNG PANGESTU YUSUF',
+                                        'AGUS PRIYANTO',
+                                        'AGUS ROSIDIN',
+                                        'ANDI SANTOSO',
+                                        'ANDI SIMPONI',
+                                        'ARRY SOEBHEKTI',
+                                        'AWING',
+                                        'DASUKI',
+                                        'DEDY SETIAWAN',
+                                        'DIAMAN DARMAWINATA',
+                                        'ELI HANDOYO',
+                                        'FAIZAL AFDAU',
+                                        'FATUL MUKMIN',
+                                        'HAERUL IKHSAN',
+                                        'HENDRIO',
+                                        'JAKA RARA SUKMA',
+                                        'JAKARIA',
+                                        'KARYA WIJAYA',
+                                        'LUKMAN AHMAD',
+                                        'MAMIK ABIDIN',
+                                        'MEDI KRISNANTO',
+                                        'MIFTAKHUROHMAN',
+                                        'MUGI PRAMONO',
+                                        'NUR SUPRIYANTO',
+                                        'NURSAID',
+                                        'NURSALIM',
+                                        'R.WAWAN HIMAWAN',
+                                        'RAHMAT NUGROHO',
+                                        'RANGGA FADILLAH',
+                                        'RIZKY ANDREA RAHMAWAN',
+                                        'RUKMAN',
+                                        'RUSITO',
+                                        'SABAR WASIRAN',
+                                        'SEPTIADI PRATOMO',
+                                        'SUDIYATNO',
+                                        'UMAR HADI',
+                                        'VITRI HANDAYANI',
+                                        'YANUARDIN SALEH SIREGAR',
+                                        'YUSUF SYAFAAT',
+                                        'ADHI PRASETIYO',
+                                        'AHMAD RIDWAN',
+                                        'ANDIK TOTOK SISWOYO',
+                                        'ARY RODJO PRASETYO',
+                                        'AVI SHENNA',
+                                        'BANGUN SUTOPO',
+                                        'CECEP ISKANDAR',
+                                        'DANIA ISNAWATI',
+                                        'DINA NIMAS AYU NAWAWULAN PRIHANTINI',
+                                        'DWI KUNTORO',
+                                        'FIKRI SYAHBANA',
+                                        'FRISILIA CLAUDIA HUTAMA',
+                                        'GUNAWAN',
+                                        'HARDI SAPUTRA',
+                                        'HARRY SUPRIYADI',
+                                        'HERLIANA',
+                                        'HERY HERMAWAN',
+                                        'HUSEIN ABDULLAH',
+                                        'ILHAM CHOLID',
+                                        'ILHAM SETIA DARMA',
+                                        'IMAM PRASETYO',
+                                        'IMAM SOPYAN',
+                                        'JEFRY WASTON E',
+                                        'JESSICA PAUNE',
+                                        'JONI SETIAWAN',
+                                        'JUN JOHAMIN PD',
+                                        'KUSTIONO',
+                                        'LINA UNIARSIH',
+                                        'M. RIDWAN GUNAWAN',
+                                        'MARTINUS CAHYO RAHASTO',
+                                        'MOCHAMMAD ANDRIANSYAH',
+                                        'MOHAMMAD FATKHURROHMAN',
+                                        'MUHAMMAD DINAR FARISI',
+                                        'MUHAMMAD MAHBUB',
+                                        'NUR DWITA SURA WIJAYA',
+                                        'PUTRI ANINDIA',
+                                        'RAGIL ISHA RAHMANTO',
+                                        'RIADUS SOLIHIN',
+                                        'RICHARDUS',
+                                        'RISFAN FAISAL',
+                                        'RUSLAN M.ALI',
+                                        'SENDY PRABOWO',
+                                        'SETIYAWAN',
+                                        'SITI MARIA ULFA',
+                                        'SUKIMIN',
+                                        'WULYO EKO PRASETYO',
+                                        'YAN WELEM MANGINSELA',
+                                        'YUDHI PRASETYO RAHMAWANTO',
+                                        'YULMAI RIDO WINANDA',
+                                        'YUNASIS PALGUNADI',
+                                        'ZAENAL ARIFIN',
+                                        'ABDUR RAHMAN AL FAAIZ',
+                                        'YAN WALEM MANGINSELA',
+                                        'VIVIAN ANGELIKA',
+                                        'Sony Stiawan',
+                                        'FAJAR BAGASKARA',
+                                    ];
+                                @endphp
+
+                                @if (in_array(auth()->user()->name, $allowedUsers))
+                                    <li><a class="dropdown-item" href="{{ route('dashboardSS') }}">Sumbang Saran</a>
+                                    </li>
+                                    <li><a class="dropdown-item" href="{{ route('dsKnowlege') }}">Knowledge
+                                            Management</a></li>
                                 @endif
 
                                 @php
-                                $allowedUsers = [
-                                    'ADMINSTRATOR', 'MEDI KRISNANTO', 'JESSICA PAUNE', 'MARTINUS CAHYO RAHASTO'
-                                ];
+                                    $allowedUsers = [
+                                        'ADMINSTRATOR',
+                                        'MEDI KRISNANTO',
+                                        'JESSICA PAUNE',
+                                        'MARTINUS CAHYO RAHASTO',
+                                    ];
                                 @endphp
-                                @if(in_array(auth()->user()->name, $allowedUsers))
-                                <li><a class="dropdown-item" href="{{ route('dashboardFPB') }}">Pengajuan Barang</a></li>
+                                @if (in_array(auth()->user()->name, $allowedUsers))
+                                    <li><a class="dropdown-item" href="{{ route('dashboardFPB') }}">Pengajuan
+                                            Barang</a></li>
                                 @endif
 
                                 {{-- <li><a class="dropdown-item" href="{{ route('reportpatrol') }}">Safety Patrol</a>
@@ -244,28 +355,48 @@
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="childDropdown">
                                         @php
-                                        $allowedUsers = [
-                                            'ADMINSTRATOR', 'MAMIK ABIDIN', 'MUGI PRAMONO', 'RANGGA FADILLAH', 'RUSITO',
-                                            'SUDIYATNO', 'ARY RODJO PRASETYO', 'BANGUN SUTOPO', 'JESSICA PAUNE',
-                                            'RAGIL ISHA RAHMANTO', 'ZAENAL ARIFIN', 'ABDUR RAHMAN AL FAAIZ', 'Sony Stiawan'
-                                        ];
+                                            $allowedUsers = [
+                                                'ADMINSTRATOR',
+                                                'MAMIK ABIDIN',
+                                                'MUGI PRAMONO',
+                                                'RANGGA FADILLAH',
+                                                'RUSITO',
+                                                'SUDIYATNO',
+                                                'ARY RODJO PRASETYO',
+                                                'BANGUN SUTOPO',
+                                                'JESSICA PAUNE',
+                                                'RAGIL ISHA RAHMANTO',
+                                                'ZAENAL ARIFIN',
+                                                'ABDUR RAHMAN AL FAAIZ',
+                                                'Sony Stiawan',
+                                            ];
                                         @endphp
 
-                                        @if(in_array(auth()->user()->name, $allowedUsers))
-                                            <li><a class="dropdown-item" href="{{ route('sales.index') }}">Data Form Perbaikan</a></li>
+                                        @if (in_array(auth()->user()->name, $allowedUsers))
+                                            <li><a class="dropdown-item" href="{{ route('sales.index') }}">Data Form
+                                                    Perbaikan</a></li>
                                         @endif
 
                                         @php
-                                        $allowedUsers = [
-                                            'ADMINSTRATOR', 'MAMIK ABIDIN', 'MUGI PRAMONO', 'RANGGA FADILLAH', 
-                                            'RUSITO', 'SUDIYATNO', 'ARY RODJO PRASETYO', 'BANGUN SUTOPO', 
-                                            'JESSICA PAUNE', 'RAGIL ISHA RAHMANTO', 'ZAENAL ARIFIN', 
-                                            'ABDUR RAHMAN AL FAAIZ'
-                                        ];
+                                            $allowedUsers = [
+                                                'ADMINSTRATOR',
+                                                'MAMIK ABIDIN',
+                                                'MUGI PRAMONO',
+                                                'RANGGA FADILLAH',
+                                                'RUSITO',
+                                                'SUDIYATNO',
+                                                'ARY RODJO PRASETYO',
+                                                'BANGUN SUTOPO',
+                                                'JESSICA PAUNE',
+                                                'RAGIL ISHA RAHMANTO',
+                                                'ZAENAL ARIFIN',
+                                                'ABDUR RAHMAN AL FAAIZ',
+                                            ];
                                         @endphp
 
-                                        @if(in_array(auth()->user()->name, $allowedUsers))
-                                            <li><a class="dropdown-item" href="{{ route('fpps.history') }}">Riwayat Form Perbaikan</a></li>
+                                        @if (in_array(auth()->user()->name, $allowedUsers))
+                                            <li><a class="dropdown-item" href="{{ route('fpps.history') }}">Riwayat
+                                                    Form Perbaikan</a></li>
                                         @endif
 
                                     </ul>
@@ -277,83 +408,171 @@
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="childDropdown">
                                         @php
-                                        $allowedUsers = [
-                                            'ADMINSTRATOR', 'MUGI PRAMONO', 'RANGGA FADILLAH', 'ADHI PRASETIYO',
-                                            'AHMAD RIDWAN', 'ANDIK TOTOK SISWOYO', 'ARY RODJO PRASETYO', 'AVI SHENNA',
-                                            'DANIA ISNAWATI', 'DINA NIMAS AYU NAWAWULAN PRIHANTINI', 'DWI KUNTORO',
-                                            'FIKRI SYAHBANA', 'GUNAWAN', 'HARDI SAPUTRA', 'HUSEIN ABDULLAH',
-                                            'ILHAM CHOLID', 'JESSICA PAUNE', 'JONI SETIAWAN', 'JUN JOHAMIN PD',
-                                            'LINA UNIARSIH', 'M. RIDWAN GUNAWAN', 'MARTINUS CAHYO RAHASTO',
-                                            'MOHAMMAD FATKHURROHMAN', 'NUR DWITA SURA WIJAYA', 'PUTRI ANINDIA',
-                                            'RIADUS SOLIHIN', 'RICHARDUS', 'RISFAN FAISAL', 'RUSLAN M.ALI',
-                                            'SENDY PRABOWO', 'SUKIMIN', 'WULYO EKO PRASETYO', 'YAN WELEM MANGINSELA',
-                                            'YUDHI PRASETYO RAHMAWANTO', 'YULMAI RIDO WINANDA', 'YUNASIS PALGUNADI',
-                                            'Sony Stiawan'
-                                        ];
+                                            $allowedUsers = [
+                                                'ADMINSTRATOR',
+                                                'MUGI PRAMONO',
+                                                'RANGGA FADILLAH',
+                                                'ADHI PRASETIYO',
+                                                'AHMAD RIDWAN',
+                                                'ANDIK TOTOK SISWOYO',
+                                                'ARY RODJO PRASETYO',
+                                                'AVI SHENNA',
+                                                'DANIA ISNAWATI',
+                                                'DINA NIMAS AYU NAWAWULAN PRIHANTINI',
+                                                'DWI KUNTORO',
+                                                'FIKRI SYAHBANA',
+                                                'GUNAWAN',
+                                                'HARDI SAPUTRA',
+                                                'HUSEIN ABDULLAH',
+                                                'ILHAM CHOLID',
+                                                'JESSICA PAUNE',
+                                                'JONI SETIAWAN',
+                                                'JUN JOHAMIN PD',
+                                                'LINA UNIARSIH',
+                                                'M. RIDWAN GUNAWAN',
+                                                'MARTINUS CAHYO RAHASTO',
+                                                'MOHAMMAD FATKHURROHMAN',
+                                                'NUR DWITA SURA WIJAYA',
+                                                'PUTRI ANINDIA',
+                                                'RIADUS SOLIHIN',
+                                                'RICHARDUS',
+                                                'RISFAN FAISAL',
+                                                'RUSLAN M.ALI',
+                                                'SENDY PRABOWO',
+                                                'SUKIMIN',
+                                                'WULYO EKO PRASETYO',
+                                                'YAN WELEM MANGINSELA',
+                                                'YUDHI PRASETYO RAHMAWANTO',
+                                                'YULMAI RIDO WINANDA',
+                                                'YUNASIS PALGUNADI',
+                                                'Sony Stiawan',
+                                            ];
                                         @endphp
 
-                                        @if(in_array(auth()->user()->name, $allowedUsers))
-                                            <li><a class="dropdown-item" href="{{ route('index') }}">Form Pengajuan Klaim/Komplain</a></li>
+                                        @if (in_array(auth()->user()->name, $allowedUsers))
+                                            <li><a class="dropdown-item" href="{{ route('index') }}">Form Pengajuan
+                                                    Klaim/Komplain</a></li>
                                         @endif
 
                                         @php
-                                        $allowedUsers = [
-                                            'ADMINSTRATOR', 'ADHI PRASETIYO', 'AHMAD RIDWAN', 'ANDIK TOTOK SISWOYO',
-                                            'DANIA ISNAWATI', 'DINA NIMAS AYU NAWAWULAN PRIHANTINI', 'DWI KUNTORO', 'GUNAWAN',
-                                            'HUSEIN ABDULLAH', 'ILHAM CHOLID', 'JESSICA PAUNE', 'JUN JOHAMIN PD', 'LINA UNIARSIH',
-                                            'M. RIDWAN GUNAWAN', 'MARTINUS CAHYO RAHASTO', 'NUR DWITA SURA WIJAYA', 'PUTRI ANINDIA',
-                                            'RICHARDUS', 'RISFAN FAISAL', 'SENDY PRABOWO', 'WULYO EKO PRASETYO',
-                                            'YAN WELEM MANGINSELA', 'YUDHI PRASETYO RAHMAWANTO', 'YULMAI RIDO WINANDA',
-                                            'YUNASIS PALGUNADI', 'Sony Stiawan'
-                                        ];
+                                            $allowedUsers = [
+                                                'ADMINSTRATOR',
+                                                'ADHI PRASETIYO',
+                                                'AHMAD RIDWAN',
+                                                'ANDIK TOTOK SISWOYO',
+                                                'DANIA ISNAWATI',
+                                                'DINA NIMAS AYU NAWAWULAN PRIHANTINI',
+                                                'DWI KUNTORO',
+                                                'GUNAWAN',
+                                                'HUSEIN ABDULLAH',
+                                                'ILHAM CHOLID',
+                                                'JESSICA PAUNE',
+                                                'JUN JOHAMIN PD',
+                                                'LINA UNIARSIH',
+                                                'M. RIDWAN GUNAWAN',
+                                                'MARTINUS CAHYO RAHASTO',
+                                                'NUR DWITA SURA WIJAYA',
+                                                'PUTRI ANINDIA',
+                                                'RICHARDUS',
+                                                'RISFAN FAISAL',
+                                                'SENDY PRABOWO',
+                                                'WULYO EKO PRASETYO',
+                                                'YAN WELEM MANGINSELA',
+                                                'YUDHI PRASETYO RAHMAWANTO',
+                                                'YULMAI RIDO WINANDA',
+                                                'YUNASIS PALGUNADI',
+                                                'Sony Stiawan',
+                                            ];
                                         @endphp
 
-                                        @if(in_array(auth()->user()->name, $allowedUsers))
-                                            <li><a class="dropdown-item" href="{{ route('showHistoryCLaimComplain') }}">Riwayat Klaim/Komplain</a></li>
+                                        @if (in_array(auth()->user()->name, $allowedUsers))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('showHistoryCLaimComplain') }}">Riwayat
+                                                    Klaim/Komplain</a></li>
                                         @endif
 
                                         @php
-                                        $allowedUsers = [
-                                            'ADMINSTRATOR', 'ADHI PRASETIYO', 'AHMAD RIDWAN', 'ANDIK TOTOK SISWOYO',
-                                            'DANIA ISNAWATI', 'DINA NIMAS AYU NAWAWULAN PRIHANTINI', 'DWI KUNTORO', 'GUNAWAN',
-                                            'HUSEIN ABDULLAH', 'ILHAM CHOLID', 'JESSICA PAUNE', 'JUN JOHAMIN PD', 'LINA UNIARSIH',
-                                            'M. RIDWAN GUNAWAN', 'MARTINUS CAHYO RAHASTO', 'NUR DWITA SURA WIJAYA', 'PUTRI ANINDIA',
-                                            'RICHARDUS', 'RISFAN FAISAL', 'SENDY PRABOWO', 'WULYO EKO PRASETYO',
-                                            'YAN WELEM MANGINSELA', 'YUDHI PRASETYO RAHMAWANTO', 'YULMAI RIDO WINANDA',
-                                            'YUNASIS PALGUNADI', 'Sony Stiawan'
-                                        ];
+                                            $allowedUsers = [
+                                                'ADMINSTRATOR',
+                                                'ADHI PRASETIYO',
+                                                'AHMAD RIDWAN',
+                                                'ANDIK TOTOK SISWOYO',
+                                                'DANIA ISNAWATI',
+                                                'DINA NIMAS AYU NAWAWULAN PRIHANTINI',
+                                                'DWI KUNTORO',
+                                                'GUNAWAN',
+                                                'HUSEIN ABDULLAH',
+                                                'ILHAM CHOLID',
+                                                'JESSICA PAUNE',
+                                                'JUN JOHAMIN PD',
+                                                'LINA UNIARSIH',
+                                                'M. RIDWAN GUNAWAN',
+                                                'MARTINUS CAHYO RAHASTO',
+                                                'NUR DWITA SURA WIJAYA',
+                                                'PUTRI ANINDIA',
+                                                'RICHARDUS',
+                                                'RISFAN FAISAL',
+                                                'SENDY PRABOWO',
+                                                'WULYO EKO PRASETYO',
+                                                'YAN WELEM MANGINSELA',
+                                                'YUDHI PRASETYO RAHMAWANTO',
+                                                'YULMAI RIDO WINANDA',
+                                                'YUNASIS PALGUNADI',
+                                                'Sony Stiawan',
+                                            ];
                                         @endphp
 
-                                        @if(in_array(auth()->user()->name, $allowedUsers))
-                                            <li><a class="dropdown-item" href="{{ route('scheduleVisit') }}">Jadwal Kunjungan</a></li>
+                                        @if (in_array(auth()->user()->name, $allowedUsers))
+                                            <li><a class="dropdown-item" href="{{ route('scheduleVisit') }}">Jadwal
+                                                    Kunjungan</a></li>
                                         @endif
 
                                     </ul>
                                 </li>
                                 @php
-                                $allowedUsers = [
-                                    'ADMINSTRATOR', 'ADHI PRASETIYO', 'AHMAD RIDWAN', 'ANDIK TOTOK SISWOYO',
-                                    'DANIA ISNAWATI', 'DINA NIMAS AYU NAWAWULAN PRIHANTINI', 'DWI KUNTORO', 'GUNAWAN',
-                                    'HUSEIN ABDULLAH', 'ILHAM CHOLID', 'JESSICA PAUNE', 'JUN JOHAMIN PD', 'LINA UNIARSIH',
-                                    'M. RIDWAN GUNAWAN', 'MARTINUS CAHYO RAHASTO', 'NUR DWITA SURA WIJAYA', 'PUTRI ANINDIA',
-                                    'RICHARDUS', 'RISFAN FAISAL', 'SENDY PRABOWO', 'WULYO EKO PRASETYO',
-                                    'YAN WELEM MANGINSELA', 'YUDHI PRASETYO RAHMAWANTO', 'YULMAI RIDO WINANDA',
-                                    'YUNASIS PALGUNADI', 'Sony Stiawan'
-                                ];
+                                    $allowedUsers = [
+                                        'ADMINSTRATOR',
+                                        'ADHI PRASETIYO',
+                                        'AHMAD RIDWAN',
+                                        'ANDIK TOTOK SISWOYO',
+                                        'DANIA ISNAWATI',
+                                        'DINA NIMAS AYU NAWAWULAN PRIHANTINI',
+                                        'DWI KUNTORO',
+                                        'GUNAWAN',
+                                        'HUSEIN ABDULLAH',
+                                        'ILHAM CHOLID',
+                                        'JESSICA PAUNE',
+                                        'JUN JOHAMIN PD',
+                                        'LINA UNIARSIH',
+                                        'M. RIDWAN GUNAWAN',
+                                        'MARTINUS CAHYO RAHASTO',
+                                        'NUR DWITA SURA WIJAYA',
+                                        'PUTRI ANINDIA',
+                                        'RICHARDUS',
+                                        'RISFAN FAISAL',
+                                        'SENDY PRABOWO',
+                                        'WULYO EKO PRASETYO',
+                                        'YAN WELEM MANGINSELA',
+                                        'YUDHI PRASETYO RAHMAWANTO',
+                                        'YULMAI RIDO WINANDA',
+                                        'YUNASIS PALGUNADI',
+                                        'Sony Stiawan',
+                                    ];
                                 @endphp
-                                
-                                @if(in_array(auth()->user()->name, $allowedUsers))
+
+                                @if (in_array(auth()->user()->name, $allowedUsers))
                                     <li>
                                         <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown"
                                             role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                             Inquiry Status
                                         </a>
                                         <ul class="dropdown-menu" aria-labelledby="childDropdown">
-                                            <li><a class="dropdown-item" href="{{ route('createinquiry') }}">Form Inquiry Material</a></li>
+                                            <li><a class="dropdown-item" href="{{ route('createinquiry') }}">Form
+                                                    Inquiry Material</a></li>
                                         </ul>
                                     </li>
                                 @endif
-                                
+
                             </ul>
                         </li>
                         <!-- Dropdown Productions -->
@@ -364,96 +583,121 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 @php
-                                $allowedUsers = [
-                                    'ADMINSTRATOR', 'MAMIK ABIDIN', 'MUGI PRAMONO', 'RANGGA FADILLAH', 'RUSITO',
-                                    'SUDIYATNO', 'ARY RODJO PRASETYO', 'BANGUN SUTOPO', 'JESSICA PAUNE', 
-                                    'RAGIL ISHA RAHMANTO', 'ZAENAL ARIFIN', 'ABDUR RAHMAN AL FAAIZ', 'Sony Stiawan'
-                                ];
+                                    $allowedUsers = [
+                                        'ADMINSTRATOR',
+                                        'MAMIK ABIDIN',
+                                        'MUGI PRAMONO',
+                                        'RANGGA FADILLAH',
+                                        'RUSITO',
+                                        'SUDIYATNO',
+                                        'ARY RODJO PRASETYO',
+                                        'BANGUN SUTOPO',
+                                        'JESSICA PAUNE',
+                                        'RAGIL ISHA RAHMANTO',
+                                        'ZAENAL ARIFIN',
+                                        'ABDUR RAHMAN AL FAAIZ',
+                                        'Sony Stiawan',
+                                    ];
                                 @endphp
 
-                                @if(in_array(auth()->user()->name, $allowedUsers))
-                                    <li><a class="dropdown-item" href="{{ route('fpps.index') }}">Form Permintaan Perbaikan</a></li>
+                                @if (in_array(auth()->user()->name, $allowedUsers))
+                                    <li><a class="dropdown-item" href="{{ route('fpps.index') }}">Form Permintaan
+                                            Perbaikan</a></li>
                                 @endif
 
                                 @php
-                                $allowedUsers = [
-                                    'ADMINSTRATOR', 'MAMIK ABIDIN', 'MUGI PRAMONO', 'RANGGA FADILLAH', 'RUSITO',
-                                    'SUDIYATNO', 'ARY RODJO PRASETYO', 'BANGUN SUTOPO', 'JESSICA PAUNE', 
-                                    'RAGIL ISHA RAHMANTO', 'ZAENAL ARIFIN', 'ABDUR RAHMAN AL FAAIZ'
-                                ];
+                                    $allowedUsers = [
+                                        'ADMINSTRATOR',
+                                        'MAMIK ABIDIN',
+                                        'MUGI PRAMONO',
+                                        'RANGGA FADILLAH',
+                                        'RUSITO',
+                                        'SUDIYATNO',
+                                        'ARY RODJO PRASETYO',
+                                        'BANGUN SUTOPO',
+                                        'JESSICA PAUNE',
+                                        'RAGIL ISHA RAHMANTO',
+                                        'ZAENAL ARIFIN',
+                                        'ABDUR RAHMAN AL FAAIZ',
+                                    ];
                                 @endphp
-                                @if(in_array(auth()->user()->name, $allowedUsers))
-                                <li><a class="dropdown-item" href="{{ route('fpps.history') }}">Riwayat Permintaan Perbaikan</a></li>
+                                @if (in_array(auth()->user()->name, $allowedUsers))
+                                    <li><a class="dropdown-item" href="{{ route('fpps.history') }}">Riwayat
+                                            Permintaan Perbaikan</a></li>
                                 @endif
-                                        <li>
-                                
+                                <li>
+
                                     <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown"
                                         role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         Bagian Maintenance
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="childDropdown">
                                         @php
-                                        $allowedUsers = [
-                                            'ADMINSTRATOR',
-                                            'MUGI PRAMONO',
-                                            'VITRI HANDAYANI',
-                                            'ANDIK TOTOK SISWOYO',
-                                            'ARY RODJO PRASETYO',
-                                            'HARDI SAPUTRA',
-                                            'JESSICA PAUNE',
-                                            'MARTINUS CAHYO RAHASTO',
-                                            'SITI MARIA ULFA',
-                                            'YULMAI RIDO WINANDA'
-                                        ];
+                                            $allowedUsers = [
+                                                'ADMINSTRATOR',
+                                                'MUGI PRAMONO',
+                                                'VITRI HANDAYANI',
+                                                'ANDIK TOTOK SISWOYO',
+                                                'ARY RODJO PRASETYO',
+                                                'HARDI SAPUTRA',
+                                                'JESSICA PAUNE',
+                                                'MARTINUS CAHYO RAHASTO',
+                                                'SITI MARIA ULFA',
+                                                'YULMAI RIDO WINANDA',
+                                            ];
                                         @endphp
-                                        @if(in_array(auth()->user()->name, $allowedUsers))
-                                            <li><a class="dropdown-item" href="{{ route('dashboardmesins') }}">Kelola DMI</a></li>
-                                            <li><a class="dropdown-item" href="{{ route('deptmtce.index') }}">Persetujuan FPP</a></li>
+                                        @if (in_array(auth()->user()->name, $allowedUsers))
+                                            <li><a class="dropdown-item" href="{{ route('dashboardmesins') }}">Kelola
+                                                    DMI</a></li>
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('deptmtce.index') }}">Persetujuan FPP</a></li>
                                         @endif
 
                                         @php
-                                        $fppsHistoryUsers = [
-                                            'ADMINSTRATOR',
-                                            'ANDI SIMPONI',
-                                            'MUGI PRAMONO',
-                                            'RANGGA FADILLAH',
-                                            'ADHI PRASETIYO',
-                                            'ARY RODJO PRASETYO',
-                                            'ILHAM CHOLID',
-                                            'JESSICA PAUNE',
-                                            'JUN JOHAMIN PD',
-                                            'KUSTIONO',
-                                            'RAGIL ISHA RAHMANTO',
-                                            'RICHARDUS',
-                                            'SITI MARIA ULFA',
-                                            'ABDUR RAHMAN AL FAAIZ'
-                                        ];
+                                            $fppsHistoryUsers = [
+                                                'ADMINSTRATOR',
+                                                'ANDI SIMPONI',
+                                                'MUGI PRAMONO',
+                                                'RANGGA FADILLAH',
+                                                'ADHI PRASETIYO',
+                                                'ARY RODJO PRASETYO',
+                                                'ILHAM CHOLID',
+                                                'JESSICA PAUNE',
+                                                'JUN JOHAMIN PD',
+                                                'KUSTIONO',
+                                                'RAGIL ISHA RAHMANTO',
+                                                'RICHARDUS',
+                                                'SITI MARIA ULFA',
+                                                'ABDUR RAHMAN AL FAAIZ',
+                                            ];
 
-                                        $preventiveTableUsers = [
-                                            'ADMINSTRATOR',
-                                            'ANDI SIMPONI',
-                                            'MUGI PRAMONO',
-                                            'RANGGA FADILLAH',
-                                            'ADHI PRASETIYO',
-                                            'ARY RODJO PRASETYO',
-                                            'ILHAM CHOLID',
-                                            'JESSICA PAUNE',
-                                            'JUN JOHAMIN PD',
-                                            'KUSTIONO',
-                                            'RAGIL ISHA RAHMANTO',
-                                            'RICHARDUS',
-                                            'SITI MARIA ULFA',
-                                            'ABDUR RAHMAN AL FAAIZ'
-                                        ];
-                                    @endphp
+                                            $preventiveTableUsers = [
+                                                'ADMINSTRATOR',
+                                                'ANDI SIMPONI',
+                                                'MUGI PRAMONO',
+                                                'RANGGA FADILLAH',
+                                                'ADHI PRASETIYO',
+                                                'ARY RODJO PRASETYO',
+                                                'ILHAM CHOLID',
+                                                'JESSICA PAUNE',
+                                                'JUN JOHAMIN PD',
+                                                'KUSTIONO',
+                                                'RAGIL ISHA RAHMANTO',
+                                                'RICHARDUS',
+                                                'SITI MARIA ULFA',
+                                                'ABDUR RAHMAN AL FAAIZ',
+                                            ];
+                                        @endphp
 
-                                    @if(in_array(auth()->user()->name, $fppsHistoryUsers))
-                                        <li><a class="dropdown-item" href="{{ route('fpps.history') }}">Riwayat Form Perbaikan</a></li>
-                                    @endif
+                                        @if (in_array(auth()->user()->name, $fppsHistoryUsers))
+                                            <li><a class="dropdown-item" href="{{ route('fpps.history') }}">Riwayat
+                                                    Form Perbaikan</a></li>
+                                        @endif
 
-                                    @if(in_array(auth()->user()->name, $preventiveTableUsers))
-                                        <li><a class="dropdown-item" href="{{ route('dashboardPreventive') }}">Tabel Preventif</a></li>
-                                    @endif
+                                        @if (in_array(auth()->user()->name, $preventiveTableUsers))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('dashboardPreventive') }}">Tabel Preventif</a></li>
+                                        @endif
 
                                     </ul>
                                 </li>
@@ -463,41 +707,45 @@
                                         Bagian Engineering
                                     </a>
                                     @php
-                                    $formTindakLanjutUsers = [
-                                        'ADMINSTRATOR',
-                                        'MUGI PRAMONO',
-                                        'ARY RODJO PRASETYO',
-                                        'JESSICA PAUNE'
-                                    ];
+                                        $formTindakLanjutUsers = [
+                                            'ADMINSTRATOR',
+                                            'MUGI PRAMONO',
+                                            'ARY RODJO PRASETYO',
+                                            'JESSICA PAUNE',
+                                        ];
 
-                                    $riwayatKlaimKomplainUsers = [
-                                        'ADMINSTRATOR',
-                                        'MUGI PRAMONO',
-                                        'ARY RODJO PRASETYO',
-                                        'JESSICA PAUNE'
-                                    ];
+                                        $riwayatKlaimKomplainUsers = [
+                                            'ADMINSTRATOR',
+                                            'MUGI PRAMONO',
+                                            'ARY RODJO PRASETYO',
+                                            'JESSICA PAUNE',
+                                        ];
 
-                                    $jadwalKunjunganUsers = [
-                                        'ADMINSTRATOR',
-                                        'MUGI PRAMONO',
-                                        'ARY RODJO PRASETYO',
-                                        'JESSICA PAUNE'
-                                    ];
-                                @endphp
+                                        $jadwalKunjunganUsers = [
+                                            'ADMINSTRATOR',
+                                            'MUGI PRAMONO',
+                                            'ARY RODJO PRASETYO',
+                                            'JESSICA PAUNE',
+                                        ];
+                                    @endphp
 
-                                <ul class="dropdown-menu" aria-labelledby="childDropdown">
-                                    @if(in_array(auth()->user()->name, $formTindakLanjutUsers))
-                                        <li><a class="dropdown-item" href="{{ route('submission') }}">Form Tindak Lanjut</a></li>
-                                    @endif
+                                    <ul class="dropdown-menu" aria-labelledby="childDropdown">
+                                        @if (in_array(auth()->user()->name, $formTindakLanjutUsers))
+                                            <li><a class="dropdown-item" href="{{ route('submission') }}">Form Tindak
+                                                    Lanjut</a></li>
+                                        @endif
 
-                                    @if(in_array(auth()->user()->name, $riwayatKlaimKomplainUsers))
-                                        <li><a class="dropdown-item" href="{{ route('showHistoryCLaimComplain') }}">Riwayat Klaim & Komplain</a></li>
-                                    @endif
+                                        @if (in_array(auth()->user()->name, $riwayatKlaimKomplainUsers))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('showHistoryCLaimComplain') }}">Riwayat Klaim &
+                                                    Komplain</a></li>
+                                        @endif
 
-                                    @if(in_array(auth()->user()->name, $jadwalKunjunganUsers))
-                                        <li><a class="dropdown-item" href="{{ route('scheduleVisit') }}">Jadwal Kunjungan</a></li>
-                                    @endif
-                                </ul>
+                                        @if (in_array(auth()->user()->name, $jadwalKunjunganUsers))
+                                            <li><a class="dropdown-item" href="{{ route('scheduleVisit') }}">Jadwal
+                                                    Kunjungan</a></li>
+                                        @endif
+                                    </ul>
 
                                 </li>
                                 <li>
@@ -506,86 +754,92 @@
                                         Maintenance Korektif
                                     </a>
                                     @php
-                                    $terimaFormPerbaikanUsers = [
-                                        'ADMINSTRATOR',
-                                        'ANDI SIMPONI',
-                                        'MUGI PRAMONO',
-                                        'RANGGA FADILLAH',
-                                        'VITRI HANDAYANI',
-                                        'ADHI PRASETIYO',
-                                        'ANDIK TOTOK SISWOYO',
-                                        'ARY RODJO PRASETYO',
-                                        'HARDI SAPUTRA',
-                                        'ILHAM CHOLID',
-                                        'JESSICA PAUNE',
-                                        'JUN JOHAMIN PD',
-                                        'KUSTIONO',
-                                        'MARTINUS CAHYO RAHASTO',
-                                        'RAGIL ISHA RAHMANTO',
-                                        'RICHARDUS',
-                                        'SITI MARIA ULFA',
-                                        'YULMAI RIDO WINANDA',
-                                        'ABDUR RAHMAN AL FAAIZ'
-                                    ];
+                                        $terimaFormPerbaikanUsers = [
+                                            'ADMINSTRATOR',
+                                            'ANDI SIMPONI',
+                                            'MUGI PRAMONO',
+                                            'RANGGA FADILLAH',
+                                            'VITRI HANDAYANI',
+                                            'ADHI PRASETIYO',
+                                            'ANDIK TOTOK SISWOYO',
+                                            'ARY RODJO PRASETYO',
+                                            'HARDI SAPUTRA',
+                                            'ILHAM CHOLID',
+                                            'JESSICA PAUNE',
+                                            'JUN JOHAMIN PD',
+                                            'KUSTIONO',
+                                            'MARTINUS CAHYO RAHASTO',
+                                            'RAGIL ISHA RAHMANTO',
+                                            'RICHARDUS',
+                                            'SITI MARIA ULFA',
+                                            'YULMAI RIDO WINANDA',
+                                            'ABDUR RAHMAN AL FAAIZ',
+                                        ];
 
-                                    $riwayatFormPerbaikanUsers = [
-                                        'ADMINSTRATOR',
-                                        'ANDI SIMPONI',
-                                        'MUGI PRAMONO',
-                                        'RANGGA FADILLAH',
-                                        'ADHI PRASETIYO',
-                                        'ARY RODJO PRASETYO',
-                                        'ILHAM CHOLID',
-                                        'JESSICA PAUNE',
-                                        'JUN JOHAMIN PD',
-                                        'KUSTIONO',
-                                        'RAGIL ISHA RAHMANTO',
-                                        'RICHARDUS',
-                                        'SITI MARIA ULFA',
-                                        'ABDUR RAHMAN AL FAAIZ'
-                                    ];
-                                @endphp
+                                        $riwayatFormPerbaikanUsers = [
+                                            'ADMINSTRATOR',
+                                            'ANDI SIMPONI',
+                                            'MUGI PRAMONO',
+                                            'RANGGA FADILLAH',
+                                            'ADHI PRASETIYO',
+                                            'ARY RODJO PRASETYO',
+                                            'ILHAM CHOLID',
+                                            'JESSICA PAUNE',
+                                            'JUN JOHAMIN PD',
+                                            'KUSTIONO',
+                                            'RAGIL ISHA RAHMANTO',
+                                            'RICHARDUS',
+                                            'SITI MARIA ULFA',
+                                            'ABDUR RAHMAN AL FAAIZ',
+                                        ];
+                                    @endphp
 
-                                <ul class="dropdown-menu" aria-labelledby="childDropdown">
-                                    @if(in_array(auth()->user()->name, $terimaFormPerbaikanUsers))
-                                        <li><a class="dropdown-item" href="{{ asset('dashboardmaintenance') }}">Terima Form Perbaikan</a></li>
-                                    @endif
+                                    <ul class="dropdown-menu" aria-labelledby="childDropdown">
+                                        @if (in_array(auth()->user()->name, $terimaFormPerbaikanUsers))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ asset('dashboardmaintenance') }}">Terima Form
+                                                    Perbaikan</a></li>
+                                        @endif
 
-                                    @if(in_array(auth()->user()->name, $riwayatFormPerbaikanUsers))
-                                        <li><a class="dropdown-item" href="{{ route('fpps.history') }}">Riwayat Form Perbaikan</a></li>
-                                    @endif
-                                </ul>
+                                        @if (in_array(auth()->user()->name, $riwayatFormPerbaikanUsers))
+                                            <li><a class="dropdown-item" href="{{ route('fpps.history') }}">Riwayat
+                                                    Form Perbaikan</a></li>
+                                        @endif
+                                    </ul>
 
                                 </li>
                                 @php
-                                $maintenancePreventifUsers = [
-                                    'ADMINSTRATOR',
-                                    'ANDI SIMPONI',
-                                    'MUGI PRAMONO',
-                                    'RANGGA FADILLAH',
-                                    'ADHI PRASETIYO',
-                                    'ARY RODJO PRASETYO',
-                                    'ILHAM CHOLID',
-                                    'JESSICA PAUNE',
-                                    'JUN JOHAMIN PD',
-                                    'KUSTIONO',
-                                    'RAGIL ISHA RAHMANTO',
-                                    'RICHARDUS',
-                                    'SITI MARIA ULFA',
-                                    'ABDUR RAHMAN AL FAAIZ'
-                                ];
-                            @endphp
+                                    $maintenancePreventifUsers = [
+                                        'ADMINSTRATOR',
+                                        'ANDI SIMPONI',
+                                        'MUGI PRAMONO',
+                                        'RANGGA FADILLAH',
+                                        'ADHI PRASETIYO',
+                                        'ARY RODJO PRASETYO',
+                                        'ILHAM CHOLID',
+                                        'JESSICA PAUNE',
+                                        'JUN JOHAMIN PD',
+                                        'KUSTIONO',
+                                        'RAGIL ISHA RAHMANTO',
+                                        'RICHARDUS',
+                                        'SITI MARIA ULFA',
+                                        'ABDUR RAHMAN AL FAAIZ',
+                                    ];
+                                @endphp
 
-                            @if(in_array(auth()->user()->name, $maintenancePreventifUsers))
-                                <li>
-                                    <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Maintenance Preventif
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="childDropdown">
-                                        <li><a class="dropdown-item" href="{{ route('dashboardPreventiveMaintenance') }}">Jadwal Preventif</a></li>
-                                    </ul>
-                                </li>
-                            @endif
+                                @if (in_array(auth()->user()->name, $maintenancePreventifUsers))
+                                    <li>
+                                        <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown"
+                                            role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Maintenance Preventif
+                                        </a>
+                                        <ul class="dropdown-menu" aria-labelledby="childDropdown">
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('dashboardPreventiveMaintenance') }}">Jadwal
+                                                    Preventif</a></li>
+                                        </ul>
+                                    </li>
+                                @endif
 
                             </ul>
                         </li>
@@ -596,133 +850,433 @@
                                 Procurement
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                @if(in_array(Auth::user()->name, ['ADMINSTRATOR', 'DIAMAN DARMAWINATA', 'FAIZAL AFDAU', 'MEDI KRISNANTO', 'MUGI PRAMONO', 'NURSALIM', 'RANGGA FADILLAH', 'ADHI PRASETIYO', 'DANIA ISNAWATI', 'DWI KUNTORO', 'FRISILIA CLAUDIA HUTAMA', 'HARRY SUPRIYADI', 'HERLIANA', 'HERY HERMAWAN', 'HUSEIN ABDULLAH', 'ILHAM CHOLID', 'JESSICA PAUNE', 'JUN JOHAMIN PD', 'LINA UNIARSIH', 'MARTINUS CAHYO RAHASTO', 'MUHAMMAD DINAR FARISI', 'PUTRI ANINDIA', 'RAGIL ISHA RAHMANTO', 'RICHARDUS', 'RISFAN FAISAL', 'SENDY PRABOWO', 'SITI MARIA ULFA', 'WULYO EKO PRASETYO', 'YAN WELEM MANGINSELA', 'YUNASIS PALGUNADI', 'ABDUR RAHMAN AL FAAIZ', 'VIVIAN ANGELIKA', 'Sony Stiawan', 'FAJAR BAGASKARA'])) 
-                                    <li><a class="dropdown-item" href="{{ route('index.PO') }}">Form Pengajuan Barang/Jasa</a></li>
+                                @if (in_array(Auth::user()->name, [
+                                        'ADMINSTRATOR',
+                                        'DIAMAN DARMAWINATA',
+                                        'FAIZAL AFDAU',
+                                        'MEDI KRISNANTO',
+                                        'MUGI PRAMONO',
+                                        'NURSALIM',
+                                        'RANGGA FADILLAH',
+                                        'ADHI PRASETIYO',
+                                        'DANIA ISNAWATI',
+                                        'DWI KUNTORO',
+                                        'FRISILIA CLAUDIA HUTAMA',
+                                        'HARRY SUPRIYADI',
+                                        'HERLIANA',
+                                        'HERY HERMAWAN',
+                                        'HUSEIN ABDULLAH',
+                                        'ILHAM CHOLID',
+                                        'JESSICA PAUNE',
+                                        'JUN JOHAMIN PD',
+                                        'LINA UNIARSIH',
+                                        'MARTINUS CAHYO RAHASTO',
+                                        'MUHAMMAD DINAR FARISI',
+                                        'PUTRI ANINDIA',
+                                        'RAGIL ISHA RAHMANTO',
+                                        'RICHARDUS',
+                                        'RISFAN FAISAL',
+                                        'SENDY PRABOWO',
+                                        'SITI MARIA ULFA',
+                                        'WULYO EKO PRASETYO',
+                                        'YAN WELEM MANGINSELA',
+                                        'YUNASIS PALGUNADI',
+                                        'ABDUR RAHMAN AL FAAIZ',
+                                        'VIVIAN ANGELIKA',
+                                        'Sony Stiawan',
+                                        'FAJAR BAGASKARA',
+                                    ]))
+                                    <li><a class="dropdown-item" href="{{ route('index.PO') }}">Form Pengajuan
+                                            Barang/Jasa</a></li>
                                 @endif
-                            
+
                                 <li>
-                                    <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown"
+                                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         Persetujuan Form
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="childDropdown">
-                                        @if(in_array(Auth::user()->name, ['ADMINSTRATOR', 'MEDI KRISNANTO', 'NURSALIM', 'RANGGA FADILLAH', 'JESSICA PAUNE', 'MARTINUS CAHYO RAHASTO', 'MUHAMMAD DINAR FARISI', 'SITI MARIA ULFA']))
-                                            <li><a class="dropdown-item" href="{{ route('index.PO.user') }}">User Section</a></li>
+                                        @if (in_array(Auth::user()->name, [
+                                                'ADMINSTRATOR',
+                                                'MEDI KRISNANTO',
+                                                'JESSICA PAUNE',
+                                                'MUHAMMAD DINAR FARISI',
+                                                'SITI MARIA ULFA',
+                                                'NURSALIM',
+                                                'MARTINUS CAHYO RAHASTO',
+                                            ]))
+                                            <li><a class="dropdown-item" href="{{ route('index.PO.user') }}">User
+                                                    Section</a></li>
                                         @endif
-                                        @if(in_array(Auth::user()->name, ['ADMINSTRATOR', 'RANGGA FADILLAH', 'VITRI HANDAYANI', 'ANDIK TOTOK SISWOYO', 'ARY RODJO PRASETYO', 'HARDI SAPUTRA', 'JESSICA PAUNE', 'MARTINUS CAHYO RAHASTO', 'SITI MARIA ULFA', 'YUDHI PRASETYO RAHMAWANTO']))
-                                            <li><a class="dropdown-item" href="{{ route('index.PO.Dept') }}">Ka. Dept</a></li>
+                                        @if (in_array(Auth::user()->name, [
+                                                'ADMINSTRATOR',
+                                                'ANDIK TOTOK SISWOYO',
+                                                'ARY RODJO PRASETYO',
+                                                'HARDI SAPUTRA',
+                                                'JESSICA PAUNE',
+                                                'MARTINUS CAHYO RAHASTO',
+                                                'YULMAI RIDO WINANDA',
+                                                'ADHI PRASETIYO',
+                                                'RICHARDUS',
+                                                'ILHAM CHOLID',
+                                                'ABDUR RAHMAN AL FAAIZ',
+                                            ]))
+                                            <li><a class="dropdown-item" href="{{ route('index.PO.Dept') }}">Ka.
+                                                    Dept</a></li>
                                         @endif
-                                        @if(in_array(Auth::user()->name, ['ADMINSTRATOR', 'ADHI PRASETIYO', 'JESSICA PAUNE', 'MARTINUS CAHYO RAHASTO', 'RICHARDUS']))
-                                            <li><a class="dropdown-item" href="{{ route('index.PO.finance') }}">Finance Section</a></li>
+                                        @if (in_array(Auth::user()->name, [
+                                                'ADMINSTRATOR',
+                                                'ADHI PRASETIYO',
+                                                'JESSICA PAUNE',
+                                                'MARTINUS CAHYO RAHASTO',
+                                                'RICHARDUS',
+                                            ]))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('index.PO.finance') }}">Finance Section</a></li>
                                         @endif
-                                        @if(in_array(Auth::user()->name, ['ADMINSTRATOR', 'JESSICA PAUNE', 'VIVIAN ANGELIKA', 'FAJAR BAGASKARA']))
-                                            <li><a class="dropdown-item" href="{{ route('index.PO.procurement') }}">Procurement Menu 1</a></li>
+                                        @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'JESSICA PAUNE', 'VIVIAN ANGELIKA', 'FAJAR BAGASKARA']))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('index.PO.procurement') }}">Procurement Menu 1</a>
+                                            </li>
                                         @endif
-                                        @if(in_array(Auth::user()->name, ['ADMINSTRATOR', 'JESSICA PAUNE', 'VIVIAN ANGELIKA', 'FAJAR BAGASKARA']))
-                                            <li><a class="dropdown-item" href="{{ route('index.PO.procurement2') }}">Procurement Menu 2</a></li>
+                                        @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'JESSICA PAUNE', 'VIVIAN ANGELIKA', 'FAJAR BAGASKARA']))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('index.PO.procurement2') }}">Procurement Menu 2</a>
+                                            </li>
                                         @endif
                                     </ul>
                                 </li>
-                            
+
                                 <li>
-                                    <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown"
+                                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         Panawaran Subcont Project Sales
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="childDropdown">
-                                        @if(in_array(Auth::user()->name, ['ADMINSTRATOR', 'JESSICA PAUNE']))
-                                            <li><a class="dropdown-item" href="{{ route('indexSales') }}">Form Penawaran Subcont</a></li>
+                                        @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'JESSICA PAUNE', 'RAGIL ISHA RAHMANTO']))
+                                            <li><a class="dropdown-item" href="{{ route('indexSales') }}">Form
+                                                    Penawaran Subcont</a></li>
                                         @endif
-                                        @if(in_array(Auth::user()->name, ['ADMINSTRATOR', 'JESSICA PAUNE', 'VIVIAN ANGELIKA', 'FAJAR BAGASKARA']))
-                                            <li><a class="dropdown-item" href="{{ route('indexProc') }}">Persetujuan Subcont</a></li>
+                                        @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'JESSICA PAUNE', 'VIVIAN ANGELIKA', 'FAJAR BAGASKARA']))
+                                            <li><a class="dropdown-item" href="{{ route('indexProc') }}">Persetujuan
+                                                    Subcont</a></li>
                                         @endif
                                     </ul>
                                 </li>
-                            
+
                                 <li>
-                                    <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown"
+                                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         Inquiry Order
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="childDropdown">
-                                        @if(in_array(Auth::user()->name, ['ADMINSTRATOR', 'ADHI PRASETIYO', 'AHMAD RIDWAN', 'ANDIK TOTOK SISWOYO', 'DANIA ISNAWATI', 'DINA NIMAS AYU NAWAWULAN PRIHANTINI', 'DWI KUNTORO', 'GUNAWAN', 'HUSEIN ABDULLAH', 'ILHAM CHOLID', 'JESSICA PAUNE', 'JUN JOHAMIN PD', 'LINA UNIARSIH', 'M. RIDWAN GUNAWAN', 'MARTINUS CAHYO RAHASTO', 'NUR DWITA SURA WIJAYA', 'PUTRI ANINDIA', 'RICHARDUS', 'RISFAN FAISAL', 'SENDY PRABOWO', 'WULYO EKO PRASETYO', 'YAN WELEM MANGINSELA', 'YUDHI PRASETYO RAHMAWANTO', 'YULMAI RIDO WINANDA', 'YUNASIS PALGUNADI', 'Sony Stiawan']))
-                                            <li><a class="dropdown-item" href="{{ route('createinquiry') }}">Form Inquiry</a></li>
+                                        @if (in_array(Auth::user()->name, [
+                                                'ADMINSTRATOR',
+                                                'ANDIK TOTOK SISWOYO',
+                                                'DANIA ISNAWATI',
+                                                'DWI KUNTORO',
+                                                'ILHAM CHOLID',
+                                                'JESSICA PAUNE',
+                                                'JUN JOHAMIN PD',
+                                                'LINA UNIARSIH',
+                                                'MARTINUS CAHYO RAHASTO',
+                                                'RISFAN FAISAL',
+                                                'SENDY PRABOWO',
+                                                'WULYO EKO PRASETYO',
+                                                'YAN WELEM MANGINSELA',
+                                                'YULMAI RIDO WINANDA',
+                                                'YUNASIS PALGUNADI',
+                                                'SARAH EGA BUDI ASTUTI',
+                                                'DIMAS ADITYA PRIANDANA',
+                                                'HEXAPA DARMADI',
+                                                'HERY HERMAWAN',
+                                                'WULYO EKO PRASETYO',
+                                                'SONY STIAWAN',
+                                                'FISKA CHRISMAS YUDHA',
+                                            ]))
+                                            <li><a class="dropdown-item" href="{{ route('createinquiry') }}">Form
+                                                    Inquiry</a></li>
                                         @endif
-                                        @if(in_array(Auth::user()->name, ['ADMINSTRATOR', 'MUGI PRAMONO', 'RANGGA FADILLAH', 'VITRI HANDAYANI', 'ADHI PRASETIYO', 'ANDIK TOTOK SISWOYO', 'ARY RODJO PRASETYO', 'HARDI SAPUTRA', 'ILHAM CHOLID', 'JESSICA PAUNE', 'JUN JOHAMIN PD', 'MARTINUS CAHYO RAHASTO', 'RAGIL ISHA RAHMANTO', 'RICHARDUS', 'SITI MARIA ULFA', 'YUDHI PRASETYO RAHMAWANTO', 'ABDUR RAHMAN AL FAAIZ']))
-                                            <li><a class="dropdown-item" href="{{ route('showApprovalKaSie') }}">Persetujuan Ka. Sie</a></li>
+                                        @if (in_array(Auth::user()->name, [
+                                                'ADMINSTRATOR',
+                                                'MUGI PRAMONO',
+                                                'ANDIK TOTOK SISWOYO',
+                                                'ILHAM CHOLID',
+                                                'JESSICA PAUNE',
+                                                'JUN JOHAMIN PD',
+                                            ]))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('showApprovalKaSie') }}">Persetujuan Ka. Sie</a>
+                                            </li>
                                         @endif
-                                        @if(in_array(Auth::user()->name, ['ADMINSTRATOR', 'MUGI PRAMONO', 'RANGGA FADILLAH', 'ADHI PRASETIYO', 'ARY RODJO PRASETYO', 'ILHAM CHOLID', 'JESSICA PAUNE', 'JUN JOHAMIN PD', 'RAGIL ISHA RAHMANTO', 'RICHARDUS', 'SITI MARIA ULFA', 'ABDUR RAHMAN AL FAAIZ']))
-                                            <li><a class="dropdown-item" href="{{ route('showApprovalKaDept') }}">Persetujuan Ka. Dept</a></li>
+                                        @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'ANDIK TOTOK SISWOYO', 'JESSICA PAUNE', 'YULMAI RIDO WINANDA']))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('showApprovalKaDept') }}">Persetujuan Ka. Dept</a>
+                                            </li>
                                         @endif
-                                        @if(in_array(Auth::user()->name, ['ADMINSTRATOR', 'ADHI PRASETIYO', 'AHMAD RIDWAN', 'ANDIK TOTOK SISWOYO', 'DANIA ISNAWATI', 'DINA NIMAS AYU NAWAWULAN PRIHANTINI', 'DWI KUNTORO', 'GUNAWAN', 'HUSEIN ABDULLAH', 'ILHAM CHOLID', 'JESSICA PAUNE', 'JUN JOHAMIN PD', 'LINA UNIARSIH', 'M. RIDWAN GUNAWAN', 'MARTINUS CAHYO RAHASTO', 'NUR DWITA SURA WIJAYA', 'PUTRI ANINDIA', 'RICHARDUS', 'RISFAN FAISAL', 'SENDY PRABOWO', 'WULYO EKO PRASETYO', 'YAN WELEM MANGINSELA', 'YUDHI PRASETYO RAHMAWANTO', 'YULMAI RIDO WINANDA', 'YUNASIS PALGUNADI', 'Sony Stiawan']))
-                                            <li><a class="dropdown-item" href="{{ route('showApprovalInventory') }}">Persetujuan Inventory</a></li>
+                                        @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'RANGGA FADILLAH']))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('showApprovalInventory') }}">Persetujuan
+                                                    Inventory</a></li>
                                         @endif
-                                        @if(in_array(Auth::user()->name, ['ADMINSTRATOR', 'ADHI PRASETIYO', 'AHMAD RIDWAN', 'ANDIK TOTOK SISWOYO', 'DANIA ISNAWATI', 'DINA NIMAS AYU NAWAWULAN PRIHANTINI', 'DWI KUNTORO', 'GUNAWAN', 'HUSEIN ABDULLAH', 'ILHAM CHOLID', 'JESSICA PAUNE', 'JUN JOHAMIN PD', 'LINA UNIARSIH', 'M. RIDWAN GUNAWAN', 'MARTINUS CAHYO RAHASTO', 'NUR DWITA SURA WIJAYA', 'PUTRI ANINDIA', 'RICHARDUS', 'RISFAN FAISAL', 'SENDY PRABOWO', 'WULYO EKO PRASETYO', 'YAN WELEM MANGINSELA', 'YUDHI PRASETYO RAHMAWANTO', 'YULMAI RIDO WINANDA', 'YUNASIS PALGUNADI', 'Sony Stiawan']))
-                                            <li><a class="dropdown-item" href="{{ route('overviewPurchase') }}">Overview Purchase</a></li>
+                                        @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'JESSICA PAUNE', 'M. IQBAL']))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('overviewPurchase') }}">Overview Purchase</a></li>
                                         @endif
+                                        <li><a class="dropdown-item" href="{{ route('overviewInquiry') }}">Overview
+                                                Inquiry Order</a></li>
                                     </ul>
                                 </li>
                             </ul>
-                            
+
                         </li>
                         <!-- Dropdown Human Resource -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle font-si" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle font-si" href="#" id="navbarDropdown"
+                                role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Human Resource
                             </a>
 
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 <li>
-                                    <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown"
+                                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         Pengajuan Form Knowledge Management
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="childDropdown">
-                                        @if(in_array(auth()->user()->name, ['ADMINSTRATOR', 'MUGI PRAMONO', 'RANGGA FADILLAH', 'VITRI HANDAYANI', 'ADHI PRASETIYO', 'ANDIK TOTOK SISWOYO']))
-                                            <li><a class="dropdown-item" href="{{ route('pengajuanKM') }}">Form Knowledge Management</a></li>
-                                            <li><a class="dropdown-item" href="{{ route('persetujuanKM') }}">Persetujuan Knowledge Management</a></li>
+                                        @if (in_array(auth()->user()->name, [
+                                                'ADMINSTRATOR',
+                                                'MUGI PRAMONO',
+                                                'YULMAI RIDO WINANDA',
+                                                'SITI MARIA ULFA',
+                                                'JESSICA PAUNE',
+                                                'ADHI PRASETIYO',
+                                                'ANDIK TOTOK SISWOYO',
+                                                'RICHARDUS',
+                                            ]))
+                                            <li><a class="dropdown-item" href="{{ route('pengajuanKM') }}">Form
+                                                    Knowledge Management</a></li>
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('persetujuanKM') }}">Persetujuan Knowledge
+                                                    Management</a></li>
                                         @endif
                                     </ul>
                                 </li>
 
                                 <li>
-                                    <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown"
+                                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         Base Competency
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="childDropdown">
-                                        @if(in_array(auth()->user()->name, ['ADMINSTRATOR', 'JESSICA PAUNE', 'SITI MARIA ULFA']))
-                                            <li><a class="dropdown-item" href="{{ route('jobShow') }}">Form Job Position</a></li>
+                                        @if (in_array(auth()->user()->name, ['ADMINSTRATOR', 'JESSICA PAUNE', 'SITI MARIA ULFA']))
+                                            <li><a class="dropdown-item" href="{{ route('jobShow') }}">Form Job
+                                                    Position</a></li>
                                         @endif
 
-                                        @if(in_array(auth()->user()->name, ['ADMINSTRATOR', 'VITRI HANDAYANI', 'ANDIK TOTOK SISWOYO', 'ARY RODJO PRASETYO', 'HARDI SAPUTRA', 'JESSICA PAUNE', 'MARTINUS CAHYO RAHASTO', 'SITI MARIA ULFA', 'YUDHI PRASETYO RAHMAWANTO']))
-                                            <li><a class="dropdown-item" href="{{ route('tcShow') }}">Form Pengajuan Competency</a></li>
+                                        @if (in_array(auth()->user()->name, [
+                                                'ADMINSTRATOR',
+                                                'YULMAI RIDO WINANDA',
+                                                'ANDIK TOTOK SISWOYO',
+                                                'ARY RODJO PRASETYO',
+                                                'HARDI SAPUTRA',
+                                                'JESSICA PAUNE',
+                                                'MARTINUS CAHYO RAHASTO',
+                                                'SITI MARIA ULFA',
+                                                'RICHARDUS',
+                                                'MUGI PRAMONO',
+                                                'ABDUR RAHMAN AL FAAIZ',
+                                                'RAGIL ISHA RAHMANTO',
+                                            ]))
+                                            <li><a class="dropdown-item" href="{{ route('tcShow') }}">Form Pengajuan
+                                                    Competency</a></li>
                                         @endif
 
-                                        @if(in_array(auth()->user()->name, ['ADMINSTRATOR', 'MUGI PRAMONO', 'RANGGA FADILLAH', 'VITRI HANDAYANI', 'ADHI PRASETIYO', 'ANDIK TOTOK SISWOYO', 'ARY RODJO PRASETYO', 'HARDI SAPUTRA', 'ILHAM CHOLID', 'JESSICA PAUNE', 'JUN JOHAMIN PD', 'MARTINUS CAHYO RAHASTO', 'RAGIL ISHA RAHMANTO', 'RICHARDUS', 'SITI MARIA ULFA', 'YUDHI PRASETYO RAHMAWANTO', 'ABDUR RAHMAN AL FAAIZ']))
-                                            <li><a class="dropdown-item" href="{{ route('penilaian.index') }}">Penilaian Technical Competency Ka. Sie</a></li>
+                                        @if (in_array(auth()->user()->name, [
+                                                'ADMINSTRATOR',
+                                                'YULMAI RIDO WINANDA',
+                                                'MUGI PRAMONO',
+                                                'ADHI PRASETIYO',
+                                                'ANDIK TOTOK SISWOYO',
+                                                'ARY RODJO PRASETYO',
+                                                'HARDI SAPUTRA',
+                                                'ILHAM CHOLID',
+                                                'JESSICA PAUNE',
+                                                'JUN JOHAMIN PD',
+                                                'MARTINUS CAHYO RAHASTO',
+                                                'RAGIL ISHA RAHMANTO',
+                                                'RICHARDUS',
+                                                'SITI MARIA ULFA',
+                                                'ABDUR RAHMAN AL FAAIZ',
+                                            ]))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('penilaian.index') }}">Penilaian Technical
+                                                    Competency Ka. Sie</a></li>
                                         @endif
 
-                                        @if(in_array(auth()->user()->name, ['ADMINSTRATOR', 'MUGI PRAMONO', 'RANGGA FADILLAH', 'VITRI HANDAYANI', 'ADHI PRASETIYO', 'ANDIK TOTOK SISWOYO', 'ARY RODJO PRASETYO', 'HARDI SAPUTRA', 'ILHAM CHOLID', 'JESSICA PAUNE', 'JUN JOHAMIN PD', 'MARTINUS CAHYO RAHASTO', 'RAGIL ISHA RAHMANTO', 'RICHARDUS', 'SITI MARIA ULFA', 'YUDHI PRASETYO RAHMAWANTO', 'ABDUR RAHMAN AL FAAIZ']))
-                                            <li><a class="dropdown-item" href="{{ route('penilaian.index') }}">Penilaian Technical Competency Ka. Dept</a></li>
+                                        @if (in_array(auth()->user()->name, [
+                                                'ADMINSTRATOR',
+                                                'MUGI PRAMONO',
+                                                'YULMAI RIDO WINANDA',
+                                                'ADHI PRASETIYO',
+                                                'ANDIK TOTOK SISWOYO',
+                                                'ARY RODJO PRASETYO',
+                                                'HARDI SAPUTRA',
+                                                'ILHAM CHOLID',
+                                                'JESSICA PAUNE',
+                                                'JUN JOHAMIN PD',
+                                                'MARTINUS CAHYO RAHASTO',
+                                                'RAGIL ISHA RAHMANTO',
+                                                'RICHARDUS',
+                                                'SITI MARIA ULFA',
+                                                'ABDUR RAHMAN AL FAAIZ',
+                                            ]))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('penilaian.index') }}">Penilaian Technical
+                                                    Competency Ka. Dept</a></li>
                                         @endif
 
-                                        @if(in_array(auth()->user()->name, ['ADMINSTRATOR', 'MUGI PRAMONO', 'RANGGA FADILLAH', 'VITRI HANDAYANI', 'ADHI PRASETIYO', 'ANDIK TOTOK SISWOYO', 'ARY RODJO PRASETYO', 'HARDI SAPUTRA', 'ILHAM CHOLID', 'JESSICA PAUNE', 'JUN JOHAMIN PD', 'MARTINUS CAHYO RAHASTO', 'RAGIL ISHA RAHMANTO', 'RICHARDUS', 'SITI MARIA ULFA', 'YUDHI PRASETYO RAHMAWANTO', 'ABDUR RAHMAN AL FAAIZ']))
-                                            <li><a class="dropdown-item" href="{{ route('penilaian.index2') }}">History Development</a></li>
+                                        @if (in_array(auth()->user()->name, [
+                                                'ADMINSTRATOR',
+                                                'MUGI PRAMONO',
+                                                'YULMAI RIDO WINANDA',
+                                                'ADHI PRASETIYO',
+                                                'ANDIK TOTOK SISWOYO',
+                                                'ARY RODJO PRASETYO',
+                                                'HARDI SAPUTRA',
+                                                'ILHAM CHOLID',
+                                                'JESSICA PAUNE',
+                                                'JUN JOHAMIN PD',
+                                                'MARTINUS CAHYO RAHASTO',
+                                                'RAGIL ISHA RAHMANTO',
+                                                'RICHARDUS',
+                                                'SITI MARIA ULFA',
+                                                'ABDUR RAHMAN AL FAAIZ',
+                                            ]))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('penilaian.index2') }}">History Development</a>
+                                            </li>
                                         @endif
 
-                                        @if(in_array(auth()->user()->name, ['ADMINSTRATOR', 'AFILIANDI', 'AGUNG PANGESTU YUSUF', 'AGUS PRIYANTO', 'AGUS ROSIDIN', 'ANDI SANTOSO', 'ANDI SIMPONI', 'ARRY SOEBHEKTI', 'AWING', 'DASUKI', 'DEDY SETIAWAN', 'DIAMAN DARMAWINATA', 'ELI HANDOYO', 'FAIZAL AFDAU', 'FATUL MUKMIN', 'HAERUL IKHSAN', 'HENDRIO', 'JAKA RARA SUKMA', 'JAKARIA', 'KARYA WIJAYA', 'LUKMAN AHMAD', 'MAMIK ABIDIN', 'MEDI KRISNANTO', 'MIFTAKHUROHMAN', 'MUGI PRAMONO', 'NUR SUPRIYANTO', 'NURSAID', 'NURSALIM', 'R.WAWAN HIMAWAN', 'RAHMAT NUGROHO', 'RANGGA FADILLAH', 'RIZKY ANDREA RAHMAWAN', 'RUKMAN', 'RUSITO', 'SABAR WASIRAN', 'SEPTIADI PRATOMO', 'SUDIYATNO', 'UMAR HADI', 'VITRI HANDAYANI', 'YANUARDIN SALEH SIREGAR', 'YUSUF SYAFAAT', 'ADHI PRASETIYO', 'AHMAD RIDWAN', 'ANDIK TOTOK SISWOYO', 'ARY RODJO PRASETYO', 'AVI SHENNA', 'BANGUN SUTOPO', 'CECEP ISKANDAR', 'DANIA ISNAWATI', 'DINA NIMAS AYU NAWAWULAN PRIHANTINI', 'DWI KUNTORO', 'FIKRI SYAHBANA', 'FRISILIA CLAUDIA HUTAMA', 'GUNAWAN', 'HARDI SAPUTRA', 'HARRY SUPRIYADI', 'HERLIANA', 'HERY HERMAWAN', 'HUSEIN ABDULLAH', 'ILHAM CHOLID', 'ILHAM SETIA DARMA', 'IMAM PRASETYO', 'IMAM SOPYAN', 'JEFRY WASTON E', 'JESSICA PAUNE', 'JONI SETIAWAN', 'JUN JOHAMIN PD', 'KUSTIONO', 'LINA UNIARSIH', 'M. RIDWAN GUNAWAN', 'MARTINUS CAHYO RAHASTO', 'MOCHAMMAD ANDRIANSYAH', 'MOHAMMAD FATKHURROHMAN', 'MUHAMMAD DINAR FARISI', 'MUHAMMAD MAHBUB', 'NUR DWITA SURA WIJAYA', 'PUTRI ANINDIA', 'RAGIL ISHA RAHMANTO', 'RIADUS SOLIHIN', 'RICHARDUS', 'RISFAN FAISAL', 'RUSLAN M.ALI', 'SENDY PRABOWO', 'SETIYAWAN', 'SITI MARIA ULFA']))
-                                            <li><a class="dropdown-item" href="{{ route('job.positions.index') }}">Summary Competency</a></li>
+                                        @if (in_array(auth()->user()->name, [
+                                                'ADMINSTRATOR',
+                                                'AFILIANDI',
+                                                'AGUNG PANGESTU YUSUF',
+                                                'AGUS PRIYANTO',
+                                                'AGUS ROSIDIN',
+                                                'ANDI SANTOSO',
+                                                'ANDI SIMPONI',
+                                                'ARRY SOEBHEKTI',
+                                                'AWING',
+                                                'DASUKI',
+                                                'DEDY SETIAWAN',
+                                                'DIAMAN DARMAWINATA',
+                                                'ELI HANDOYO',
+                                                'FAIZAL AFDAU',
+                                                'FATUL MUKMIN',
+                                                'HAERUL IKHSAN',
+                                                'HENDRIO',
+                                                'JAKA RARA SUKMA',
+                                                'JAKARIA',
+                                                'KARYA WIJAYA',
+                                                'LUKMAN AHMAD',
+                                                'MAMIK ABIDIN',
+                                                'MEDI KRISNANTO',
+                                                'MIFTAKHUROHMAN',
+                                                'MUGI PRAMONO',
+                                                'NUR SUPRIYANTO',
+                                                'NURSAID',
+                                                'NURSALIM',
+                                                'R.WAWAN HIMAWAN',
+                                                'RAHMAT NUGROHO',
+                                                'RANGGA FADILLAH',
+                                                'RIZKY ANDREA RAHMAWAN',
+                                                'RUKMAN',
+                                                'RUSITO',
+                                                'SABAR WASIRAN',
+                                                'SEPTIADI PRATOMO',
+                                                'SUDIYATNO',
+                                                'UMAR HADI',
+                                                'VITRI HANDAYANI',
+                                                'YANUARDIN SALEH SIREGAR',
+                                                'YUSUF SYAFAAT',
+                                                'ADHI PRASETIYO',
+                                                'AHMAD RIDWAN',
+                                                'ANDIK TOTOK SISWOYO',
+                                                'ARY RODJO PRASETYO',
+                                                'AVI SHENNA',
+                                                'BANGUN SUTOPO',
+                                                'CECEP ISKANDAR',
+                                                'DANIA ISNAWATI',
+                                                'DINA NIMAS AYU NAWAWULAN PRIHANTINI',
+                                                'DWI KUNTORO',
+                                                'FIKRI SYAHBANA',
+                                                'FRISILIA CLAUDIA HUTAMA',
+                                                'GUNAWAN',
+                                                'HARDI SAPUTRA',
+                                                'HARRY SUPRIYADI',
+                                                'HERLIANA',
+                                                'HERY HERMAWAN',
+                                                'HUSEIN ABDULLAH',
+                                                'ILHAM CHOLID',
+                                                'ILHAM SETIA DARMA',
+                                                'IMAM PRASETYO',
+                                                'IMAM SOPYAN',
+                                                'JEFRY WASTON E',
+                                                'JESSICA PAUNE',
+                                                'JONI SETIAWAN',
+                                                'JUN JOHAMIN PD',
+                                                'KUSTIONO',
+                                                'LINA UNIARSIH',
+                                                'M. RIDWAN GUNAWAN',
+                                                'MARTINUS CAHYO RAHASTO',
+                                                'MOCHAMMAD ANDRIANSYAH',
+                                                'MOHAMMAD FATKHURROHMAN',
+                                                'MUHAMMAD DINAR FARISI',
+                                                'MUHAMMAD MAHBUB',
+                                                'NUR DWITA SURA WIJAYA',
+                                                'PUTRI ANINDIA',
+                                                'RAGIL ISHA RAHMANTO',
+                                                'RIADUS SOLIHIN',
+                                                'RICHARDUS',
+                                                'RISFAN FAISAL',
+                                                'RUSLAN M.ALI',
+                                                'SENDY PRABOWO',
+                                                'SETIYAWAN',
+                                                'SITI MARIA ULFA',
+                                            ]))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('job.positions.index') }}">Summary Competency</a>
+                                            </li>
                                         @endif
                                     </ul>
                                 </li>
 
                                 <li>
-                                    <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown"
+                                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         Training Development
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="childDropdown">
-                                        @if(in_array(auth()->user()->name, ['ADMINSTRATOR', 'VITRI HANDAYANI', 'ANDIK TOTOK SISWOYO', 'ARY RODJO PRASETYO', 'HARDI SAPUTRA', 'JESSICA PAUNE', 'MARTINUS CAHYO RAHASTO', 'SITI MARIA ULFA', 'YUDHI PRASETYO RAHMAWANTO']))
-                                            <li><a class="dropdown-item" href="{{ route('indexPD') }}">Form Pengajuan Training</a></li>
+                                        @if (in_array(auth()->user()->name, [
+                                                'ADMINSTRATOR',
+                                                'YULMAI RIDO WINANDA',
+                                                'ANDIK TOTOK SISWOYO',
+                                                'ARY RODJO PRASETYO',
+                                                'HARDI SAPUTRA',
+                                                'JESSICA PAUNE',
+                                                'MARTINUS CAHYO RAHASTO',
+                                                'SITI MARIA ULFA',
+                                                'RICHARDUS',
+                                                'ADHI PRASETYO',
+                                            ]))
+                                            <li><a class="dropdown-item" href="{{ route('indexPD') }}">Form Pengajuan
+                                                    Training</a></li>
                                         @endif
 
-                                        @if(in_array(auth()->user()->name, ['ADMINSTRATOR', 'JESSICA PAUNE', 'SITI MARIA ULFA']))
-                                            <li><a class="dropdown-item" href="{{ route('indexPD2') }}">Persetujuan Development</a></li>
+                                        @if (in_array(auth()->user()->name, ['ADMINSTRATOR', 'JESSICA PAUNE', 'SITI MARIA ULFA']))
+                                            <li><a class="dropdown-item" href="{{ route('indexPD2') }}">Persetujuan
+                                                    Development</a></li>
                                         @endif
                                     </ul>
                                 </li>
@@ -737,32 +1291,111 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 @php
-                                $allowedUsers = [
-                                    'ADMINSTRATOR', 'AFILIANDI', 'AGUNG PANGESTU YUSUF', 'AGUS PRIYANTO', 'AGUS ROSIDIN',
-                                    'ANDI SANTOSO', 'ANDI SIMPONI', 'ARRY SOEBHEKTI', 'AWING', 'DASUKI', 'DEDY SETIAWAN',
-                                    'DIAMAN DARMAWINATA', 'ELI HANDOYO', 'FAIZAL AFDAU', 'FATUL MUKMIN', 'HAERUL IKHSAN',
-                                    'HENDRIO', 'JAKA RARA SUKMA', 'JAKARIA', 'KARYA WIJAYA', 'LUKMAN AHMAD', 'MAMIK ABIDIN',
-                                    'MEDI KRISNANTO', 'MIFTAKHUROHMAN', 'MUGI PRAMONO', 'NUR SUPRIYANTO', 'NURSAID', 'NURSALIM',
-                                    'R.WAWAN HIMAWAN', 'RAHMAT NUGROHO', 'RANGGA FADILLAH', 'RIZKY ANDREA RAHMAWAN', 'RUKMAN',
-                                    'RUSITO', 'SABAR WASIRAN', 'SEPTIADI PRATOMO', 'SUDIYATNO', 'UMAR HADI', 'VITRI HANDAYANI',
-                                    'YANUARDIN SALEH SIREGAR', 'YUSUF SYAFAAT', 'ADHI PRASETIYO', 'AHMAD RIDWAN', 'ANDIK TOTOK SISWOYO',
-                                    'ARY RODJO PRASETYO', 'AVI SHENNA', 'BANGUN SUTOPO', 'CECEP ISKANDAR', 'DANIA ISNAWATI', 
-                                    'DINA NIMAS AYU NAWAWULAN PRIHANTINI', 'DWI KUNTORO', 'FIKRI SYAHBANA', 'FRISILIA CLAUDIA HUTAMA',
-                                    'GUNAWAN', 'HARDI SAPUTRA', 'HARRY SUPRIYADI', 'HERLIANA', 'HERY HERMAWAN', 'HUSEIN ABDULLAH',
-                                    'ILHAM CHOLID', 'ILHAM SETIA DARMA', 'IMAM PRASETYO', 'IMAM SOPYAN', 'JEFRY WASTON E', 
-                                    'JESSICA PAUNE', 'JONI SETIAWAN', 'JUN JOHAMIN PD', 'KUSTIONO', 'LINA UNIARSIH', 
-                                    'M. RIDWAN GUNAWAN', 'MARTINUS CAHYO RAHASTO', 'MOCHAMMAD ANDRIANSYAH', 'MOHAMMAD FATKHURROHMAN', 
-                                    'MUHAMMAD DINAR FARISI', 'MUHAMMAD MAHBUB', 'NUR DWITA SURA WIJAYA', 'PUTRI ANINDIA', 
-                                    'RAGIL ISHA RAHMANTO', 'RIADUS SOLIHIN', 'RICHARDUS', 'RISFAN FAISAL', 'RUSLAN M.ALI', 
-                                    'SENDY PRABOWO', 'SETIYAWAN', 'SITI MARIA ULFA', 'SUKIMIN', 'WULYO EKO PRASETYO', 
-                                    'YAN WELEM MANGINSELA', 'YUDHI PRASETYO RAHMAWANTO', 'YULMAI RIDO WINANDA', 'YUNASIS PALGUNADI', 
-                                    'ZAENAL ARIFIN', 'ABDUR RAHMAN AL FAAIZ', 'YAN WALEM MANGINSELA', 'VIVIAN ANGELIKA', 
-                                    'Sony Stiawan', 'FAJAR BAGASKARA'
-                                ];
-                            @endphp
-                                @if(in_array(Auth::user()->name, $allowedUsers))
-                                    <li><a class="dropdown-item" href="{{ route('showSS') }}">Form Sumbang Saran</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('forumSS') }}">Overview Sumbang Saran</a></li>
+                                    $allowedUsers = [
+                                        'ADMINSTRATOR',
+                                        'AFILIANDI',
+                                        'AGUNG PANGESTU YUSUF',
+                                        'AGUS PRIYANTO',
+                                        'AGUS ROSIDIN',
+                                        'ANDI SANTOSO',
+                                        'ANDI SIMPONI',
+                                        'ARRY SOEBHEKTI',
+                                        'AWING',
+                                        'DASUKI',
+                                        'DEDY SETIAWAN',
+                                        'DIAMAN DARMAWINATA',
+                                        'ELI HANDOYO',
+                                        'FAIZAL AFDAU',
+                                        'FATUL MUKMIN',
+                                        'HAERUL IKHSAN',
+                                        'HENDRIO',
+                                        'JAKA RARA SUKMA',
+                                        'JAKARIA',
+                                        'KARYA WIJAYA',
+                                        'LUKMAN AHMAD',
+                                        'MAMIK ABIDIN',
+                                        'MEDI KRISNANTO',
+                                        'MIFTAKHUROHMAN',
+                                        'MUGI PRAMONO',
+                                        'NUR SUPRIYANTO',
+                                        'NURSAID',
+                                        'NURSALIM',
+                                        'R.WAWAN HIMAWAN',
+                                        'RAHMAT NUGROHO',
+                                        'RANGGA FADILLAH',
+                                        'RIZKY ANDREA RAHMAWAN',
+                                        'RUKMAN',
+                                        'RUSITO',
+                                        'SABAR WASIRAN',
+                                        'SEPTIADI PRATOMO',
+                                        'SUDIYATNO',
+                                        'UMAR HADI',
+                                        'VITRI HANDAYANI',
+                                        'YANUARDIN SALEH SIREGAR',
+                                        'YUSUF SYAFAAT',
+                                        'ADHI PRASETIYO',
+                                        'AHMAD RIDWAN',
+                                        'ANDIK TOTOK SISWOYO',
+                                        'ARY RODJO PRASETYO',
+                                        'AVI SHENNA',
+                                        'BANGUN SUTOPO',
+                                        'CECEP ISKANDAR',
+                                        'DANIA ISNAWATI',
+                                        'DINA NIMAS AYU NAWAWULAN PRIHANTINI',
+                                        'DWI KUNTORO',
+                                        'FIKRI SYAHBANA',
+                                        'FRISILIA CLAUDIA HUTAMA',
+                                        'GUNAWAN',
+                                        'HARDI SAPUTRA',
+                                        'HARRY SUPRIYADI',
+                                        'HERLIANA',
+                                        'HERY HERMAWAN',
+                                        'HUSEIN ABDULLAH',
+                                        'ILHAM CHOLID',
+                                        'ILHAM SETIA DARMA',
+                                        'IMAM PRASETYO',
+                                        'IMAM SOPYAN',
+                                        'JEFRY WASTON E',
+                                        'JESSICA PAUNE',
+                                        'JONI SETIAWAN',
+                                        'JUN JOHAMIN PD',
+                                        'KUSTIONO',
+                                        'LINA UNIARSIH',
+                                        'M. RIDWAN GUNAWAN',
+                                        'MARTINUS CAHYO RAHASTO',
+                                        'MOCHAMMAD ANDRIANSYAH',
+                                        'MOHAMMAD FATKHURROHMAN',
+                                        'MUHAMMAD DINAR FARISI',
+                                        'MUHAMMAD MAHBUB',
+                                        'NUR DWITA SURA WIJAYA',
+                                        'PUTRI ANINDIA',
+                                        'RAGIL ISHA RAHMANTO',
+                                        'RIADUS SOLIHIN',
+                                        'RICHARDUS',
+                                        'RISFAN FAISAL',
+                                        'RUSLAN M.ALI',
+                                        'SENDY PRABOWO',
+                                        'SETIYAWAN',
+                                        'SITI MARIA ULFA',
+                                        'SUKIMIN',
+                                        'WULYO EKO PRASETYO',
+                                        'YAN WELEM MANGINSELA',
+                                        'YUDHI PRASETYO RAHMAWANTO',
+                                        'YULMAI RIDO WINANDA',
+                                        'YUNASIS PALGUNADI',
+                                        'ZAENAL ARIFIN',
+                                        'ABDUR RAHMAN AL FAAIZ',
+                                        'YAN WALEM MANGINSELA',
+                                        'VIVIAN ANGELIKA',
+                                        'Sony Stiawan',
+                                        'FAJAR BAGASKARA',
+                                    ];
+                                @endphp
+                                @if (in_array(Auth::user()->name, $allowedUsers))
+                                    <li><a class="dropdown-item" href="{{ route('showSS') }}">Form Sumbang Saran</a>
+                                    </li>
+                                    <li><a class="dropdown-item" href="{{ route('forumSS') }}">Overview Sumbang
+                                            Saran</a></li>
                                 @else
                                     <li><a class="dropdown-item" href="#">Access Denied</a></li>
                                 @endif
@@ -774,26 +1407,50 @@
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="childDropdown">
                                         @php
-                                        $kaSieUsers = [
-                                            'ADMINSTRATOR', 'MUGI PRAMONO', 'RANGGA FADILLAH', 'VITRI HANDAYANI', 'ADHI PRASETIYO', 
-                                            'ANDIK TOTOK SISWOYO', 'ARY RODJO PRASETYO', 'HARDI SAPUTRA', 'ILHAM CHOLID', 'JESSICA PAUNE',
-                                            'JUN JOHAMIN PD', 'MARTINUS CAHYO RAHASTO', 'RAGIL ISHA RAHMANTO', 'RICHARDUS', 'SITI MARIA ULFA',
-                                            'YUDHI PRASETYO RAHMAWANTO', 'ABDUR RAHMAN AL FAAIZ'
-                                        ];
+                                            $kaSieUsers = [
+                                                'ADMINSTRATOR',
+                                                'MUGI PRAMONO',
+                                                'RANGGA FADILLAH',
+                                                'VITRI HANDAYANI',
+                                                'ADHI PRASETIYO',
+                                                'ANDIK TOTOK SISWOYO',
+                                                'ARY RODJO PRASETYO',
+                                                'HARDI SAPUTRA',
+                                                'ILHAM CHOLID',
+                                                'JESSICA PAUNE',
+                                                'JUN JOHAMIN PD',
+                                                'MARTINUS CAHYO RAHASTO',
+                                                'RAGIL ISHA RAHMANTO',
+                                                'RICHARDUS',
+                                                'SITI MARIA ULFA',
+                                                'YUDHI PRASETYO RAHMAWANTO',
+                                                'ABDUR RAHMAN AL FAAIZ',
+                                            ];
 
-                                        $kaDeptUsers = [
-                                            'ADMINSTRATOR', 'MUGI PRAMONO', 'RANGGA FADILLAH', 'ADHI PRASETIYO', 'ARY RODJO PRASETYO', 
-                                            'ILHAM CHOLID', 'JESSICA PAUNE', 'JUN JOHAMIN PD', 'RAGIL ISHA RAHMANTO', 'RICHARDUS', 
-                                            'SITI MARIA ULFA', 'ABDUR RAHMAN AL FAAIZ'
-                                        ];
-                                    @endphp
+                                            $kaDeptUsers = [
+                                                'ADMINSTRATOR',
+                                                'MUGI PRAMONO',
+                                                'RANGGA FADILLAH',
+                                                'ADHI PRASETIYO',
+                                                'ARY RODJO PRASETYO',
+                                                'ILHAM CHOLID',
+                                                'JESSICA PAUNE',
+                                                'JUN JOHAMIN PD',
+                                                'RAGIL ISHA RAHMANTO',
+                                                'RICHARDUS',
+                                                'SITI MARIA ULFA',
+                                                'ABDUR RAHMAN AL FAAIZ',
+                                            ];
+                                        @endphp
 
-                                        @if(in_array(Auth::user()->name, $kaSieUsers))
-                                            <li><a class="dropdown-item" href="{{ route('showKonfirmasiForeman') }}">Ka. Sie</a></li>
+                                        @if (in_array(Auth::user()->name, $kaSieUsers))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('showKonfirmasiForeman') }}">Ka. Sie</a></li>
                                         @endif
 
-                                        @if(in_array(Auth::user()->name, $kaDeptUsers))
-                                            <li><a class="dropdown-item" href="{{ route('showKonfirmasiDeptHead') }}">Ka. Dept</a></li>
+                                        @if (in_array(Auth::user()->name, $kaDeptUsers))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('showKonfirmasiDeptHead') }}">Ka. Dept</a></li>
                                         @endif
                                     </ul>
                                 </li>
@@ -804,21 +1461,30 @@
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="childDropdown">
                                         @php
-                                        $penilaianKomiteUsers = [
-                                            'ADMINSTRATOR', 'ARY RODJO PRASETYO', 'JESSICA PAUNE', 'SITI MARIA ULFA'
-                                        ];
+                                            $penilaianKomiteUsers = [
+                                                'ADMINSTRATOR',
+                                                'ARY RODJO PRASETYO',
+                                                'JESSICA PAUNE',
+                                                'SITI MARIA ULFA',
+                                            ];
 
-                                        $penilaianHRGAUsers = [
-                                            'ADMINSTRATOR', 'ARY RODJO PRASETYO', 'JESSICA PAUNE', 'SITI MARIA ULFA'
-                                        ];
-                                    @endphp
+                                            $penilaianHRGAUsers = [
+                                                'ADMINSTRATOR',
+                                                'ARY RODJO PRASETYO',
+                                                'JESSICA PAUNE',
+                                                'SITI MARIA ULFA',
+                                            ];
+                                        @endphp
 
-                                        @if(in_array(Auth::user()->name, $penilaianKomiteUsers))
-                                            <li><a class="dropdown-item" href="{{ route('showKonfirmasiKomite') }}">Penilaian Komite</a></li>
+                                        @if (in_array(Auth::user()->name, $penilaianKomiteUsers))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('showKonfirmasiKomite') }}">Penilaian Komite</a>
+                                            </li>
                                         @endif
 
-                                        @if(in_array(Auth::user()->name, $penilaianHRGAUsers))
-                                            <li><a class="dropdown-item" href="{{ route('showKonfirmasiHRGA') }}">Penilaian HRGA</a></li>
+                                        @if (in_array(Auth::user()->name, $penilaianHRGAUsers))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('showKonfirmasiHRGA') }}">Penilaian HRGA</a></li>
                                         @endif
 
                                     </ul>
@@ -826,6 +1492,14 @@
                             </ul>
                         </li>
                     </ul>
+
+                    <div class="d-flex justify-content-end m-2 p-1">
+                        @if (Auth::check())
+                            <small
+                                style="color: #f8f9fa; font-weight: bold; font-family: Cambria, serif; font-size: 12pt;">Hello,
+                                {{ Auth::user()->name }}</small>
+                        @endif
+                    </div>
                     <!-- Search Bar -->
                     <form class="d-flex justify-content-end">
                         {{-- <input class="form-control me-2" disabled> --}}

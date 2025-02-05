@@ -395,11 +395,20 @@
                                                 </td>
                                                 <td>
                                                     @if ($inquiry->details->isNotEmpty())
-                                                        @foreach ($inquiry->details as $detail)
-                                                            <p>{{ $detail->ship }}</p>
-                                                        @endforeach
+                                                        @php
+                                                            // Ambil semua nilai ship dari detail
+                                                            $ships = $inquiry->details->pluck('ship')->unique(); // Mengambil nilai unik
+                                                        @endphp
+
+                                                        @if ($ships->count() === 1)
+                                                            <p>{{ $ships->first() }}</p>
+                                                        @else
+                                                            @foreach ($ships as $ship)
+                                                                <p>{{ $ship }}</p>
+                                                            @endforeach
+                                                        @endif
                                                     @else
-                                                        N/A
+                                                        --- No Shipping Options ---
                                                     @endif
                                                 </td>
                                                 <td>
@@ -441,19 +450,19 @@
             </div>
         </section>
 
-                        <!-- jQuery -->
-                        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-                        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
-                        <script>
-                            $(document).ready(function() {
-                                // Hover function for dropdowns
-                                $('.nav-item.dropdown').hover(function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
-                                }, function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
-                                });
-                            });
-                            </script>
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
+        <script>
+            $(document).ready(function() {
+                // Hover function for dropdowns
+                $('.nav-item.dropdown').hover(function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+                }, function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
+                });
+            });
+        </script>
 
         <!-- jQuery -->
         <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>

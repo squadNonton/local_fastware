@@ -47,7 +47,7 @@ h6 {
   transition: all 0.3s;
 }
 
-@media (max-width: 1199px) {
+@media (max-width: 2000px) {
   #main {
     padding: 20px;
   }

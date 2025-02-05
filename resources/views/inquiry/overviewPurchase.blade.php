@@ -249,6 +249,15 @@
                 /* Merah untuk show form */
             }
 
+            .btn-custom-confirm-purchasing {
+                background-color: #ffb300;
+                color: #000000;
+                border: none;
+                font-size: 8pt;
+                font-family: 'Cambria', serif;
+                font-weight: bold;
+            }
+
             .btn-custom-form {
                 background-color: #4df300;
                 /* Merah untuk show form */
@@ -348,6 +357,7 @@
                                     <thead>
                                         <tr>
                                             <th>No</th>
+                                            <th class="text-center">PO Number</th>
                                             <th class="text-center">Create By</th>
                                             <th class="text-center">Reference</th>
                                             <th class="text-center">Category</th>
@@ -364,6 +374,7 @@
                                         @foreach ($inquiries as $index => $inquiry)
                                             <tr>
                                                 <td>{{ $index + 1 }}</td>
+                                                <td class="text-center">{{ $inquiry->refnopo }}</td>
                                                 <td class="text-center">{{ $inquiry->create_by }}</td>
                                                 <td class="text-center">{{ $inquiry->kode_inquiry }}</td>
                                                 <td class="text-center">{{ $inquiry->loc_imp }}</td>
@@ -415,9 +426,18 @@
                                                 </td>
                                                 <td>
                                                     @if ($inquiry->details->isNotEmpty())
-                                                        @foreach ($inquiry->details as $detail)
-                                                            <p>{{ $detail->ship }}</p>
-                                                        @endforeach
+                                                        @php
+                                                            // Ambil semua nilai ship dari detail
+                                                            $ships = $inquiry->details->pluck('ship')->unique(); // Mengambil nilai unik
+                                                        @endphp
+
+                                                        @if ($ships->count() === 1)
+                                                            <p>{{ $ships->first() }}</p>
+                                                        @else
+                                                            @foreach ($ships as $ship)
+                                                                <p>{{ $ship }}</p>
+                                                            @endforeach
+                                                        @endif
                                                     @else
                                                         --- No Shipping Options ---
                                                     @endif
@@ -444,7 +464,7 @@
                                                     @endif
 
                                                     <a href="#" class="btn btn-primary btn-sm"
-                                                        onclick="showEditDataModal({{ $inquiry->id }}, '{{ $inquiry->supplier }}', '{{ $inquiry->progress }}', '{{ $inquiry->est_date }}'); return false;"
+                                                        onclick="showEditDataModal({{ $inquiry->id }}, '{{ $inquiry->supplier }}', '{{ $inquiry->progress }}', '{{ $inquiry->refnopo }}', '{{ $inquiry->est_date }}'); return false;"
                                                         title="Edit Inquiry">
                                                         <i class="bi bi-pencil"></i>
                                                     </a>
@@ -499,8 +519,10 @@
                                                     PT. SAMUDRA BAJA NUSANTARA</option>
                                                 <option value="PT. SURYA SEJAHTERA METALINDO LESTARI">
                                                     PT. SURYA SEJAHTERA METALINDO LESTARI</option>
-                                                <option value="CV. DIMA RAMA SAKTI">
-                                                    CV. DIMA RAMA SAKTI</option>
+                                                <option value="CV. DIMA RAMA SAKTI">
+                                                    CV. DIMA RAMA SAKTI</option>
+                                                <option value="CV. DWI PUTRA TEKNINDO">
+                                                    CV. DWI PUTRA TEKNINDO</option>
                                                 <!-- Tambahkan opsi lain jika diperlukan -->
                                             </select>
                                         </div>
@@ -509,6 +531,12 @@
                                         <div class="mb-3">
                                             <label for="progress" class="form-label">Last Update</label>
                                             <input type="text" class="form-control" id="progress" name="progress"
+                                                required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="refnopo" class="form-label">Ref PO Number</label>
+                                            <input type="text" class="form-control" id="refnopo" name="refnopo"
                                                 required>
                                         </div>
 
@@ -534,7 +562,7 @@
             </div>
         </section>
 
-        
+
         <!-- jQuery -->
         <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
         <!-- SimpleDataTables JS -->
@@ -619,11 +647,12 @@
                 });
             }
 
-            function showEditDataModal(id, supplier, progress, estDate) {
+            function showEditDataModal(id, supplier, progress, refnopo, estDate) {
                 // Set inquiry_id
                 document.getElementById('inquiryId').value = id;
                 document.getElementById('supplier').value = supplier; // Set supplier
                 document.getElementById('progress').value = progress; // Set last update
+                document.getElementById('refnopo').value = refnopo; // Set nopo
                 document.getElementById('estDate').value = estDate; // Set est. date
 
                 // Tampilkan modal
