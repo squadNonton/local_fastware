@@ -1273,7 +1273,7 @@ $fpbFinishPercentage = $totalFPB > 0 ? round(($fpbFinishUnique / $totalFPB) * 10
     {
         try {
             Log::info('Received request data for purchase order:', $request->all()); // Log all incoming data
-
+    
             $validatedData = $request->validate([
                 'kategori_po' => 'required|string',
                 'nama_barang.*' => 'required|string',
@@ -1289,24 +1289,24 @@ $fpbFinishPercentage = $totalFPB > 0 ? round(($fpbFinishUnique / $totalFPB) * 10
                 'nama_project.*' => 'nullable|string',
                 'no_so.*' => 'nullable|string',
             ]);
-
+    
             Log::info('Validated data:', $validatedData); // Log the validated data
-
+    
             // Generate no_fpb
             $currentYear = date('Y');
             $latestPo = MstPoPengajuan::whereYear('created_at', $currentYear)
                 ->orderBy('id', 'desc')
                 ->first();
-
+    
             $newPoNumber = 1; // Default value if no existing PO
             if ($latestPo) {
                 $lastPoNumber = (int)substr($latestPo->no_fpb, strrpos($latestPo->no_fpb, '/') + 1);
                 $newPoNumber = $lastPoNumber + 1;
             }
-
+    
             $no_fpb = 'FPB/' . $currentYear . '/' . str_pad($newPoNumber, 5, '0', STR_PAD_LEFT); // Format to 00001
             Log::info('Generated PO number: ' . $no_fpb); // Log the generated PO number
-
+    
             // Check if the generated no_fpb already exists in the database
             while (MstPoPengajuan::where('no_fpb', $no_fpb)->exists()) {
                 Log::warning('Duplicate PO number found, generating a new one.');
@@ -1315,7 +1315,7 @@ $fpbFinishPercentage = $totalFPB > 0 ? round(($fpbFinishUnique / $totalFPB) * 10
                 $no_fpb = 'FPB/' . $currentYear . '/' . str_pad($newPoNumber, 5, '0', STR_PAD_LEFT);
                 Log::info('Newly generated PO number: ' . $no_fpb); // Log the newly generated PO number
             }
-
+    
             foreach ($validatedData['nama_barang'] as $index => $nama_barang) {
                 $purchaseOrder = new MstPoPengajuan();
                 $purchaseOrder->no_fpb = $no_fpb; // Store generated no_fpb
@@ -1325,21 +1325,21 @@ $fpbFinishPercentage = $totalFPB > 0 ? round(($fpbFinishUnique / $totalFPB) * 10
                 $purchaseOrder->pcs = $validatedData['pcs'][$index];
                 $purchaseOrder->price_list = isset($validatedData['price_list'][$index]) ?
                     str_replace(',', '', $validatedData['price_list'][$index]) : null;
-
+    
                 // Menghitung total harga (pcs * price_list)
                 if (isset($validatedData['pcs'][$index]) && isset($validatedData['price_list'][$index])) {
                     $purchaseOrder->total_harga = $validatedData['pcs'][$index] * str_replace(',', '', $validatedData['price_list'][$index]);
                 } else {
                     $purchaseOrder->total_harga = null;
                 }
-
+    
                 Log::info('Creating purchase order for item:', [
                     'no_fpb' => $no_fpb,
                     'kategori_po' => $validatedData['kategori_po'],
                     'nama_barang' => $nama_barang,
                     'spesifikasi' => $validatedData['spesifikasi'][$index],
-                ]); // Removed qty reference from log
-
+                ]);
+    
                 if ($request->hasFile('file')) {
                     $fileNames = []; // Array untuk menyimpan nama file
                 
@@ -1364,7 +1364,8 @@ $fpbFinishPercentage = $totalFPB > 0 ? round(($fpbFinishUnique / $totalFPB) * 10
                             $fileNames[] = $originalName;
                         }
                     }
-
+                }
+    
                 // Handle Subcont fields if they are set
                 if ($validatedData['kategori_po'] === 'Subcont') {
                     $purchaseOrder->target_cost = isset($validatedData['target_cost'][$index]) ?
@@ -1373,11 +1374,11 @@ $fpbFinishPercentage = $totalFPB > 0 ? round(($fpbFinishUnique / $totalFPB) * 10
                     $purchaseOrder->rekomendasi = $validatedData['rekomendasi'][$index] ?? null;
                     $purchaseOrder->nama_customer = $validatedData['nama_customer'][$index] ?? null;
                     $purchaseOrder->nama_project = $validatedData['nama_project'][$index] ?? null;
-
+    
                     // Generate and insert no_so
-                    $so_number = 'SO/' . $currentYear . '/' . ($validatedData['no_so'][$index] ?? ''); // Format SO/{year}/{value from view}
+                    $so_number = 'SO/' . $currentYear . '/' . ($validatedData['no_so'][$index] ?? '');
                     $purchaseOrder->no_so = $so_number;
-
+    
                     Log::info('Subcont fields for item:', [
                         'target_cost' => $purchaseOrder->target_cost,
                         'lead_time' => $purchaseOrder->lead_time,
@@ -1387,10 +1388,10 @@ $fpbFinishPercentage = $totalFPB > 0 ? round(($fpbFinishUnique / $totalFPB) * 10
                         'no_so' => $so_number,
                     ]);
                 }
-
+    
                 $purchaseOrder->status_1 = 1;
                 $purchaseOrder->modified_at = $request->user()->name;
-
+    
                 // Attempt to save the purchase order
                 try {
                     $purchaseOrder->save();
@@ -1403,7 +1404,7 @@ $fpbFinishPercentage = $totalFPB > 0 ? round(($fpbFinishUnique / $totalFPB) * 10
                     return redirect()->route('index.PO')->with('error', 'Data failed to save: ' . $e->getMessage());
                 }
             }
-
+    
             return redirect()->route('index.PO')->with('success', 'Data successfully saved!');
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Validation failed: ' . json_encode($e->errors())); // Convert errors to string
@@ -1413,6 +1414,7 @@ $fpbFinishPercentage = $totalFPB > 0 ? round(($fpbFinishUnique / $totalFPB) * 10
             return redirect()->route('index.PO')->with('error', 'An unexpected error occurred: ' . $e->getMessage());
         }
     }
+    
 
     public function update(Request $request, $id)
     {
