@@ -130,19 +130,20 @@ $endDate2 = $request->input('end_date_leadtime');
     // Query untuk kategori list (tidak tergantung pada kategori yang dipilih)
     $kategoriList = MstPoPengajuan::distinct()->pluck('kategori_po');
     
-    // Query untuk chart pertama (Open Finish) berdasarkan kategori yang dipilih
-    $query1 = MstPoPengajuan::query();
-    if ($startDate1 && $endDate1) {
-        $query1->whereBetween('created_at', [$startDate1, $endDate1]);
-    }
-    if ($kategori) {
-        $query1->where('kategori_po', $kategori);
-    }
-    
-    $mstPoPengajuans1 = $query1->get();
-    $uniqueFPB1 = $mstPoPengajuans1->unique('no_fpb');
-    $filteredMst1 = $uniqueFPB1->where('kategori_po', $kategori);
-    $categoryTotal1 = $filteredMst1->count();
+// Query untuk chart pertama (Open Finish) berdasarkan kategori yang dipilih
+$queryMst = MstPoPengajuan::query();
+if ($kategori) {
+    $queryMst->where('kategori_po', $kategori);
+}
+
+$noFpbList = $queryMst->pluck('no_fpb'); // Mengambil semua no_fpb sesuai kategori
+$queryTrs = TrsPoPengajuan::whereIn('id_fpb', function ($query) use ($noFpbList) {
+    $query->select('id')->from('mst_po_pengajuans')->whereIn('no_fpb', $noFpbList);
+});
+// Filter berdasarkan tanggal dari TrsPoPengajuan
+if ($startDate1 && $endDate1) {
+    $queryTrs->whereBetween('created_at', [$startDate1, $endDate1]);
+}
     
     // Query untuk chart kedua (Lead Time) - Semua kategori tanpa filter berdasarkan kategori
     $query2 = MstPoPengajuan::query();
@@ -154,71 +155,77 @@ $endDate2 = $request->input('end_date_leadtime');
     $filteredMst2 = $uniqueFPB2;
     $categoryTotal2 = $filteredMst2->count();
     
-// Inisialisasi FPB Open dan Finish
-$fpbOpen = 0;
-$fpbFinish = 0;
-$processedFPB = []; // Menyimpan FPB yang sudah dihitung
-$submitConfirmFPB = 0; // FPB yang statusnya antara 6-8 (Submit - Confirm)
-$confirmFinishFPB = 0; // FPB yang statusnya 9 (Confirm - Finish)
+    $trsPoPengajuan = $queryTrs->get()->groupBy('id_fpb'); // Kelompokkan berdasarkan id_fpb
+// Menghitung data unik berdasarkan no_fpb
+$fpbOpenUnique = 0;
+$fpbFinishUnique = 0;
+$processedFPB = [];
 
 // Monthly Data untuk chart Open Finish
 $monthlyData = [
     'open' => array_fill(0, 12, 0),
     'finish' => array_fill(0, 12, 0)
 ];
+
+$currentYear = Carbon::now()->year;
 $currentMonth = Carbon::now()->month - 1; // Bulan berjalan (0-indexed, Januari = 0)
 
-// Menghitung monthly data untuk Open Finish
-$activeFPB = [];
-foreach ($uniqueFPB1 as $fpb) {
-    $createdMonth = Carbon::parse($fpb->created_at)->month - 1;
-    $lastRecord = TrsPoPengajuan::where('id_fpb', $fpb->id)
-        ->orderBy('updated_at', 'desc')
-        ->first();
+foreach ($trsPoPengajuan as $id_fpb => $trsEntries) {
+    $fpbEntry = $trsEntries->first(); // Ambil salah satu entry untuk mendapatkan no_fpb
+    $no_fpb = MstPoPengajuan::where('id', $id_fpb)->value('no_fpb'); // Ambil no_fpb berdasarkan id_fpb di mst
 
-    if (!isset($processedFPB[$fpb->no_fpb])) {
-        $processedFPB[$fpb->no_fpb] = true; // Tandai FPB ini agar tidak dihitung berulang
-        
+    if (!isset($processedFPB[$no_fpb])) {
+        $processedFPB[$no_fpb] = true; // Tandai FPB ini agar tidak dihitung berulang
+
+        $lastRecord = $trsEntries->sortByDesc('updated_at')->first(); // Ambil status terbaru berdasarkan updated_at
+        $createdDate = Carbon::parse($fpbEntry->created_at);
+        $createdYear = $createdDate->year;
+        $createdMonth = $createdDate->month - 1;
+
         if ($lastRecord && $lastRecord->status == 9) {
-            $finishMonth = Carbon::parse($lastRecord->updated_at)->month - 1;
-            for ($m = $createdMonth; $m <= $finishMonth; $m++) {
-                $monthlyData['open'][$m]++;
+            $finishDate = Carbon::parse($lastRecord->updated_at);
+            $finishYear = $finishDate->year;
+            $finishMonth = $finishDate->month - 1;
+
+            // Jika FPB melewati tahun, tetap dihitung sampai selesai
+            if ($finishYear > $createdYear) {
+                for ($year = $createdYear; $year <= $finishYear; $year++) {
+                    $startMonth = ($year == $createdYear) ? $createdMonth : 0;
+                    $endMonth = ($year == $finishYear) ? $finishMonth : 11;
+
+                    for ($m = $startMonth; $m <= $endMonth; $m++) {
+                        $monthlyData['open'][$m]++;
+                    }
+                }
+            } else {
+                for ($m = $createdMonth; $m <= $finishMonth; $m++) {
+                    $monthlyData['open'][$m]++;
+                }
             }
+
             $monthlyData['finish'][$finishMonth]++;
-        } else {
-            for ($m = $createdMonth; $m <= $currentMonth; $m++) {
-                $monthlyData['open'][$m]++;
-            }
-        }
-    }
-}
-
-// **Inisialisasi Hitungan FPB Unik**
-$fpbOpenUnique = 0;
-$fpbFinishUnique = 0;
-$processedFPB = []; // Menyimpan status FPB yang sudah dihitung
-
-foreach ($uniqueFPB1 as $fpb) {
-    $lastRecord = TrsPoPengajuan::where('id_fpb', $fpb->id)
-        ->orderBy('updated_at', 'desc')
-        ->first();
-
-    if (!isset($processedFPB[$fpb->id])) {
-        if ($lastRecord && $lastRecord->status == 9) {
             $fpbFinishUnique++;
-            $processedFPB[$fpb->id] = 'finish'; // Tandai FPB sebagai finish
+
         } else {
+            // Jika belum selesai, tetap dihitung sampai bulan berjalan
+            for ($year = $createdYear; $year <= $currentYear; $year++) {
+                $startMonth = ($year == $createdYear) ? $createdMonth : 0;
+                $endMonth = ($year == $currentYear) ? $currentMonth : 11;
+
+                for ($m = $startMonth; $m <= $endMonth; $m++) {
+                    $monthlyData['open'][$m]++;
+                }
+            }
+
             $fpbOpenUnique++;
-            $processedFPB[$fpb->id] = 'open'; // Tandai FPB sebagai open
         }
     }
 }
 
+// Hitung total dan persentase FPB
 $totalFPB = $fpbOpenUnique + $fpbFinishUnique;
 $fpbOpenPercentage = $totalFPB > 0 ? round(($fpbOpenUnique / $totalFPB) * 100) : 0;
 $fpbFinishPercentage = $totalFPB > 0 ? round(($fpbFinishUnique / $totalFPB) * 100) : 0;
-
-
 
 
 
@@ -299,8 +306,8 @@ $fpbFinishPercentage = $totalFPB > 0 ? round(($fpbFinishUnique / $totalFPB) * 10
     ];
 
     return view('dashboard.dashboardFPB', [
-        'fpbOpen' => $fpbOpen,
-        'fpbFinish' => $fpbFinish,
+        'fpbOpen' => $fpbOpenUnique,
+        'fpbFinish' => $fpbFinishUnique,
         'fpbOpenPercentage' => $fpbOpenPercentage,
         'fpbFinishPercentage' => $fpbFinishPercentage,
         'leadTimeData' => $leadTimeData,

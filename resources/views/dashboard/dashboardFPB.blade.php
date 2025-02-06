@@ -166,14 +166,50 @@
 document.addEventListener('DOMContentLoaded', function () {
   // Ambil data bulanan dari controller
   const monthlyData = @json($monthlyData);
+  const startDate = @json($startDate1);
+  const endDate = @json($endDate1);
 
   // Nama bulan (indeks 0 untuk Jan, dst.)
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  // Konversi startDate & endDate ke objek Date
+  const start = startDate ? new Date(startDate) : null;
+  const end = endDate ? new Date(endDate) : null;
+
+  let filteredMonths = [];
+  let openData = [];
+  let finishData = [];
+
+  if (!start && !end) {
+    // Jika tidak ada filter, tampilkan semua bulan dari Januari sampai Desember
+    for (let i = 0; i < 12; i++) {
+      filteredMonths.push(allMonths[i]);
+      openData.push(monthlyData.open[i]);
+      finishData.push(monthlyData.finish[i]);
+    }
+  } else {
+    let startYear = start ? start.getFullYear() : new Date().getFullYear();
+    let endYear = end ? end.getFullYear() : new Date().getFullYear();
+
+    // Looping tahun untuk memastikan bulan dari dua tahun yang berbeda bisa tampil
+    for (let year = startYear; year <= endYear; year++) {
+      // Tentukan bulan mulai dan bulan akhir berdasarkan tahun yang bersangkutan
+      let startMonth = (year === startYear) ? start.getMonth() : 0;
+      let endMonth = (year === endYear) ? end.getMonth() : 11;
+
+      // Loop untuk setiap bulan dalam tahun yang sedang diproses
+      for (let month = startMonth; month <= endMonth; month++) {
+        filteredMonths.push(`${allMonths[month]} ${year}`); // Menambahkan bulan dan tahun yang sesuai
+        openData.push(monthlyData.open[month]); // Menambahkan data Open bulan tersebut
+        finishData.push(monthlyData.finish[month]); // Menambahkan data Finish bulan tersebut
+      }
+    }
+  }
 
   Highcharts.chart('chart-status-fpb', {
     chart: { type: 'column' },
     title: { align: 'center', text: 'Form Pengajuan Barang' },
-    xAxis: { categories: months },
+    xAxis: { categories: filteredMonths },
     yAxis: {
       allowDecimals: false,
       min: 0,
@@ -201,8 +237,8 @@ document.addEventListener('DOMContentLoaded', function () {
     },
     colors: ['#f1c40f', '#3498db'], // Warna: kuning untuk Open, biru untuk Finish
     series: [
-      { name: 'Open', data: monthlyData.open },
-      { name: 'Finish', data: monthlyData.finish }
+      { name: 'Open', data: openData },
+      { name: 'Finish', data: finishData }
     ],
     credits: { enabled: false } // Menghapus link Highcharts.com
   });
