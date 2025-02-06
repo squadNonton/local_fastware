@@ -85,10 +85,9 @@
                                                     name="total_harga[]" disabled required>
                                             </div>
                                             <div class="col-md-2">
-                                                <label for="file" class="form-label">Upload File/Drawing:<span
-                                                        style="color: red;">*</span></label>
-                                                <input class="form-control" type="file" id="file" name="file[]"
-                                                    accept="*/*" required>
+                                                <label for="file" class="form-label">Upload File/Drawing:<span style="color: red;">*</span></label>
+                                                <input class="form-control" type="file" id="file" name="file[]" accept="*/*" multiple required>
+                                                <ol id="file-list" class="mt-2"></ol> <!-- List nama file yang diunggah -->
                                             </div>
                                         </div>
                                         <br>
@@ -313,6 +312,41 @@
                     });
                 }
             }
+
+            document.getElementById('file').addEventListener('change', function(event) {
+            let fileList = event.target.files;
+            let fileListContainer = document.getElementById('file-list');
+            fileListContainer.innerHTML = ''; // Kosongkan daftar sebelum diisi ulang
+
+            if (fileList.length > 0) {
+                for (let i = 0; i < fileList.length; i++) {
+                    let listItem = document.createElement('li');
+                    listItem.textContent = fileList[i].name; // Menampilkan nama file
+                    fileListContainer.appendChild(listItem);
+                    }
+                }
+            });
+
+            document.getElementById('file').addEventListener('change', function(event) {
+                let fileList = event.target.files;
+                let fileListContainer = document.getElementById('file-list');
+                fileListContainer.innerHTML = ''; // Kosongkan daftar sebelum diisi ulang
+
+                if (fileList.length > 0) {
+                    for (let i = 0; i < fileList.length; i++) {
+                        let listItem = document.createElement('li');
+                        
+                        // Buat link untuk membuka file jika sudah terupload
+                        let link = document.createElement('a');
+                        link.href = URL.createObjectURL(fileList[i]);  // Menggunakan URL.createObjectURL untuk akses lokal file
+                        link.target = '_blank';  // Membuka di tab baru
+                        link.textContent = fileList[i].name;  // Nama file yang akan ditampilkan
+                        listItem.appendChild(link);
+                        
+                        fileListContainer.appendChild(listItem);
+                    }
+                }
+            });
         </script>
 
     </main><!-- End #main -->

@@ -66,7 +66,8 @@
                                 <label for="file" class="form-label fw-bold text-primary">
                                     <i class="fas fa-upload"></i> Upload Drawing <span style="color: red;">*</span>
                                 </label>
-                                <input type="file" class="form-control" id="file" name="file" required>
+                                <input type="file" class="form-control" id="file" name="file" multiple required>
+                                <ol id="file-list" class="mt-2"></ol> <!-- List nama file yang diunggah -->
                             </div>
 
                             <!-- Tombol Submit -->
@@ -116,6 +117,39 @@
                     });
                     return;
                 }
+
+                document.getElementById('file').addEventListener('change', function(event) {
+                let fileList = event.target.files;
+                let fileListContainer = document.getElementById('file-list');
+                fileListContainer.innerHTML = ''; // Kosongkan daftar sebelum diisi ulang
+
+                if (fileList.length > 0) {
+                    for (let i = 0; i < fileList.length; i++) {
+                        let listItem = document.createElement('li');
+                        
+                        // Buat link untuk membuka file jika sudah terupload
+                        let link = document.createElement('a');
+                        link.href = URL.createObjectURL(fileList[i]);  // Menggunakan URL.createObjectURL untuk akses lokal file
+                        link.target = '_blank';  // Membuka di tab baru
+                        link.textContent = fileList[i].name;  // Nama file yang akan ditampilkan
+                        listItem.appendChild(link);
+                        
+                        fileListConta   iner.appendChild(listItem);
+                    }
+ x               }
+            });
+
+                document.getElementById('file').addEventListener('change', function(event) {
+                let fileList = document.getElementById('file-list');
+                fileList.innerHTML = ""; // Reset daftar file seb  
+                //  p   elumnya
+
+                Array.from(event.target.files).forEach((file, index) => {
+                    let listItem = document.createElement("li");
+                    listItem.textContent = (index + 1) + ". " + file.name;
+                    fileList.appendChild(listItem);
+                    });
+                });
 
                 // Tampilkan alert berhasil sebelum submit
                 Swal.fire({
