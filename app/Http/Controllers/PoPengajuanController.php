@@ -64,7 +64,7 @@ class PoPengajuanController extends Controller
                 ->get();
         } elseif ($roleId == 5) {
             // Jika role_id adalah 48, ambil data dengan modified_at bernilai 'MUGI PRAMONO'
-            $data = MstPoPengajuan::whereIn('mst_po_pengajuans.modified_at', ['MUGI PRAMONO', 'RAGIL ISHA RAHMANTO', 'ABDUR RAHMAN AL FAAIZ', 'BANGUN SUTOPO'])
+            $data = MstPoPengajuan::whereIn('mst_po_pengajuans.modified_at', ['MUGI PRAMONO', 'RAGIL ISHA RAHMANTO'])
                 ->leftJoin('trs_po_pengajuans as trs', function ($join) {
                     $join->on('trs.id_fpb', '=', 'mst_po_pengajuans.id')
                         ->whereRaw('trs.updated_at = (SELECT MAX(updated_at) FROM trs_po_pengajuans WHERE trs_po_pengajuans.id_fpb = mst_po_pengajuans.id)');
@@ -339,15 +339,48 @@ class PoPengajuanController extends Controller
             if (
                 $roleId == 11 || $roleId == 14
             ) {
-                $allowedNames = ['JESSICA PAUNE', 'ABDUR RAHMAN AL FAAIZ', 'SITI MARIA ULFA', 'MUHAMMAD DINAR FARISI', 'MEDI KRISNANTO', 'VIVIAN ANGELIKA', 'ADHI PRASETIYO'];
+                $allowedNames = [
+                    'JESSICA PAUNE',
+                    'ABDUR RAHMAN AL FAAIZ',
+                    'SITI MARIA ULFA',
+                    'MUHAMMAD DINAR FARISI',
+                    'MEDI KRISNANTO',
+                    'VIVIAN ANGELIKA',
+                    'ADHI PRASETIYO',
+                    'RAGIL ISHA RAHMANTO'
+                ];
             } elseif ($roleId == 5) {
-                $allowedNames = ['MUGI PRAMONO',  'RAGIL ISHA RAHMANTO'];
+                $allowedNames = [
+                    'MUGI PRAMONO',
+                    'RAGIL ISHA RAHMANTO'
+                ];
             } elseif ($roleId == 2) {
-                $allowedNames = ['ILHAM CHOLID', 'JUN JOHAMIN PD', 'HERY HERMAWAN', 'WULYO EKO PRASETYO', 'SENDY PRABOWO', 'YAN WELEM MANGINSELA', 'HEXAPA DARMADI', 'SARAH EGA BUDI ASTUTI', 'SONY STIAWAN', 'DIMAS ADITYA PRIANDANA', 'DANIA ISNAWATI', 'FRISILIA CLAUDIA HUTAMA', 'DWI KUNTORO', 'YUNASIS PALGUNADI', 'RISFAN FAISAL'];
+                $allowedNames = [
+                    'ILHAM CHOLID',
+                    'JUN JOHAMIN PD',
+                    'HERY HERMAWAN',
+                    'WULYO EKO PRASETYO',
+                    'SENDY PRABOWO',
+                    'YAN WELEM MANGINSELA',
+                    'HEXAPA DARMADI',
+                    'SARAH EGA BUDI ASTUTI',
+                    'SONY STIAWAN',
+                    'DIMAS ADITYA PRIANDANA',
+                    'DANIA ISNAWATI',
+                    'FRISILIA CLAUDIA HUTAMA',
+                    'DWI KUNTORO',
+                    'YUNASIS PALGUNADI',
+                    'RISFAN FAISAL'
+                ];
             } elseif ($roleId == 7 || $roleId == 30) {
-                $allowedNames = ['NURSALIM', 'ABDUR RAHMAN AL FAAIZ',];
+                $allowedNames = [
+                    'NURSALIM',
+                    'ABDUR RAHMAN AL FAAIZ',
+                ];
             } elseif ($roleId == 3) {
-                $allowedNames = ['LINA UNIARSIH'];
+                $allowedNames = [
+                    'LINA UNIARSIH'
+                ];
             }
 
             // Mengambil data dari model MstPoPengajuan berdasarkan role_id dan nama yang diperbolehkan
@@ -689,16 +722,36 @@ class PoPengajuanController extends Controller
             $deptHead = $trsPoPengajuanStatus3->modified_at;
         } else {
             // Logika pemilihan nama berdasarkan role_id
-            if ($roleId == 11 || $roleId == 14) {
-                $allowedNames = ['JESSICA PAUNE', 'ABDUR RAHMAN AL FAAIZ', 'SITI MARIA ULFA', 'MUHAMMAD DINAR FARISI', 'MEDI KRISNANTO', 'VIVIAN ANGELIKA', 'ADHI PRASETIYO'];
-            } elseif ($roleId == 5) {
-                $allowedNames = ['MUGI PRAMONO',  'RAGIL ISHA RAHMANTO'];
-            } elseif ($roleId == 2) {
-                $allowedNames = ['ILHAM CHOLID', 'JUN JOHAMIN PD', 'HERY HERMAWAN', 'WULYO EKO PRASETYO', 'SENDY PRABOWO', 'YAN WELEM MANGINSELA', 'HEXAPA DARMADI', 'SARAH EGA BUDI ASTUTI', 'SONY STIAWAN', 'DIMAS ADITYA PRIANDANA', 'DANIA ISNAWATI', 'FRISILIA CLAUDIA HUTAMA', 'DWI KUNTORO', 'YUNASIS PALGUNADI', 'RISFAN FAISAL'];
-            } elseif ($roleId == 7 || $roleId == 30) {
-                $allowedNames = ['NURSALIM', 'ABDUR RAHMAN AL FAAIZ',];
-            } elseif ($roleId == 3) {
-                $allowedNames = ['LINA UNIARSIH'];
+            if (in_array($poPengajuan->modified_at, ['JESSICA PAUNE', 'SITI MARIA ULFA', 'MUHAMMAD DINAR FARISI', 'MEDI KRISNANTO', 'VIVIAN ANGELIKA'])) {
+                $deptHead = TrsPoPengajuan::where('id_fpb', $poPengajuan->id)
+                    ->where('status', 3)
+                    ->select('modified_at')
+                    ->value('modified_at') ?? $poPengajuan->modified_at;
+            } elseif (in_array($poPengajuan->modified_at, ['MUGI PRAMONO', 'RAGIL ISHA RAHMANTO'])) {
+                $deptHead = TrsPoPengajuan::where('id_fpb', $poPengajuan->id)
+                    ->where('status', 3)
+                    ->select('modified_at')
+                    ->value('modified_at') ?? 'ARY RODJO PRASETYO';
+            } elseif (in_array($poPengajuan->modified_at, ['ILHAM CHOLID', 'JUN JOHAMIN PD', 'HERY HERMAWAN', 'WULYO EKO PRASETYO', 'SENDY PRABOWO', 'YAN WELEM MANGINSELA', 'HEXAPA DARMADI', 'SARAH EGA BUDI ASTUTI', 'SONY STIAWAN', 'DIMAS ADITYA PRIANDANA'])) {
+                $deptHead = TrsPoPengajuan::where('id_fpb', $poPengajuan->id)
+                    ->where('status', 3)
+                    ->select('modified_at')
+                    ->value('modified_at') ?? 'YULMAI RIDO WINANDA';
+            } elseif (in_array($poPengajuan->modified_at, ['LINA UNIARSIH'])) {
+                $deptHead = TrsPoPengajuan::where('id_fpb', $poPengajuan->id)
+                    ->where('status', 3)
+                    ->select('modified_at')
+                    ->value('modified_at') ?? 'JUN JOHAMIN PD';
+            } elseif (in_array($poPengajuan->modified_at, ['DANIA ISNAWATI', 'FRISILIA CLAUDIA HUTAMA', 'DWI KUNTORO', 'YUNASIS PALGUNADI', 'RISFAN FAISAL'])) {
+                $deptHead = TrsPoPengajuan::where('id_fpb', $poPengajuan->id)
+                    ->where('status', 3)
+                    ->select('modified_at')
+                    ->value('modified_at') ?? 'ANDIK TOTOK SISWOYO';
+            } elseif (in_array($poPengajuan->modified_at, ['NURSALIM', 'ABDUR RAHMAN AL FAAIZ'])) {
+                $deptHead = TrsPoPengajuan::where('id_fpb', $poPengajuan->id)
+                    ->where('status', 3)
+                    ->select('modified_at')
+                    ->value('modified_at') ?? 'HARDI SAPUTRA';
             }
         }
 
