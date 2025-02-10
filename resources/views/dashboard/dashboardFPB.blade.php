@@ -70,13 +70,13 @@
                             @endif
                         </p>
                         <p><strong>Kategori:</strong> 
-                            {{ request('kategori_po') ? request('kategori_po') : 'Semua Kategori' }}
+                             {{ request('kategori_po') ? request('kategori_po') : 'Semua Kategori' }}
                         </p>
                     </div>
 
                     <figure class="highcharts-figure">
                         <div id="chart-status-fpb" style="min-width: 310px; height: 100%; margin: 0 auto;"></div>
-                    </figure>
+                    </figure> 
                 </div>
             </div>
         </div>    
@@ -141,6 +141,49 @@
             </div>
         </div>
     </div>
+
+    <div class="row">
+      <!-- ViewCard Utama -->
+      <div class="col-sm-12">
+          <div class="card" style="height: 100%;">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                  <h4>FORM INQUIRY LOCAL</h4>
+                  <div class="card p-2 bg-light text-dark">
+                      <strong>Total: {{ $totalinquiry }}</strong>
+                  </div>
+                  <form method="GET" action="{{ route('dashboardFPB') }}" class="form-inline">
+                      <input type="hidden" name="filter_type" value="inquiry">
+                      <div class="form-group mr-2">
+                          <label for="start_date_inquiry" class="mr-2">Dari:</label>
+                          <input type="date" name="start_date_inquiry" id="start_date_inquiry" class="form-control" value="{{ request('start_date_inquiry') }}">
+                      </div>
+                      <div class="form-group mr-2">
+                          <label for="end_date_inquiry" class="mr-2">Sampai:</label>
+                          <input type="date" name="end_date_inquiry" id="end_date_inquiry" class="form-control" value="{{ request('end_date_inquiry') }}">
+                      </div>                                
+                      <button type="submit" class="btn btn-primary">Filter</button>
+                  </form>
+
+                  <!-- Chart Pie -->
+                  <div class="col-sm-3">
+                      <div id="pieChart1" style="height: 200px;"></div>
+                  </div>
+              </div>
+              
+              <div class="card-body">
+                  <div class="row">
+                      <!-- Chart Bar -->
+                      <div class="col-sm-9">
+                          <figure class="highcharts-figure">
+                              <div id="chart-status-inquiry" style="min-width: 310px; height: 100%; margin: 0 auto;"></div>
+                          </figure>
+                      </div>
+                  
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
 </section>
 
 
@@ -243,7 +286,6 @@ document.addEventListener('DOMContentLoaded', function () {
     credits: { enabled: false } // Menghapus link Highcharts.com
   });
 });
-
 
 
     
@@ -435,6 +477,89 @@ Highcharts.chart({
         ]
     }]
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+            const monthlyData = @json($monthlyData1);
+            Highcharts.chart('chart-status-inquiry', {
+                chart: { type: 'column' },
+                title: { text: 'Form Inquiry Local' },
+                credits: {
+                enabled: false // Menghapus credit "Highcharts.com"
+                },
+                xAxis: { categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] },
+                yAxis: { title: { text: 'Jumlah Inquiry' } },
+
+                tooltip: {
+      formatter: function () {
+        return `<b>${this.series.name}</b><br>Jumlah: ${this.point.y}`;
+      }
+    },
+                
+                plotOptions: {
+                    column: {
+                        dataLabels: {
+                        enabled: true,
+                        formatter: function () {
+                            return `${this.y} `;
+                        },
+                        style: {
+                            fontWeight: 'bold',
+                            color: 'black',
+                            textOutline: 'none'
+                        }
+                        }
+                    }
+                    },
+                series: [
+                    { name: 'Open', data: monthlyData.open },
+                    { name: 'On Progress', data: monthlyData.onprogress },
+                    { name: 'Finish', data: monthlyData.finish }
+                ]
+            });
+
+            Highcharts.chart('pieChart1', {
+                chart: { type: 'pie' },
+                title: { text: 'Status Inquiry' },
+                credits: {
+                enabled: false // Menghapus credit "Highcharts.com"
+                },
+                tooltip: {
+                    valueSuffix: '{series.name}: <b>{point.percentage:.1f}%</b> ({point.custom.count})'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '{point.name}: {point.percentage:.1f}% ({point.count})',
+                            style: {
+                                fontWeight: 'bold',
+                                color: 'black',
+                                textOutline: 'none'
+                                    }
+                            }
+                        }
+                    },
+                            series: [{
+                    name: 'Status',
+                    data: [
+                        {   name: 'Open',
+                            y: {{ $inquiryOpenPercentage }},
+                            count: {{ $inquiryOpenCount }}
+                        },
+                        {   name: 'OnProgress', 
+                            y: {{$inquiryOnprogressPercentage}},
+                            count: {{ $inquiryOnprogressCount }}
+                    },
+                        {   name: 'Finish', 
+                            y: {{ $inquiryFinishPercentage }},
+                            count: {{ $inquiryFinishCount }}
+                    }
+                    ]
+                }]
+            });
+        });
 
 </script>
 </main>
