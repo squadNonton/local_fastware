@@ -24,13 +24,16 @@
                       
                       <!-- Field Filter FPB -->
                       <div class="form-group mr-2">
-                          <label for="start_date_fpb" class="mr-2">Dari:</label>
-                          <input type="date" name="start_date_fpb" id="start_date_fpb" class="form-control" value="{{ request('start_date_fpb') }}">
+                        <label for="start_date_fpb" class="mr-2">Dari:</label>
+                        <input type="date" name="start_date_fpb" id="start_date_fpb" class="form-control" 
+                              value="{{ request('start_date_fpb', \Carbon\Carbon::create(2025, 1, 1)->toDateString()) }}">
                       </div>
                       <div class="form-group mr-2">
-                          <label for="end_date_fpb" class="mr-2">Sampai:</label>
-                          <input type="date" name="end_date_fpb" id="end_date_fpb" class="form-control" value="{{ request('end_date_fpb') }}">
-                      </div>
+                        <label for="end_date_fpb" class="mr-2">Sampai:</label>
+                        <input type="date" name="end_date_fpb" id="end_date_fpb" class="form-control" 
+                              value="{{ request('end_date_fpb', \Carbon\Carbon::create(2025, 12, 31)->toDateString()) }}">
+                      </div>  
+
                       <div class="form-group mr-2">
                           <label for="kategori_po" class="mr-2">Kategori:</label>
                           <select name="kategori_po" id="kategori_po" class="form-control">
@@ -59,21 +62,6 @@
 
                 <!-- Informasi Filter Aktif -->
                 <div class="card-body">
-                    <div class="alert alert-info">
-                        <p><strong>Periode:</strong> 
-                            @if(request('start_date_fpb') && request('end_date_fpb'))
-                                {{ \Carbon\Carbon::parse(request('start_date_fpb'))->format('d M Y') }} 
-                                s/d 
-                                {{ \Carbon\Carbon::parse(request('end_date_fpb'))->format('d M Y') }}
-                            @else
-                                Semua Tanggal
-                            @endif
-                        </p>
-                        <p><strong>Kategori:</strong> 
-                             {{ request('kategori_po') ? request('kategori_po') : 'Semua Kategori' }}
-                        </p>
-                    </div>
-
                     <figure class="highcharts-figure">
                         <div id="chart-status-fpb" style="min-width: 310px; height: 100%; margin: 0 auto;"></div>
                     </figure> 
@@ -122,18 +110,6 @@
 
                 <!-- Informasi Filter Aktif untuk Lead Time -->
                 <div class="card-body">
-                    <div class="alert alert-info">
-                        <p><strong>Periode Lead Time:</strong> 
-                            @if(request('start_date_leadtime') && request('end_date_leadtime'))
-                                {{ \Carbon\Carbon::parse(request('start_date_leadtime'))->format('d M Y') }} 
-                                s/d 
-                                {{ \Carbon\Carbon::parse(request('end_date_leadtime'))->format('d M Y') }}
-                            @else
-                                Semua Tanggal
-                            @endif
-                        </p>
-                    </div>
-
                     <figure class="highcharts-figure">
                         <div id="chart-lead-time" style="min-width: 310px; height: 100%; margin: 0 auto;"></div>
                     </figure>
@@ -207,47 +183,48 @@
 {{-- <script src="https://code.highcharts.com/modules/accessibility.js"></script> --}}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  // Ambil data bulanan dari controller
-  const monthlyData = @json($monthlyData);
-  const startDate = @json($startDate1);
-  const endDate = @json($endDate1);
+    // Ambil data bulanan dari controller
+    const monthlyData = @json($monthlyData);
+    const startDate = @json($startDate1);
+    const endDate = @json($endDate1);
 
-  // Nama bulan (indeks 0 untuk Jan, dst.)
-  const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    // Nama bulan (indeks 0 untuk Jan, dst.)
+    const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  // Konversi startDate & endDate ke objek Date
-  const start = startDate ? new Date(startDate) : null;
-  const end = endDate ? new Date(endDate) : null;
+    const start = startDate ? new Date(startDate) : null;
+const end = endDate ? new Date(endDate) : null;
 
-  let filteredMonths = [];
-  let openData = [];
-  let finishData = [];
 
-  if (!start && !end) {
-    // Jika tidak ada filter, tampilkan semua bulan dari Januari sampai Desember
+    let filteredMonths = [];
+    let openData = [];
+    let finishData = [];
+    let defaultYear = 2025; // Set default ke tahun 2025
+    // Jika tidak ada filter tanggal, gunakan tahun 2025
+    if (!start && !end) { // Jika pengguna tidak memilih filter tanggal
+
     for (let i = 0; i < 12; i++) {
-      filteredMonths.push(allMonths[i]);
-      openData.push(monthlyData.open[i]);
-      finishData.push(monthlyData.finish[i]);
+        filteredMonths.push(`${allMonths[i]} ${defaultYear}`);
+        openData.push(monthlyData.open[i] ?? 0); // Gunakan nilai default 0 jika data tidak tersedia
+        finishData.push(monthlyData.finish[i] ?? 0);
     }
-  } else {
-    let startYear = start ? start.getFullYear() : new Date().getFullYear();
-    let endYear = end ? end.getFullYear() : new Date().getFullYear();
+} else {
+    let startYear = start ? start.getFullYear() : 2025;
+    let endYear = end ? end.getFullYear() : 2025;
 
-    // Looping tahun untuk memastikan bulan dari dua tahun yang berbeda bisa tampil
     for (let year = startYear; year <= endYear; year++) {
-      // Tentukan bulan mulai dan bulan akhir berdasarkan tahun yang bersangkutan
-      let startMonth = (year === startYear) ? start.getMonth() : 0;
-      let endMonth = (year === endYear) ? end.getMonth() : 11;
+        let startMonth = (year === startYear && start) ? start.getMonth() : 0;
+        let endMonth = (year === endYear && end) ? end.getMonth() : 11;
 
-      // Loop untuk setiap bulan dalam tahun yang sedang diproses
-      for (let month = startMonth; month <= endMonth; month++) {
-        filteredMonths.push(`${allMonths[month]} ${year}`); // Menambahkan bulan dan tahun yang sesuai
-        openData.push(monthlyData.open[month]); // Menambahkan data Open bulan tersebut
-        finishData.push(monthlyData.finish[month]); // Menambahkan data Finish bulan tersebut
-      }
+        for (let month = startMonth; month <= endMonth; month++) {
+            filteredMonths.push(`${allMonths[month]} ${year}`);
+            openData.push(monthlyData.open[month] ?? 0);
+            finishData.push(monthlyData.finish[month] ?? 0);
+        }
     }
-  }
+}
+
+
+
 
   Highcharts.chart('chart-status-fpb', {
     chart: { type: 'column' },
@@ -257,7 +234,7 @@ document.addEventListener('DOMContentLoaded', function () {
       allowDecimals: false,
       min: 0,
       title: { text: 'Jumlah FPB' }
-    },
+    },  
     tooltip: {
       formatter: function () {
         return `<b>${this.series.name}</b><br>Jumlah: ${this.point.y}`;

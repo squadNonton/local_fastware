@@ -123,8 +123,9 @@ class PoPengajuanController extends Controller
         $startDate2 = $request->input('start_date_leadtime');
         $endDate2 = $request->input('end_date_leadtime');
         // Filter FPB
-        $startDate1 = $request->input('start_date_fpb', '2025-01-01');
-        $endDate1 = $request->input('end_date_fpb', '2025-12-31');
+        $startDate1 = !empty($request->input('start_date_fpb')) ? $request->input('start_date_fpb') : '2025-01-01';
+        $endDate1 = !empty($request->input('end_date_fpb')) ? $request->input('end_date_fpb') : '2025-12-31';
+
         $kategori = $request->input('kategori_po');
 
         // Query untuk kategori list (tidak tergantung pada kategori yang dipilih)
@@ -394,6 +395,12 @@ class PoPengajuanController extends Controller
         $inquiryOpenPercentage = $totalinquiry > 0 ? round(($inquiryOpenUnique / $totalinquiry) * 100) : 0;
         $inquiryOnprogressPercentage = $totalinquiry > 0 ? round(($inquiryOnprogressUnique / $totalinquiry) * 100) : 0;
         $inquiryFinishPercentage = $totalinquiry > 0 ? round(($inquiryFinishUnique / $totalinquiry) * 100) : 0;
+
+        $monthlyData = [
+            'open' => array_pad($monthlyData['open'], 12, 0),
+            'finish' => array_pad($monthlyData['finish'], 12, 0)
+        ];
+        
 
 
     return view('dashboard.dashboardFPB', [
