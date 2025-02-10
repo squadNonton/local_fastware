@@ -123,8 +123,8 @@ class PoPengajuanController extends Controller
         $startDate2 = $request->input('start_date_leadtime');
         $endDate2 = $request->input('end_date_leadtime');
         // Filter FPB
-        $startDate1 = $request->input('start_date_fpb');
-        $endDate1 = $request->input('end_date_fpb');
+        $startDate1 = $request->input('start_date_fpb', '2025-01-01');
+        $endDate1 = $request->input('end_date_fpb', '2025-12-31');
         $kategori = $request->input('kategori_po');
 
         // Query untuk kategori list (tidak tergantung pada kategori yang dipilih)
@@ -307,8 +307,8 @@ class PoPengajuanController extends Controller
             'confirm_finish' => $totalConfirmFinish
         ];
 
-        $startDate = $request->input('start_date_inquiry');
-        $endDate = $request->input('end_date_inquiry');
+        $startDate = $request->input('start_date_inquiry', '2025-01-01');
+        $endDate = $request->input('end_date_inquiry', '2025-12-31');
 
         $query = InquirySales::query();
         if ($startDate && $endDate) {
