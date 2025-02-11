@@ -135,6 +135,11 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('lihatfppsales/{formperbaikan}', [FormFPPController::class, 'LihatFPPSales'])
         ->name('sales.lihat');
 
+    // CRP
+    Route::get('/crp', function () {
+        return view('inquiry.crp'); // Sesuaikan dengan path yang benar
+    })->name('crp');
+
     // Download File
     Route::get('download-excel/{tindaklanjut}', [FormFPPController::class, 'downloadAttachment'])->name('download.attachment');
     // DashboardforALL

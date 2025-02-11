@@ -1284,6 +1284,17 @@
                             </ul>
                         </li>
 
+                        {{-- Dropdown Inventory --}}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle font-si" href="#" id="navbarDropdown"
+                                role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Purchase Import
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="{{ route('crp') }}">CRP</a></li>
+                            </ul>
+                        </li>
+
                         <!-- Dropdown Sumbang Saran -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle font-si" href="#" id="navbarDropdown"
