@@ -420,7 +420,6 @@
                 color: red;
             }
         </style>
-
         {{-- <div class="pagetitle">
         <h1>Halaman Inquiry</h1>
         <nav>
@@ -429,7 +428,7 @@
             </ol>
         </nav>
     </div> --}}
-        <section class="section">
+        <section class="">
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-start mt-4 mb-3">

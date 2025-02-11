@@ -75,24 +75,36 @@ class TcController extends Controller
                 ];
             } elseif ($userName == 'MUGI PRAMONO') {
                 $jobPositions = [
-                    'Cutting Leader',
-                    'Cutting Operator',
-                    'Foreman QC',
-                    'Production HT Leader', //tidak ada di db
-                    'production HT Admin', //tidak ada di db
+                    'Leader HT',
                     'Admin HT & PPC',
-                    'Production HT Operator', //tidak ada di db
-                    'Maintenance Operator', //tidak ada di db
+                    'Operator HT',
+                    'Operator MTN',
+                    'Foreman CT',
+                    'Foreman QC',
+                    // 'Cutting Leader',
+                    // 'Cutting Operator',
+                    // 'Foreman QC',
+                    // 'Production HT Leader', //tidak ada di db
+                    // 'production HT Admin', //tidak ada di db
+                    // 'Admin HT & PPC',
+                    // 'Production HT Operator', //tidak ada di db
+                    // 'Maintenance Operator', //tidak ada di db
                 ];
             } elseif ($userName == 'RAGIL ISHA RAHMANTO') {
                 $jobPositions = [
-                    'MC Custom & Bubut Leader', //tidak ada di db
-                    'MC Custom Staff',
-                    'Operator Mc. Custom',
-                    'Operator Machining',
                     'Leader MC',
-                    'MC Operator', //tidak ada di db
-                    'Bubut Operator', //tidak ada di db
+                    'Operator Mc. Custom',
+                    'MC Custom Staff',
+                    'Operator Machining',
+                    'Operator Bubut',
+                    'Foreman Machining Custom',
+                    // 'MC Custom & Bubut Leader', //tidak ada di db
+                    // 'MC Custom Staff',
+                    // 'Operator Mc. Custom',
+                    // 'Operator Machining',
+                    // 'Leader MC',
+                    // 'MC Operator', //tidak ada di db
+                    // 'Bubut Operator', //tidak ada di db
                 ];
             } elseif ($userName == 'MARTINUS CAHYO RAHASTO') {
                 $jobPositions = [
@@ -315,25 +327,37 @@ class TcController extends Controller
                 ])->unique('job_position');
             } elseif ($userName == 'MUGI PRAMONO') {
                 $jobPositions = $uniquejobPositions->whereIn('job_position', [
-                    'Cutting Leader',
-                    'Cutting Operator',
-                    'Foreman QC',
-                    'Production HT Leader', //tidak ada di db
-                    'production HT Admin', //tidak ada di db
+                    'Leader HT',
                     'Admin HT & PPC',
-                    'Production HT Operator', //tidak ada di db
-                    'Maintenance Operator', //tidak ada di db
+                    'Operator HT',
+                    'Operator MTN',
+                    'Foreman CT',
+                    'Foreman QC',
+                    // 'Cutting Leader',
+                    // 'Cutting Operator',
+                    // 'Foreman QC',
+                    // 'Production HT Leader', //tidak ada di db
+                    // 'production HT Admin', //tidak ada di db
+                    // 'Admin HT & PPC',
+                    // 'Production HT Operator', //tidak ada di db
+                    // 'Maintenance Operator', //tidak ada di db
                 ])->unique('job_position')
                     ->sortBy('job_position');
-            } elseif ($userName == 'RAGIL ISHA') {
+            } elseif ($userName == 'RAGIL ISHA RAHMANTO') {
                 $jobPositions = $uniquejobPositions->whereIn('job_position', [
-                    'MC Custom & Bubut Leader', //tidak ada di db
-                    'MC Custom Staff',
-                    'Operator Mc. Custom',
-                    'Operator Machining',
                     'Leader MC',
-                    'MC Operator', //tidak ada di db
-                    'Bubut Operator', //tidak ada di db
+                    'Operator Mc. Custom',
+                    'MC Custom Staff',
+                    'Operator Machining',
+                    'Operator Bubut',
+                    'Foreman Machining Custom',
+                    // 'MC Custom & Bubut Leader', //tidak ada di db
+                    // 'MC Custom Staff',
+                    // 'Operator Mc. Custom',
+                    // 'Operator Machining',
+                    // 'Leader MC',
+                    // 'MC Operator', //tidak ada di db
+                    // 'Bubut Operator', //tidak ada di db
                 ])->unique('job_position');
             } elseif ($userName == 'MARTINUS CAHYO RAHASTO') {
                 $jobPositions = $uniquejobPositions->whereIn('job_position', [

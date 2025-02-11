@@ -523,6 +523,8 @@
                                                     CV. DIMA RAMA SAKTI</option>
                                                 <option value="CV. DWI PUTRA TEKNINDO">
                                                     CV. DWI PUTRA TEKNINDO</option>
+                                                <option value="CV. DWI PUTRA TEKNINDO">
+                                                    PT INTI ATLAS INDONESIA</option>
                                                 <!-- Tambahkan opsi lain jika diperlukan -->
                                             </select>
                                         </div>
