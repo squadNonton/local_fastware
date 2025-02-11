@@ -11,6 +11,7 @@ use App\Models\MstPoPengajuan;
 use App\Models\TrsPoPengajuan;
 use App\Models\InquirySales;
 use Illuminate\Support\Carbon;
+use ZipArchive;
 
 class PoPengajuanController extends Controller
 {
@@ -1437,14 +1438,14 @@ class PoPengajuanController extends Controller
     public function store(Request $request)
     {
         try {
-            Log::info('Received request data for purchase order:', $request->all()); // Log all incoming data
-
+            Log::info('Received request data for purchase order:', $request->all());
+    
             $validatedData = $request->validate([
                 'kategori_po' => 'required|string',
                 'nama_barang.*' => 'required|string',
                 'spesifikasi.*' => 'required|string',
                 'pcs.*' => 'required|integer',
-                'file.*' => 'nullable|file|max:11048',
+                'filename.*' => 'nullable|file|max:11048',
                 'price_list.*' => 'nullable|numeric',
                 'total_harga.*' => 'nullable|numeric',
                 'target_cost.*' => 'nullable|numeric',
@@ -1454,84 +1455,74 @@ class PoPengajuanController extends Controller
                 'nama_project.*' => 'nullable|string',
                 'no_so.*' => 'nullable|string',
             ]);
-
-            Log::info('Validated data:', $validatedData); // Log the validated data
-
+    
+            Log::info('Validated data:', $validatedData);
+    
             // Generate no_fpb
             $currentYear = date('Y');
             $latestPo = MstPoPengajuan::whereYear('created_at', $currentYear)
                 ->orderBy('id', 'desc')
                 ->first();
-
-            $newPoNumber = 1; // Default value if no existing PO
+    
+            $newPoNumber = 1;
             if ($latestPo) {
                 $lastPoNumber = (int)substr($latestPo->no_fpb, strrpos($latestPo->no_fpb, '/') + 1);
                 $newPoNumber = $lastPoNumber + 1;
             }
-
-            $no_fpb = 'FPB/' . $currentYear . '/' . str_pad($newPoNumber, 5, '0', STR_PAD_LEFT); // Format to 00001
-            Log::info('Generated PO number: ' . $no_fpb); // Log the generated PO number
-
-            // Check if the generated no_fpb already exists in the database
+    
+            $no_fpb = 'FPB/' . $currentYear . '/' . str_pad($newPoNumber, 5, '0', STR_PAD_LEFT);
+            Log::info('Generated PO number: ' . $no_fpb);
+    
             while (MstPoPengajuan::where('no_fpb', $no_fpb)->exists()) {
                 Log::warning('Duplicate PO number found, generating a new one.');
-                // If it exists, generate a new no_fpb
                 $newPoNumber++;
                 $no_fpb = 'FPB/' . $currentYear . '/' . str_pad($newPoNumber, 5, '0', STR_PAD_LEFT);
-                Log::info('Newly generated PO number: ' . $no_fpb); // Log the newly generated PO number
+                Log::info('Newly generated PO number: ' . $no_fpb);
             }
-
+    
             foreach ($validatedData['nama_barang'] as $index => $nama_barang) {
                 $purchaseOrder = new MstPoPengajuan();
-                $purchaseOrder->no_fpb = $no_fpb; // Store generated no_fpb
+                $purchaseOrder->no_fpb = $no_fpb;
                 $purchaseOrder->kategori_po = $validatedData['kategori_po'];
                 $purchaseOrder->nama_barang = $nama_barang;
                 $purchaseOrder->spesifikasi = $validatedData['spesifikasi'][$index];
                 $purchaseOrder->pcs = $validatedData['pcs'][$index];
                 $purchaseOrder->price_list = isset($validatedData['price_list'][$index]) ?
                     str_replace(',', '', $validatedData['price_list'][$index]) : null;
-
-                // Menghitung total harga (pcs * price_list)
+    
                 if (isset($validatedData['pcs'][$index]) && isset($validatedData['price_list'][$index])) {
                     $purchaseOrder->total_harga = $validatedData['pcs'][$index] * str_replace(',', '', $validatedData['price_list'][$index]);
                 } else {
                     $purchaseOrder->total_harga = null;
                 }
-
+    
                 Log::info('Creating purchase order for item:', [
                     'no_fpb' => $no_fpb,
                     'kategori_po' => $validatedData['kategori_po'],
                     'nama_barang' => $nama_barang,
                     'spesifikasi' => $validatedData['spesifikasi'][$index],
                 ]);
-
+    
+                // Menyimpan file ke dalam kolom `file_name`
                 if ($request->hasFile('file')) {
-                    $fileNames = []; // Array untuk menyimpan nama file
-
+                    $fileNames = [];
+    
                     foreach ($request->file('file') as $file) {
                         if ($file->isValid()) {
-                            // Ambil nama asli file
                             $originalName = $file->getClientOriginalName();
-
-                            // Cegah overwrite jika ada file dengan nama yang sama
-                            $destinationPath = public_path('assets/pre_order');
-                            $filePath = $destinationPath . '/' . $originalName;
-
-                            if (file_exists($filePath)) {
-                                // Tambahkan timestamp jika ada file dengan nama yang sama
-                                $originalName = time() . '_' . $originalName;
-                            }
-
-                            // Pindahkan file ke folder tujuan
-                            $file->move($destinationPath, $originalName);
-
-                            // Simpan nama file ke dalam array
-                            $fileNames[] = $originalName;
+                            $fileName = pathinfo($originalName, PATHINFO_FILENAME);
+                            $extension = $file->getClientOriginalExtension();
+                            $uniqueFileName = $fileName . '_' . uniqid() . '.' . $extension;
+    
+                            $file->move(public_path('assets/pre_order'), $uniqueFileName);
+    
+                            $fileNames[] = $uniqueFileName;
                         }
                     }
+    
+                    $purchaseOrder->file_name = json_encode($fileNames); // Menyimpan nama file ke dalam kolom `file_name`
                 }
-
-                // Handle Subcont fields if they are set
+    
                 if ($validatedData['kategori_po'] === 'Subcont') {
                     $purchaseOrder->target_cost = isset($validatedData['target_cost'][$index]) ?
                         str_replace(',', '', $validatedData['target_cost'][$index]) : null;
@@ -1539,11 +1530,10 @@ class PoPengajuanController extends Controller
                     $purchaseOrder->rekomendasi = $validatedData['rekomendasi'][$index] ?? null;
                     $purchaseOrder->nama_customer = $validatedData['nama_customer'][$index] ?? null;
                     $purchaseOrder->nama_project = $validatedData['nama_project'][$index] ?? null;
-
-                    // Generate and insert no_so
+    
                     $so_number = 'SO/' . $currentYear . '/' . ($validatedData['no_so'][$index] ?? '');
                     $purchaseOrder->no_so = $so_number;
-
+    
                     Log::info('Subcont fields for item:', [
                         'target_cost' => $purchaseOrder->target_cost,
                         'lead_time' => $purchaseOrder->lead_time,
@@ -1553,26 +1543,25 @@ class PoPengajuanController extends Controller
                         'no_so' => $so_number,
                     ]);
                 }
-
+    
                 $purchaseOrder->status_1 = 1;
                 $purchaseOrder->modified_at = $request->user()->name;
-
-                // Attempt to save the purchase order
+    
                 try {
                     $purchaseOrder->save();
                     Log::info('Purchase order saved successfully:', ['no_fpb' => $no_fpb]);
                 } catch (\Exception $e) {
                     Log::error('Failed to save purchase order: ' . $e->getMessage(), [
                         'no_fpb' => $no_fpb,
-                        'data' => json_encode($purchaseOrder->toArray()), // Convert to string for logging
+                        'data' => json_encode($purchaseOrder->toArray()),
                     ]);
                     return redirect()->route('index.PO')->with('error', 'Data failed to save: ' . $e->getMessage());
                 }
             }
-
+    
             return redirect()->route('index.PO')->with('success', 'Data successfully saved!');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Validation failed: ' . json_encode($e->errors())); // Convert errors to string
+            Log::error('Validation failed: ' . json_encode($e->errors()));
             return redirect()->route('index.PO')->with('error', 'Validation failed: ' . implode(', ', $e->errors()));
         } catch (\Exception $e) {
             Log::error('Unexpected error: ' . $e->getMessage());
@@ -2350,28 +2339,39 @@ class PoPengajuanController extends Controller
     {
         // Cari data berdasarkan ID
         $mstPoPengajuan = MstPoPengajuan::find($id);
-
+    
         if (!$mstPoPengajuan) {
-            return abort(404, 'File tidak ditemukan.');
+            return abort(404, 'Data tidak ditemukan.');
         }
-
-        // Dapatkan nama file dari model
-        $fileName = $mstPoPengajuan->file;
-
-        if (!$fileName) {
-            return abort(404, 'Tidak ada file yang terlampir.');
+    
+        // Ambil daftar file dari kolom `file_name` (dengan asumsi JSON / array)
+        $files = json_decode($mstPoPengajuan->file_name, true);
+    
+        if (empty($files) || !is_array($files)) {
+            return abort(404, 'Tidak ada file yang tersedia.');
         }
-
-        // Tentukan path file di direktori public/assets/pre_order
-        $filePath = public_path('assets/pre_order/' . $fileName);
-
-        // Cek apakah file ada di server
-        if (!file_exists($filePath)) {
-            return abort(404, 'File tidak ditemukan di server.');
+    
+        // Path direktori penyimpanan file
+        $storagePath = public_path('assets/pre_order/');
+        $zipFileName = 'files_' . $id . '.zip';
+        $zipFilePath = storage_path($zipFileName);
+    
+        // Buat file ZIP
+        $zip = new ZipArchive;
+        if ($zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+            foreach ($files as $file) {
+                $filePath = $storagePath . $file;
+                if (file_exists($filePath)) {
+                    $zip->addFile($filePath, $file);
+                }
+            }
+            $zip->close();
+        } else {
+            return abort(500, 'Gagal membuat file ZIP.');
         }
-
-        // Kembalikan file sebagai response download
-        return response()->download($filePath, $fileName);
+    
+        // Kirim ZIP untuk diunduh
+        return response()->download($zipFilePath)->deleteFileAfterSend(true);
     }
 
     public function getPoHistory($id)
