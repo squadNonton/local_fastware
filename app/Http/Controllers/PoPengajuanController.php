@@ -117,16 +117,15 @@ class PoPengajuanController extends Controller
     }
 
     public function dashboardFPB(Request $request)
-    {
+        {
 
         // Filter Lead Time
         $startDate2 = $request->input('start_date_leadtime');
         $endDate2 = $request->input('end_date_leadtime');
         // Filter FPB
-        // Filter FPB
-        $startDate1 = $request->input('start_date_fpb', '2025-01-01');
-        $endDate1 = $request->input('end_date_fpb', '2025-12-31');
-        $kategori = $request->input('kategori_po');
+        $startDate1 = $request->input('start_date_fpb') ?: '2025-01-01';
+        $endDate1 = $request->input('end_date_fpb') ?: '2025-12-31';
+        $kategori = $request->input('kategori_po', '');
 
         // Query untuk kategori list (tidak tergantung pada kategori yang dipilih)
         $kategoriList = MstPoPengajuan::distinct()->pluck('kategori_po');
@@ -146,7 +145,7 @@ class PoPengajuanController extends Controller
             $queryTrs->whereBetween('created_at', [$startDate1, $endDate1]);
         }
 
-
+        
         // Query untuk chart kedua (Lead Time) - Semua kategori tanpa filter berdasarkan kategori
         $query2 = MstPoPengajuan::query();
         if ($startDate2 && $endDate2) {
@@ -159,7 +158,7 @@ class PoPengajuanController extends Controller
 
         $trsPoPengajuan = $queryTrs->get()->groupBy('id_fpb'); // Kelompokkan berdasarkan id_fpb
 
-
+            
         // Menghitung data unik berdasarkan no_fpb
         $fpbOpenUnique = 0;
         $fpbFinishUnique = 0;
@@ -209,6 +208,7 @@ class PoPengajuanController extends Controller
 
                     $monthlyData['finish'][$finishMonth]++;
                     $fpbFinishUnique++;
+
                 } else {
                     // Jika belum selesai, tetap dihitung sampai bulan berjalan
                     for ($year = $createdYear; $year <= $currentYear; $year++) {
@@ -239,61 +239,61 @@ class PoPengajuanController extends Controller
         $totalConfirmFinish = 0;
 
         foreach ($categories as $category) {
-            $filteredMst = $uniqueFPB2->where('kategori_po', $category);
-            $categoryTotal = $filteredMst->count();
+        $filteredMst = $uniqueFPB2->where('kategori_po', $category);
+        $categoryTotal = $filteredMst->count();
 
-            $categoryLeadDaysFirstJob = [];
-            $categoryLeadDaysSecondJob = [];
-            $categorySubmitConfirm = 0;
-            $categoryConfirmFinish = 0;
+        $categoryLeadDaysFirstJob = [];
+        $categoryLeadDaysSecondJob = [];
+        $categorySubmitConfirm = 0;
+        $categoryConfirmFinish = 0;
 
-            foreach ($filteredMst as $fpb) {
-                $fpbStartDate = $fpb->created_at;
+        foreach ($filteredMst as $fpb) {
+            $fpbStartDate = $fpb->created_at;
 
-                $trsPoFirstJob = TrsPoPengajuan::where('id_fpb', $fpb->id)
-                    ->whereBetween('status', [2, 6])
-                    ->orderBy('updated_at', 'desc')
-                    ->first();
+            $trsPoFirstJob = TrsPoPengajuan::where('id_fpb', $fpb->id)
+                ->whereBetween('status', [2, 6])
+                ->orderBy('updated_at', 'desc')
+                ->first();
 
-                $trsPoSecondJob = TrsPoPengajuan::where('id_fpb', $fpb->id)
-                    ->whereBetween('status', [7, 9])
-                    ->orderBy('updated_at', 'desc')
-                    ->first();
+            $trsPoSecondJob = TrsPoPengajuan::where('id_fpb', $fpb->id)
+                ->whereBetween('status', [7, 9])
+                ->orderBy('updated_at', 'desc')
+                ->first();
 
-                if ($trsPoFirstJob && $trsPoFirstJob->status >= 6) {
-                    $leadDaysFirstJob = $trsPoFirstJob->updated_at->diffInDays($fpbStartDate);
-                    $categoryLeadDaysFirstJob[] = $leadDaysFirstJob;
-                }
-
-                if ($trsPoSecondJob && $trsPoSecondJob->status >= 6) {
-                    $leadDaysSecondJob = $trsPoSecondJob->updated_at->diffInDays($trsPoFirstJob ? $trsPoFirstJob->updated_at : $fpbStartDate);
-                    $categoryLeadDaysSecondJob[] = $leadDaysSecondJob;
-                }
-
-                if ($trsPoSecondJob && in_array($trsPoSecondJob->status, [10, 9])) {
-                    $categoryConfirmFinish++;
-                } elseif ($trsPoFirstJob && in_array($trsPoFirstJob->status, [6, 7, 8])) {
-                    $categorySubmitConfirm++;
-                }
+            if ($trsPoFirstJob && $trsPoFirstJob->status >= 6) {
+                $leadDaysFirstJob = $trsPoFirstJob->updated_at->diffInDays($fpbStartDate);
+                $categoryLeadDaysFirstJob[] = $leadDaysFirstJob;
             }
 
-            $averageLeadDaysFirstJob = count($categoryLeadDaysFirstJob) > 0 ? round(array_sum($categoryLeadDaysFirstJob) / count($categoryLeadDaysFirstJob)) : 0;
-            $averageLeadDaysSecondJob = count($categoryLeadDaysSecondJob) > 0 ? round(array_sum($categoryLeadDaysSecondJob) / count($categoryLeadDaysSecondJob)) : 0;
+            if ($trsPoSecondJob && $trsPoSecondJob->status >= 6) {
+                $leadDaysSecondJob = $trsPoSecondJob->updated_at->diffInDays($trsPoFirstJob ? $trsPoFirstJob->updated_at : $fpbStartDate);
+                $categoryLeadDaysSecondJob[] = $leadDaysSecondJob;
+            }
 
-            $categoryPercentage = $totalFPB > 0 ? round(($categoryTotal / $totalFPB) * 100) : 0;
-            $totalPercentage += $categoryPercentage;
+            if ($trsPoSecondJob && in_array($trsPoSecondJob->status, [10, 9])) {
+                $categoryConfirmFinish++;
+            } elseif ($trsPoFirstJob && in_array($trsPoFirstJob->status, [6, 7, 8])) {
+                $categorySubmitConfirm++;
+            }
+        }
 
-            // Tambahkan ke total global
-            $totalSubmitConfirm += $categorySubmitConfirm;
-            $totalConfirmFinish += $categoryConfirmFinish;
+        $averageLeadDaysFirstJob = count($categoryLeadDaysFirstJob) > 0 ? round(array_sum($categoryLeadDaysFirstJob) / count($categoryLeadDaysFirstJob)) : 0;
+        $averageLeadDaysSecondJob = count($categoryLeadDaysSecondJob) > 0 ? round(array_sum($categoryLeadDaysSecondJob) / count($categoryLeadDaysSecondJob)) : 0;
 
-            $leadTimeData[$category] = [
-                'average_lead_days_first' => $averageLeadDaysFirstJob,
-                'average_lead_days_second' => $averageLeadDaysSecondJob,
-                'total' => $categoryTotal,
-                'percentage' => $categoryPercentage,
-                'submit_confirm' => $categorySubmitConfirm,
-                'confirm_finish' => $categoryConfirmFinish
+        $categoryPercentage = $totalFPB > 0 ? round(($categoryTotal / $totalFPB) * 100) : 0;
+        $totalPercentage += $categoryPercentage;
+
+        // Tambahkan ke total global
+        $totalSubmitConfirm += $categorySubmitConfirm;
+        $totalConfirmFinish += $categoryConfirmFinish;
+
+        $leadTimeData[$category] = [
+            'average_lead_days_first' => $averageLeadDaysFirstJob,
+            'average_lead_days_second' => $averageLeadDaysSecondJob,
+            'total' => $categoryTotal,
+            'percentage' => $categoryPercentage,
+            'submit_confirm' => $categorySubmitConfirm,
+            'confirm_finish' => $categoryConfirmFinish
             ];
         }
 
@@ -307,8 +307,8 @@ class PoPengajuanController extends Controller
             'confirm_finish' => $totalConfirmFinish
         ];
 
-        $startDate = $request->input('start_date_inquiry', '2025-01-01');
-        $endDate = $request->input('end_date_inquiry', '2025-12-31');
+        $startDate = $request->input('start_date_inquiry')  ?: '2025-01-01';
+        $endDate = $request->input('end_date_inquiry')  ?: '2025-12-31';
 
         $query = InquirySales::query();
         if ($startDate && $endDate) {
@@ -337,7 +337,7 @@ class PoPengajuanController extends Controller
                 $processedinquiry[$inquiry->id] = true;
 
                 if ($lastRecord1) {
-                    if ($lastRecord1->status == 6) {
+                    if ($lastRecord1->status == 6    ) {
                         $finishMonth1 = Carbon::parse($lastRecord1->updated_at)->month - 1;
                         for ($m = $createdMonth1; $m <= $finishMonth1; $m++) {
                             $monthlyData1['open'][$m]++;
@@ -396,36 +396,36 @@ class PoPengajuanController extends Controller
         $inquiryFinishPercentage = $totalinquiry > 0 ? round(($inquiryFinishUnique / $totalinquiry) * 100) : 0;
 
 
-        return view('dashboard.dashboardFPB', [
-            'fpbOpen' => $fpbOpenUnique,
-            'fpbFinish' => $fpbFinishUnique,
-            'fpbOpenPercentage' => $fpbOpenPercentage,
-            'fpbFinishPercentage' => $fpbFinishPercentage,
-            'leadTimeData' => $leadTimeData,
-            'monthlyData' => $monthlyData,
-            'totalFPB' => $totalFPB,
-            'fpbOpenUnique' => $fpbOpenUnique,
-            'fpbFinishUnique' => $fpbFinishUnique,
-            'kategoriList' => $kategoriList,
-            'startDate1'   => $startDate1,
-            'endDate1'     => $endDate1,
-            'startDate2' => $startDate2,
-            'endDate2'   => $endDate2,
-            'startDate' => $startDate,
-            'endDate' => $endDate,
-            'inquiryOpenCount' => $inquiryOpenCount,
-            'inquiryOnprogressCount' => $inquiryOnprogressCount,
-            'inquiryFinishCount' => $inquiryFinishCount,
-            'inquiryOpenUnique' => $inquiryOpenUnique,
-            'inquiryOnprogressUnique' => $inquiryOnprogressUnique,
-            'inquiryFinishUnique' => $inquiryFinishUnique,
-            'inquiryOpenPercentage' => $inquiryOpenPercentage,
-            'inquiryOnprogressPercentage' => $inquiryOnprogressPercentage,
-            'inquiryFinishPercentage' => $inquiryFinishPercentage,
-            'monthlyData1' => $monthlyData1,
-            'totalinquiry' => $totalinquiry,
-        ]);
-    }
+    return view('dashboard.dashboardFPB', [
+        'fpbOpen' => $fpbOpenUnique,
+        'fpbFinish' => $fpbFinishUnique,
+        'fpbOpenPercentage' => $fpbOpenPercentage,
+        'fpbFinishPercentage' => $fpbFinishPercentage,
+        'leadTimeData' => $leadTimeData,
+        'monthlyData' => $monthlyData,
+        'totalFPB' => $totalFPB,
+        'fpbOpenUnique' => $fpbOpenUnique,
+        'fpbFinishUnique' => $fpbFinishUnique,
+        'kategoriList' => $kategoriList,
+        'startDate1'   => $startDate1,
+        'endDate1'     => $endDate1,
+        'startDate2' => $startDate2,
+        'endDate2'   => $endDate2,
+        'startDate' => $startDate,
+        'endDate' => $endDate,
+        'inquiryOpenCount' => $inquiryOpenCount,
+        'inquiryOnprogressCount' => $inquiryOnprogressCount,
+        'inquiryFinishCount' => $inquiryFinishCount,
+        'inquiryOpenUnique' => $inquiryOpenUnique,
+        'inquiryOnprogressUnique' => $inquiryOnprogressUnique,
+        'inquiryFinishUnique' => $inquiryFinishUnique,
+        'inquiryOpenPercentage' => $inquiryOpenPercentage,
+        'inquiryOnprogressPercentage' => $inquiryOnprogressPercentage,
+        'inquiryFinishPercentage' => $inquiryFinishPercentage,
+        'monthlyData1' => $monthlyData1,
+        'totalinquiry' => $totalinquiry,
+    ]);
+}
 
     public function indexPoDeptHead()
     {

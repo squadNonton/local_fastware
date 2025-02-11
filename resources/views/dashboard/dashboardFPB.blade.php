@@ -12,28 +12,25 @@
   <section class="section dashboard">
 
     <div class="row">
-        <!-- Viewcard Kiri: Pengajuan Barang -->
-        <div class="col-sm-5">
-            <div class="card" style="height: 100%;">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4>FORM PENGAJUAN BARANG</h4>
-
-                    <!-- Form Filter Pengajuan Barang (Chart FPB) -->
-                    <form method="GET" action="{{ route('dashboardFPB') }}" class="form-inline">
+      <!-- Viewcard Kiri: Pengajuan Barang -->
+      <div class="col-sm-8">
+          <div class="card" style="height: 100%;">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                  <h4>FORM PENGAJUAN BARANG</h4>
+  
+                  <!-- Form Filter Pengajuan Barang (Chart FPB) -->
+                  <form method="GET" action="{{ route('dashboardFPB') }}" class="form-inline">
                       <input type="hidden" name="filter_type" value="fpb">
                       
                       <!-- Field Filter FPB -->
                       <div class="form-group mr-2">
-                        <label for="start_date_fpb" class="mr-2">Dari:</label>
-                        <input type="date" name="start_date_fpb" id="start_date_fpb" class="form-control" 
-                              value="{{ request('start_date_fpb', \Carbon\Carbon::create(2025, 1, 1)->toDateString()) }}">
+                          <label for="start_date_fpb" class="mr-2">Dari:</label>
+                          <input type="date" name="start_date_fpb" id="start_date_fpb" class="form-control" value="{{ request('start_date_fpb', '2025-01-01') }}">
                       </div>
                       <div class="form-group mr-2">
-                        <label for="end_date_fpb" class="mr-2">Sampai:</label>
-                        <input type="date" name="end_date_fpb" id="end_date_fpb" class="form-control" 
-                              value="{{ request('end_date_fpb', \Carbon\Carbon::create(2025, 12, 31)->toDateString()) }}">
-                      </div>  
-
+                          <label for="end_date_fpb" class="mr-2">Sampai:</label>
+                          <input type="date" name="end_date_fpb" id="end_date_fpb" class="form-control" value="{{ request('end_date_fpb', '2025-12-31') }}">
+                      </div>
                       <div class="form-group mr-2">
                           <label for="kategori_po" class="mr-2">Kategori:</label>
                           <select name="kategori_po" id="kategori_po" class="form-control">
@@ -51,76 +48,119 @@
                       <input type="hidden" name="end_date_leadtime" value="{{ request('end_date_leadtime') }}">
                       
                       <button type="submit" class="btn btn-primary">Filter</button>
-                    </form>
-
-
-                    <!-- Card Total FPB -->
-                    <div class="card p-2 bg-light text-dark">
-                        <strong>Total: {{ $totalFPB }}</strong>
-                    </div>
-                </div>
-
-                <!-- Informasi Filter Aktif -->
-                <div class="card-body">
-                    <figure class="highcharts-figure">
-                        <div id="chart-status-fpb" style="min-width: 310px; height: 100%; margin: 0 auto;"></div>
-                    </figure> 
-                </div>
-            </div>
-        </div>    
-
-        <!-- ViewCard Pie Chart -->
-        <div class="col-sm-2">
-            <div class="card">
-                <div class="card-body">
-                    <div id="pieChart" style="height: 200px;"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Viewcard Kanan: Lead Time Order Fulfillment -->
-        <div class="col-sm-5">
-            <div class="card" style="height: 100%;">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4>LEADTIME ORDER FULFILLMENT</h4>
-
-                    <!-- Form Filter Lead Time (Chart Lead Time) -->
-                    <form method="GET" action="{{ route('dashboardFPB') }}" class="form-inline">
-                      <input type="hidden" name="filter_type" value="leadtime">
-                      
-                      <!-- Field Filter Lead Time -->
-                      <div class="form-group mr-2">
-                          <label for="start_date_leadtime" class="mr-2">Dari:</label>
-                          <input type="date" name="start_date_leadtime" id="start_date_leadtime" class="form-control" value="{{ request('start_date_leadtime') }}">
+                  </form>
+  
+                  <!-- Card Total FPB -->
+                  <div class="card p-2 bg-light text-dark">
+                      <strong>Total: {{ $totalFPB }}</strong>
+                  </div>
+              </div>
+  
+              <!-- Informasi Filter Aktif -->
+              <div class="card-body">
+                  <div class="alert alert-info">
+                      <p><strong>Periode:</strong> 
+                          @if(request('start_date_fpb') && request('end_date_fpb'))
+                              {{ \Carbon\Carbon::parse(request('start_date_fpb'))->format('d M Y') }} 
+                              s/d 
+                              {{ \Carbon\Carbon::parse(request('end_date_fpb'))->format('d M Y') }}
+                          @else
+                              Semua Tanggal
+                          @endif
+                      </p>
+                      <p><strong>Kategori:</strong> 
+                           {{ request('kategori_po') ? request('kategori_po') : 'Semua Kategori' }}
+                      </p>
+                  </div>
+  
+                  <figure class="highcharts-figure">
+                      <div id="chart-status-fpb" style="min-width: 310px; height: 100%; margin: 0 auto;"></div>
+                  </figure> 
+              </div>
+          </div>
+      </div>    
+  
+      <!-- ViewCard Pie Chart 1 -->
+      <div class="col-sm-4">
+          <div class="row">
+              <div class="col-sm-12">
+                  <div class="card">
+                      <div class="card-body">
+                          <div id="pieChart" style="height: 400px;"></div>
                       </div>
-                      <div class="form-group mr-2">
-                          <label for="end_date_leadtime" class="mr-2">Sampai:</label>
-                          <input type="date" name="end_date_leadtime" id="end_date_leadtime" class="form-control" value="{{ request('end_date_leadtime') }}">
+                  </div>
+              </div>
+  
+              <!-- ViewCard Pie Chart 2 -->
+              <div class="col-sm-12">
+                  <div class="card">
+                      <div class="card-body">
+                          <div id="pieChart1" style="height: 400px;"></div>
                       </div>
-                      
-                      <!-- Hidden Input untuk Filter FPB agar tetap dipertahankan -->
-                      <input type="hidden" name="start_date_fpb" value="{{ request('start_date_fpb') }}">
-                      <input type="hidden" name="end_date_fpb" value="{{ request('end_date_fpb') }}">
-                      <input type="hidden" name="kategori_po" value="{{ request('kategori_po') }}">
-                      
-                      <button type="submit" class="btn btn-primary">Filter</button>
-                    </form>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+  
+        
+    <p></p>
 
+    <div class="row">
+
+      <!-- Viewcard Kanan: Lead Time Order Fulfillment -->
+      <div class="col-sm-6">
+        <div class="card" style="height: 100%;">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>LEADTIME ORDER FULFILLMENT</h4>
+
+                <!-- Form Filter Lead Time (Chart Lead Time) -->
+                <form method="GET" action="{{ route('dashboardFPB') }}" class="form-inline">
+                  <input type="hidden" name="filter_type" value="leadtime">
+                  
+                  <!-- Field Filter Lead Time -->
+                  <div class="form-group mr-2">
+                      <label for="start_date_leadtime" class="mr-2">Dari:</label>
+                      <input type="date" name="start_date_leadtime" id="start_date_leadtime" class="form-control" value="{{ request('start_date_leadtime') }}">
+                  </div>
+                  <div class="form-group mr-2">
+                      <label for="end_date_leadtime" class="mr-2">Sampai:</label>
+                      <input type="date" name="end_date_leadtime" id="end_date_leadtime" class="form-control" value="{{ request('end_date_leadtime') }}">
+                  </div>
+                  
+                  <!-- Hidden Input untuk Filter FPB agar tetap dipertahankan -->
+                  <input type="hidden" name="start_date_fpb" value="{{ request('start_date_fpb') }}">
+                  <input type="hidden" name="end_date_fpb" value="{{ request('end_date_fpb') }}">
+                  <input type="hidden" name="kategori_po" value="{{ request('kategori_po') }}">
+                  
+                  <button type="submit" class="btn btn-primary">Filter</button>
+                </form>
+
+            </div>
+
+            <!-- Informasi Filter Aktif untuk Lead Time -->
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <p><strong>Periode Lead Time:</strong> 
+                        @if(request('start_date_leadtime') && request('end_date_leadtime'))
+                            {{ \Carbon\Carbon::parse(request('start_date_leadtime'))->format('d M Y') }} 
+                            s/d 
+                            {{ \Carbon\Carbon::parse(request('end_date_leadtime'))->format('d M Y') }}
+                        @else
+                            Semua Tanggal
+                        @endif
+                    </p>
                 </div>
 
-                <!-- Informasi Filter Aktif untuk Lead Time -->
-                <div class="card-body">
-                    <figure class="highcharts-figure">
-                        <div id="chart-lead-time" style="min-width: 310px; height: 100%; margin: 0 auto;"></div>
-                    </figure>
-                </div>
+                <figure class="highcharts-figure">
+                    <div id="chart-lead-time" style="min-width: 310px; height: 100%; margin: 0 auto;"></div>
+                </figure>
             </div>
         </div>
     </div>
 
-    <div class="row">
       <!-- ViewCard Utama -->
-      <div class="col-sm-12">
+      <div class="col-sm-6">
           <div class="card" style="height: 100%;">
               <div class="card-header d-flex justify-content-between align-items-center">
                   <h4>FORM INQUIRY LOCAL</h4>
@@ -140,10 +180,7 @@
                       <button type="submit" class="btn btn-primary">Filter</button>
                   </form>
 
-                  <!-- Chart Pie -->
-                  <div class="col-sm-3">
-                      <div id="pieChart1" style="height: 200px;"></div>
-                  </div>
+                  
               </div>
               
               <div class="card-body">
@@ -159,7 +196,6 @@
               </div>
           </div>
       </div>
-  </div>
 </section>
 
 
@@ -183,48 +219,47 @@
 {{-- <script src="https://code.highcharts.com/modules/accessibility.js"></script> --}}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Ambil data bulanan dari controller
-    const monthlyData = @json($monthlyData);
-    const startDate = @json($startDate1);
-    const endDate = @json($endDate1);
+  // Ambil data bulanan dari controller
+  const monthlyData = @json($monthlyData);
+  const startDate = @json($startDate1);
+  const endDate = @json($endDate1);
 
-    // Nama bulan (indeks 0 untuk Jan, dst.)
-    const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // Nama bulan (indeks 0 untuk Jan, dst.)
+  const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-    const start = startDate ? new Date(startDate) : null;
-const end = endDate ? new Date(endDate) : null;
+  // Konversi startDate & endDate ke objek Date
+  const start = startDate ? new Date(startDate) : null;
+  const end = endDate ? new Date(endDate) : null;
 
+  let filteredMonths = [];
+  let openData = [];
+  let finishData = [];
 
-    let filteredMonths = [];
-    let openData = [];
-    let finishData = [];
-    let defaultYear = 2025; // Set default ke tahun 2025
-    // Jika tidak ada filter tanggal, gunakan tahun 2025
-    if (!start && !end) { // Jika pengguna tidak memilih filter tanggal
-
+  if (!start && !end) {
+    // Jika tidak ada filter, tampilkan semua bulan dari Januari sampai Desember
     for (let i = 0; i < 12; i++) {
-        filteredMonths.push(`${allMonths[i]} ${defaultYear}`);
-        openData.push(monthlyData.open[i] ?? 0); // Gunakan nilai default 0 jika data tidak tersedia
-        finishData.push(monthlyData.finish[i] ?? 0);
+      filteredMonths.push(allMonths[i]);
+      openData.push(monthlyData.open[i]);
+      finishData.push(monthlyData.finish[i]);
     }
-} else {
-    let startYear = start ? start.getFullYear() : 2025;
-    let endYear = end ? end.getFullYear() : 2025;
+  } else {
+    let startYear = start ? start.getFullYear() : new Date().getFullYear();
+    let endYear = end ? end.getFullYear() : new Date().getFullYear();
 
+    // Looping tahun untuk memastikan bulan dari dua tahun yang berbeda bisa tampil
     for (let year = startYear; year <= endYear; year++) {
-        let startMonth = (year === startYear && start) ? start.getMonth() : 0;
-        let endMonth = (year === endYear && end) ? end.getMonth() : 11;
+      // Tentukan bulan mulai dan bulan akhir berdasarkan tahun yang bersangkutan
+      let startMonth = (year === startYear) ? start.getMonth() : 0;
+      let endMonth = (year === endYear) ? end.getMonth() : 11;
 
-        for (let month = startMonth; month <= endMonth; month++) {
-            filteredMonths.push(`${allMonths[month]} ${year}`);
-            openData.push(monthlyData.open[month] ?? 0);
-            finishData.push(monthlyData.finish[month] ?? 0);
-        }
+      // Loop untuk setiap bulan dalam tahun yang sedang diproses
+      for (let month = startMonth; month <= endMonth; month++) {
+        filteredMonths.push(`${allMonths[month]} ${year}`); // Menambahkan bulan dan tahun yang sesuai
+        openData.push(monthlyData.open[month]); // Menambahkan data Open bulan tersebut
+        finishData.push(monthlyData.finish[month]); // Menambahkan data Finish bulan tersebut
+      }
     }
-}
-
-
-
+  }
 
   Highcharts.chart('chart-status-fpb', {
     chart: { type: 'column' },
@@ -234,7 +269,7 @@ const end = endDate ? new Date(endDate) : null;
       allowDecimals: false,
       min: 0,
       title: { text: 'Jumlah FPB' }
-    },  
+    },
     tooltip: {
       formatter: function () {
         return `<b>${this.series.name}</b><br>Jumlah: ${this.point.y}`;
