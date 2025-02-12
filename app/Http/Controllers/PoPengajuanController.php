@@ -1506,22 +1506,27 @@ class PoPengajuanController extends Controller
                 // Menyimpan file ke dalam kolom `file_name`
                 if ($request->hasFile('file')) {
                     $fileNames = [];
-    
+                    $existingFiles = json_decode($purchaseOrder->file_name ?? '[]', true); // Mendapatkan file yang sudah ada
+                    $nextNumber = count($existingFiles) + 1; // Menentukan nomor urut berikutnya
+
                     foreach ($request->file('file') as $file) {
                         if ($file->isValid()) {
                             $originalName = $file->getClientOriginalName();
                             $fileName = pathinfo($originalName, PATHINFO_FILENAME);
                             $extension = $file->getClientOriginalExtension();
-                            $uniqueFileName = $fileName . '_' . uniqid() . '.' . $extension;
-    
-                            $file->move(public_path('assets/pre_order'), $uniqueFileName);
-    
-                            $fileNames[] = $uniqueFileName;
+                            $newFileName = 'adsi_' . $fileName . '_' . $nextNumber . '.' . $extension;
+
+                            $file->move(public_path('assets/pre_order'), $newFileName);
+
+                            $fileNames[] = $newFileName;
+                            $nextNumber++; // Menambah nomor urut untuk file berikutnya
                         }
                     }
-    
-                    $purchaseOrder->file_name = json_encode($fileNames); // Menyimpan nama file ke dalam kolom `file_name`
+
+                    $allFileNames = array_merge($existingFiles, $fileNames); // Menggabungkan file yang sudah ada dengan file baru
+                    $purchaseOrder->file_name = json_encode($allFileNames); // Menyimpan nama file ke dalam kolom `file_name`
                 }
+
     
                 if ($validatedData['kategori_po'] === 'Subcont') {
                     $purchaseOrder->target_cost = isset($validatedData['target_cost'][$index]) ?
