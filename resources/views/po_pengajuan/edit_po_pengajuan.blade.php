@@ -122,7 +122,7 @@
                                                 </div>
                                                 <div class="col-md-2">
                                                     <label for="file" class="form-label">Upload File/Drawing:<span style="color: red;">*</span></label>
-                                                    <input class="form-control" type="file" id="file" name="file[]" accept="*/*" multiple required>
+                                                    <input class="form-control" type="file" id="file" name="file[]" accept="*/*" multiple>
                                                     <ol id="file-list" class="mt-2"></ol> <!-- List nama file yang diunggah -->
                                                 </div>
                                                 
