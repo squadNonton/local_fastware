@@ -427,6 +427,9 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/index-po-procurement', [PoPengajuanController::class, 'indexPoProcurement'])->name('index.PO.procurement');
     Route::get('/index-po-procurement2', [PoPengajuanController::class, 'indexPoProcurement2'])->name('index.PO.procurement2');
 
+    Route::get('/overviewfpb', [PoPengajuanController::class, 'overviewFPB'])->name('overviewfpb');
+    Route::get('/fpb/detail', [PoPengajuanController::class, 'viewformfpb'])->name('fpb.detail');
+
     Route::get('/po-pengajuan/{id}/edit', [PoPengajuanController::class, 'edit'])->name('edit.PoPengajuan');
     Route::get('/po-pengajuan-dept/{id}/edit', [PoPengajuanController::class, 'editDept'])->name('edit.PoPengajuan.dept');
 

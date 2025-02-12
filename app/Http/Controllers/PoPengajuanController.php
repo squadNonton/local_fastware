@@ -23,7 +23,7 @@ class PoPengajuanController extends Controller
         $roleId = auth()->user()->role_id;
 
         // Jika role_id adalah 1, 14, atau 15, ambil semua data
-        if (in_array($roleId, [1, 14, 15, 54])) {
+        if (in_array($roleId, [1, 14, 15, 41, 54])) {
             $data = MstPoPengajuan::leftJoin('trs_po_pengajuans as trs', function ($join) {
                 $join->on('trs.id_fpb', '=', 'mst_po_pengajuans.id')
                     ->whereRaw('trs.updated_at = (SELECT MAX(updated_at) FROM trs_po_pengajuans WHERE trs_po_pengajuans.id_fpb = mst_po_pengajuans.id)');
@@ -426,6 +426,91 @@ class PoPengajuanController extends Controller
         'monthlyData1' => $monthlyData1,
         'totalinquiry' => $totalinquiry,
     ]);
+}
+
+public function overviewfpb()
+{
+    // Mengambil semua data tanpa melihat role_id
+    $data = MstPoPengajuan::leftJoin('trs_po_pengajuans as trs', function ($join) {
+            $join->on('trs.id_fpb', '=', 'mst_po_pengajuans.id')
+                ->whereRaw('trs.updated_at = (SELECT MAX(updated_at) FROM trs_po_pengajuans WHERE trs_po_pengajuans.id_fpb = mst_po_pengajuans.id)');
+        }) // LEFT JOIN dengan filter subquery untuk mengambil baris terbaru
+        ->select(
+            'mst_po_pengajuans.no_fpb',
+            'mst_po_pengajuans.id',
+            'mst_po_pengajuans.modified_at',
+            'mst_po_pengajuans.kategori_po',
+            'mst_po_pengajuans.nama_barang',
+            'mst_po_pengajuans.catatan',
+            'mst_po_pengajuans.status_1',
+            'mst_po_pengajuans.status_2',
+            DB::raw('COALESCE(trs.updated_at, "-") as trs_updated_at')
+        )
+        ->orderBy('mst_po_pengajuans.status_1', 'asc')
+        ->orderBy('mst_po_pengajuans.no_fpb', 'desc') // Urutan berdasarkan no_fpb
+        ->orderBy('trs.updated_at', 'asc') // Urutan berdasarkan trs.updated_at
+        ->get();
+
+    // Mengirim data ke view
+    return view('po_pengajuan.overviewfpb', compact('data'));
+}
+
+public function viewformfpb(){
+    // Mengambil nomor FPB terakhir atau yang sedang aktif
+    $latestPoPengajuan = MstPoPengajuan::latest('created_at')->first();
+
+    if (!$latestPoPengajuan) {
+        return abort(404); // Jika tidak ada data FPB
+    }
+
+    // Mengambil semua data berdasarkan no_fpb yang sama
+    $mstPoPengajuans = MstPoPengajuan::where('no_fpb', $latestPoPengajuan->no_fpb)->get();
+
+    // Mengambil modified_at dari TrsPoPengajuan berdasarkan status tertentu
+    $trsPoPengajuanStatus3 = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
+        ->where('status', 3)
+        ->select('modified_at')
+        ->first();
+
+    $trsPoPengajuanStatus4 = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
+        ->where('status', 5)
+        ->select('modified_at')
+        ->first();
+
+    // Tentukan User Acc berdasarkan kategori_po
+    $userAccHeader = '';
+    $userAccbody = '';
+
+    if ($latestPoPengajuan->kategori_po == 'IT') {
+        $userAccHeader = 'IT';
+        $trsPoPengajuanIT = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
+            ->where('status', 4)
+            ->select('modified_at')
+            ->first();
+        $userAccbody = $trsPoPengajuanIT ? $trsPoPengajuanIT->modified_at : '';
+    } elseif ($latestPoPengajuan->kategori_po == 'GA') {
+        $userAccHeader = 'GA';
+        $trsPoPengajuanGA = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
+            ->where('status', 4)
+            ->select('modified_at')
+            ->first();
+        $userAccbody = $trsPoPengajuanGA ? $trsPoPengajuanGA->modified_at : '';
+    } elseif (in_array($latestPoPengajuan->kategori_po, ['Consumable', 'Spareparts', 'Indirect Material'])) {
+        $userAccHeader = 'Warehouse';
+        $trsPoPengajuan = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
+            ->where('status', 4)
+            ->select('modified_at')
+            ->first();
+        $userAccbody = $trsPoPengajuan ? $trsPoPengajuan->modified_at : '';
+    }
+
+    // Mengambil semua transaksi berdasarkan ID FPB
+    $matchingTrsPoPengajuans = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
+        ->select('created_at', 'status')
+        ->get();
+
+    // Mengirim data ke view
+    return view('po_pengajuan.view_form_overview', compact('mstPoPengajuans', 'userAccHeader', 'userAccbody', 'matchingTrsPoPengajuans', 'trsPoPengajuanStatus4'));
 }
 
     public function indexPoDeptHead()
@@ -1611,32 +1696,42 @@ class PoPengajuanController extends Controller
                         }
 
                         // Handle file uploads
-                    if ($request->hasFile('file')) {
-                        $files = $request->file('file');
+                        // Handle file uploads
+                        if ($request->hasFile('file')) {
+                            $files = $request->file('file');
 
-                        // Pastikan $files adalah array
-                        if (!is_array($files)) {
-                            $files = [$files]; // Konversi ke array jika hanya satu file
-                        }
-
-                        // Hapus file lama dari penyimpanan dan database
-                        if ($pengajuanPoItem->file_name) {
-                            $oldFiles = explode(',', $pengajuanPoItem->file_name);
-                            foreach ($oldFiles as $oldFile) {
-                                Storage::delete('public/assets/pre_order/' . $oldFile);
+                            // Pastikan $files adalah array
+                            if (!is_array($files)) {
+                                $files = [$files]; // Konversi ke array jika hanya satu file
                             }
+
+                            // Hapus file lama dari penyimpanan dan database
+                            if ($pengajuanPoItem->file_name) {
+                                $oldFiles = json_decode($pengajuanPoItem->file_name, true); // Decode JSON
+                                if (is_array($oldFiles)) {
+                                    foreach ($oldFiles as $oldFile) {
+                                        Storage::delete('public/assets/pre_order/' . $oldFile);
+                                    }
+                                }
+                            }
+
+                            $uploadedFiles = [];
+                            foreach ($files as $index => $file) {
+                                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME); // Ambil nama tanpa ekstensi
+                                $extension = $file->getClientOriginalExtension(); // Ambil ekstensi file
+
+                                // Format nama file: adsi_namafile_1.extension
+                                $hashedName = 'adsi_' . $originalName . '_' . ($index + 1) . '.' . $extension;
+                                $file->move(public_path('assets/pre_order'), $hashedName);
+
+                                $uploadedFiles[] = $hashedName;
+                            }
+
+                            // Simpan daftar file dalam format JSON di database
+                            $pengajuanPoItem->file_name = json_encode($uploadedFiles);
                         }
 
-                        $uploadedFiles = [];
-                        foreach ($files as $index => $file) {
-                            $hashedName = 'adsi_' . $file->getClientOriginalName() . '_' . ($index + 1);
-                            $file->move(public_path('assets/pre_order'), $hashedName);
-
-                            $uploadedFiles[] = $hashedName;
-                        }
-
-                        $pengajuanPoItem->file_name = json_encode($uploadedFiles);
-                    }
+                        
 
                         // Special handling for Subcont category
                         if ($pengajuanPo->kategori_po === 'Subcont') {

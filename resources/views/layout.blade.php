@@ -850,6 +850,7 @@
                                 Procurement
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{{ route('overviewfpb') }}">Overview FPB</a></li>
                                 @if (in_array(Auth::user()->name, [
                                         'ADMINSTRATOR',
                                         'DIAMAN DARMAWINATA',
