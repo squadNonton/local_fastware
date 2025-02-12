@@ -1611,17 +1611,32 @@ class PoPengajuanController extends Controller
                         }
 
                         // Handle file uploads
-                        if ($request->hasFile('file.' . $index)) {
-                            if ($pengajuanPoItem->file) {
-                                Storage::delete('public/assets/pre_order/' . $pengajuanPoItem->file);
+                    if ($request->hasFile('file')) {
+                        $files = $request->file('file');
+
+                        // Pastikan $files adalah array
+                        if (!is_array($files)) {
+                            $files = [$files]; // Konversi ke array jika hanya satu file
+                        }
+
+                        // Hapus file lama dari penyimpanan dan database
+                        if ($pengajuanPoItem->file_name) {
+                            $oldFiles = explode(',', $pengajuanPoItem->file_name);
+                            foreach ($oldFiles as $oldFile) {
+                                Storage::delete('public/assets/pre_order/' . $oldFile);
                             }
-                            $file = $request->file('file.' . $index);
-                            $hashedName = uniqid() . '.' . $file->getClientOriginalExtension();
+                        }
+
+                        $uploadedFiles = [];
+                        foreach ($files as $index => $file) {
+                            $hashedName = 'adsi_' . $file->getClientOriginalName() . '_' . ($index + 1);
                             $file->move(public_path('assets/pre_order'), $hashedName);
 
-                            $pengajuanPoItem->file = $hashedName;
-                            $pengajuanPoItem->file_name = $file->getClientOriginalName();
+                            $uploadedFiles[] = $hashedName;
                         }
+
+                        $pengajuanPoItem->file_name = json_encode($uploadedFiles);
+                    }
 
                         // Special handling for Subcont category
                         if ($pengajuanPo->kategori_po === 'Subcont') {
@@ -1662,14 +1677,19 @@ class PoPengajuanController extends Controller
                     $pengajuanPoItem->modified_at = $request->user()->name;
 
                     // Handle file upload for new item
-                    if ($request->hasFile('file.' . $index)) {
-                        $file = $request->file('file.' . $index);
-                        $hashedName = uniqid() . '.' . $file->getClientOriginalExtension();
-                        $file->move(public_path('assets/pre_order'), $hashedName);
+                    // Handle new file upload
+                        if ($request->hasFile('file.' . $index)) {
+                            $uploadedFiles = $request->file('file.' . $index);
+                            $fileNames = [];
 
-                        $pengajuanPoItem->file = $hashedName;
-                        $pengajuanPoItem->file_name = $file->getClientOriginalName();
-                    }
+                            foreach ($uploadedFiles as $fileIndex => $file) {
+                                $hashedName = uniqid('adsi_') . '_' . ($fileIndex + 1) . '.' . $file->getClientOriginalExtension();
+                                $file->move(public_path('assets/pre_order'), $hashedName);
+                                $fileNames[] = $hashedName;
+                            }
+
+                            $pengajuanPoItem->file_name = json_encode($uploadedFiles);
+                        }
 
                     // Special handling for Subcont category
                     if ($pengajuanPo->kategori_po === 'Subcont') {

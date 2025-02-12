@@ -121,10 +121,11 @@
                                                         name="total_harga[]" value="Rp 0" disabled>
                                                 </div>
                                                 <div class="col-md-2">
-                                                    <label for="file" class="form-label">Upload File/Drawing:</label>
-                                                    <input class="form-control" type="file" name="file[]"
-                                                        accept="*/*">
+                                                    <label for="file" class="form-label">Upload File/Drawing:<span style="color: red;">*</span></label>
+                                                    <input class="form-control" type="file" id="file" name="file[]" accept="*/*" multiple required>
+                                                    <ol id="file-list" class="mt-2"></ol> <!-- List nama file yang diunggah -->
                                                 </div>
+                                                
                                             </div>
                                             <br>
 
@@ -214,6 +215,26 @@
                             </script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+        <script>
+            document.getElementById('file').addEventListener('change', function(event) {
+                const fileList = document.getElementById('file-list');
+                fileList.innerHTML = ''; // Kosongkan daftar file sebelumnya
+            
+                const files = event.target.files;
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(file);
+                    a.download = file.name;
+                    a.textContent = file.name;
+                    a.style.cursor = 'pointer';
+                    li.appendChild(a);
+                    fileList.appendChild(li);
+                }
+            });
+            </script>
+            
         <script>
             // Fungsi untuk memeriksa dan menampilkan/SubcontFields
             function checkSubcont() {
