@@ -668,4 +668,21 @@ class InquirySalesController extends Controller
 
         return view('inquiry.overviewInquiry', compact('draftInquiries'));
     }
+
+
+    public function createInquirySalesImport()
+    {
+        $statuses = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        $inquiries = InquirySales::with('customer')
+            ->whereIn('status', $statuses)
+            ->where('is_active', 1)
+            ->orderByRaw('FIELD(status, 0, 1, 2, 3, 4, 5, 6, 7,8,9)')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->unique('kode_inquiry');
+
+        $customers = Customer::all();
+
+        return view('inquiry.createImport', compact('inquiries', 'customers'));
+    }
 }

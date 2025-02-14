@@ -253,8 +253,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('downtimeExport', [FormFPPController::class, 'downtimeExport']);
     Route::get('/getBatchData', [HeatTreatmentController::class, 'getBatchData'])->name('getBatchData');
 
-    // Inquiry Sales
-    // view
+    // Inquiry Sales Local
     Route::get('createinquiry', [InquirySalesController::class, 'createInquirySales'])->name('createinquiry');
     Route::get('formulirInquiry/{id}', [InquirySalesController::class, 'formulirInquiry'])->name('formulirInquiry');
     // Route::get('tindakLanjutInquiry/{id}', [InquirySalesController::class, 'tindakLanjutInquiry'])->name('tindakLanjutInquiry');
@@ -284,10 +283,15 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/showFormSS/pdf/{id}', [InquirySalesController::class, 'generatePDF'])->name('showFormSS.pdf');
     // Route::get('historyFormSS/{id}', [InquirySalesController::class, 'historyFormSS'])->name('historyFormSS');
 
+
+    // Inquiry Order Import
+    Route::get('createinquiryImport', [InquirySalesController::class, 'createInquirySalesImport'])->name('createinquiryImport');
+
+
+
     Route::get('konfirmInquiry', [InquirySalesController::class, 'konfirmInquiry'])->name('konfirmInquiry');
     Route::get('validasiInquiry', [InquirySalesController::class, 'validasiInquiry'])->name('validasiInquiry');
     Route::get('reportInquiry', [InquirySalesController::class, 'reportInquiry'])->name('reportInquiry');
-    // fungsi
     Route::post('storeinquiry', [InquirySalesController::class, 'storeInquirySales'])->name('storeinquiry');
 
     Route::post('/inquiry/previewSS', [InquirySalesController::class, 'previewSS'])->name('inquiry.previewSS');

@@ -969,7 +969,7 @@
                                 <li>
                                     <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown"
                                         role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Inquiry Order
+                                        Inquiry Order Local
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="childDropdown">
                                         @if (in_array(Auth::user()->name, [
@@ -996,8 +996,8 @@
                                                 'SONY STIAWAN',
                                                 'FISKA CHRISMAS YUDHA',
                                             ]))
-                                            <li><a class="dropdown-item" href="{{ route('createinquiry') }}">Form
-                                                    Inquiry</a></li>
+                                            <li><a class="dropdown-item" href="{{ route('createinquiry') }}">
+                                                    Form Inquiry Local</a></li>
                                         @endif
                                         @if (in_array(Auth::user()->name, [
                                                 'ADMINSTRATOR',
@@ -1026,7 +1026,22 @@
                                                     href="{{ route('overviewPurchase') }}">Overview Purchase</a></li>
                                         @endif
                                         <li><a class="dropdown-item" href="{{ route('overviewInquiry') }}">Overview
-                                                Inquiry Order</a></li>
+                                                Inquiry Order Local</a></li>
+                                    </ul>
+                                </li>
+
+                                <li>
+                                    <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown"
+                                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Inquiry Order Import
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="childDropdown">
+                                        <li><a class="dropdown-item" href="">Form Inquiry Import</a></li>
+                                        <li><a class="dropdown-item" href="">Persetujuan Ka.Sie</a></li>
+                                        <li><a class="dropdown-item" href="">Persetujuan Ka.Dept</a></li>
+                                        <li><a class="dropdown-item" href="">Persetujuan Inventory</a></li>
+                                        <li><a class="dropdown-item" href="">Overview Import</a></li>
+                                        <li><a class="dropdown-item" href="">Overview Inquiry Import</a></li>
                                     </ul>
                                 </li>
                             </ul>
@@ -1289,10 +1304,10 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle font-si" href="#" id="navbarDropdown"
                                 role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Purchase Import
+                                CRP System
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{{ route('crp') }}">CRP</a></li>
+                                <li><a class="dropdown-item" href="{{ route('crp') }}">Form CRP</a></li>
                             </ul>
                         </li>
 
