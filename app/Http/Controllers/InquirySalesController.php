@@ -31,6 +31,27 @@ class InquirySalesController extends Controller
         return view('inquiry.create', compact('inquiries', 'customers'));
     }
 
+        public function createInquirySales1()
+    {
+        $statuses = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+        // Update status dari 1 menjadi 2 sebelum mengambil data
+        InquirySales::where('status', 1)->update(['status' => 2]);
+
+        // Ambil data inquiry setelah update
+        $inquiries = InquirySales::with('customer')
+            ->whereIn('status', $statuses)
+            ->where('is_active', 1)
+            ->orderByRaw('FIELD(status, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9)')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->unique('kode_inquiry');
+
+        $customers = Customer::all();
+
+        return view('inquiry.create', compact('inquiries', 'customers'));
+    }
+
     public function storeInquirySales(Request $request)
     {
         $request->validate([
@@ -240,7 +261,7 @@ class InquirySalesController extends Controller
         // Update status inquiry
         $inquiry = InquirySales::find($id_inquiry);
         if ($inquiry) {
-            $inquiry->status = 2;
+            $inquiry->status = 1;
             $inquiry->save();
             Log::info('Inquiry status updated to 3', ['id' => $inquiry->id]);
         } else {
@@ -489,6 +510,69 @@ class InquirySalesController extends Controller
 
         return response()->json(['message' => 'Inquiry updated successfully.']);
     }
+
+    public function updateInquiryDetails(Request $request, $id)
+{
+    // Validasi input
+    $request->validate([
+        'materials.*.id_type' => 'required|integer',
+        'materials.*.jenis' => 'required|string',
+        'materials.*.thickness' => 'nullable|numeric',
+        'materials.*.weight' => 'nullable|numeric',
+        'materials.*.inner_diameter' => 'nullable|numeric',
+        'materials.*.outer_diameter' => 'nullable|numeric',
+        'materials.*.length' => 'nullable|numeric',
+        'materials.*.qty' => 'required|integer',
+        'materials.*.m1' => 'nullable|numeric',
+        'materials.*.m2' => 'nullable|numeric',
+        'materials.*.m3' => 'nullable|numeric',
+        'materials.*.ship' => 'required|string',
+        'materials.*.so' => 'nullable|string',
+        'materials.*.note' => 'nullable|string',
+    ]);
+
+    // Temukan inquiry berdasarkan ID
+    $inquiry = InquirySales::findOrFail($id);
+
+    $updatedMaterials = [];
+
+    // Update data materials
+    foreach ($request->materials as $materialData) {
+        $material = DetailInquiry::where('id_inquiry', $id)
+            ->where('id_type', $materialData['id_type'])
+            ->first();
+
+        if ($material) {
+            $jenis = $materialData['jenis'];
+
+            // Perbarui hanya nilai yang sesuai dengan jenisnya
+            $material->jenis = $jenis;
+            $material->thickness = ($jenis === 'Flat') ? $materialData['thickness'] : null;
+            $material->weight = ($jenis === 'Flat') ? $materialData['weight'] : null;
+            $material->inner_diameter = ($jenis === 'Honed Tube') ? $materialData['inner_diameter'] : null;
+            $material->outer_diameter = ($jenis === 'Round' || $jenis === 'Honed Tube') ? $materialData['outer_diameter'] : null;
+            $material->length = $materialData['length'];
+            $material->qty = $materialData['qty'];
+            $material->m1 = $materialData['m1'];
+            $material->m2 = $materialData['m2'];
+            $material->m3 = $materialData['m3'];
+            $material->ship = $materialData['ship'];
+            $material->so = $materialData['so'];
+            $material->note = $materialData['note'];
+            $material->save();
+
+            // Tambahkan data yang sudah diperbarui ke dalam array
+            $updatedMaterials[] = $material;
+        }
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Data berhasil diperbarui!',
+        'updatedMaterials' => $updatedMaterials // Kirim data terbaru ke frontend
+    ]);
+
+}
 
     // public function confirmPurchase($id)
     // {

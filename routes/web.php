@@ -255,6 +255,7 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     // Inquiry Sales Local
     Route::get('createinquiry', [InquirySalesController::class, 'createInquirySales'])->name('createinquiry');
+    Route::get('createinquiry1', [InquirySalesController::class, 'createInquirySales1'])->name('createinquiry1');
     Route::get('formulirInquiry/{id}', [InquirySalesController::class, 'formulirInquiry'])->name('formulirInquiry');
     // Route::get('tindakLanjutInquiry/{id}', [InquirySalesController::class, 'tindakLanjutInquiry'])->name('tindakLanjutInquiry');
     Route::get('showFormSS/{id}', [InquirySalesController::class, 'showFormSS'])->name('showFormSS');
@@ -288,7 +289,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('createinquiryImport', [InquirySalesController::class, 'createInquirySalesImport'])->name('createinquiryImport');
 
 
-
+    Route::post('/inquiry/update-details/{id}', [InquirySalesController::class, 'updateInquiryDetails'])->name('updateInquiryDetails');
     Route::get('konfirmInquiry', [InquirySalesController::class, 'konfirmInquiry'])->name('konfirmInquiry');
     Route::get('validasiInquiry', [InquirySalesController::class, 'validasiInquiry'])->name('validasiInquiry');
     Route::get('reportInquiry', [InquirySalesController::class, 'reportInquiry'])->name('reportInquiry');

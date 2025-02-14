@@ -110,7 +110,7 @@
                             <label>Create By :</label>
                             <div class="form-value">{{ $inquiry->create_by }}</div>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group">    
                             <label>Category :</label>
                             <div class="form-value">{{ $inquiry->loc_imp }}</div>
                         </div>
@@ -143,8 +143,8 @@
                                     <th style="width: 50px;">Shapes</th>
                                     <th style="width: 40px;">Thickness</th>
                                     <th style="width: 40px;">Width</th>
-                                    <th style="width: 40px; text-align:center;"">Inner Dia</th>
-                                    <th style="width: 40px; text-align:center;"">Outer Dia</th>
+                                    <th style="width: 40px; text-align:center;">Inner Dia</th>
+                                    <th style="width: 40px; text-align:center;">Outer Dia</th>
                                     <th style="width: 50px;">Length</th>
                                     <th style="width: 50px; text-align:center;">Qty
                                         <p style="font-size: 9pt; text-align:center;">(in Pcs)</p>
@@ -155,54 +155,113 @@
                                     <th style="width: 90px; text-align:center;">Ship-to</th>
                                     <th style="width: 50px; text-align:center;">Sales Order</th>
                                     {{-- <th style="width: 50px; text-align:center;">PO Number</th> --}}
-                                    <th style="width: 50px; text-align:center;"">Remark</th>
+                                    <th style="width: 50px; text-align:center;">Remark</th>
                                 </tr>
                             </thead>
+                        
                             <tbody id="table-body">
-                                @forelse ($materials as $index => $material)
-                                    <tr>
-                                        <td>{{ $index + 1 }}</td>
-                                        <td>{{ $material->type_materials ? $material->type_materials->type_name : 'N/A' }}
-                                        </td>
-                                        <!-- Menampilkan type_name -->
-                                        <td>{{ $material['jenis'] }}</td>
-                                        <td>{{ $material['thickness'] }}</td>
-                                        <td>{{ $material['weight'] }}</td>
-                                        <td>{{ $material['inner_diameter'] }}</td>
-                                        <td>{{ $material['outer_diameter'] }}</td>
-                                        <td>{{ $material['length'] }}</td>
-                                        <td>{{ $material['qty'] }}</td>
-                                        <td>{{ $material['m1'] }}</td>
-                                        <td>{{ $material['m2'] }}</td>
-                                        <td>{{ $material['m3'] }}</td>
-                                        <td>{{ $material['ship'] }}</td>
-                                        <td>{{ $material['so'] }}</td>
-                                        {{-- <td>{{ $material['nopo'] }}</td> --}}
-                                        <td>{{ $material['note'] }}</td>
-                                        {{-- <td>{{ $material['file'] }}</td> --}}
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="15" style="text-align: center;">Data tidak ditemukan</td>
-                                    </tr>
-                                @endforelse
+                                @if ($inquiry->status == 1)
+                                    @forelse ($materials as $index => $material)
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td contenteditable="false" class="editable">
+                                                <select name="id_type" class="material-dropdown" style="width: 180px;" disabled>
+                                                    <option value="" disabled selected>Cari Material...</option>
+                                                    @foreach ($typeMaterials as $type)
+                                                        <option value="{{ $type->id }}" {{ $material->id_type == $type->id ? 'selected' : '' }}>
+                                                            {{ $type->type_name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                            <td contenteditable="false" class="editable">
+                                                <select name="jenis" class="jenis-dropdown" style="width: 80px;" disabled onchange="handleShapeChange(this)">
+                                                    <option value="Flat" {{ $material['jenis'] == 'Flat' ? 'selected' : '' }}>Flat</option>
+                                                    <option value="Round" {{ $material['jenis'] == 'Round' ? 'selected' : '' }}>Round</option>
+                                                    <option value="Honed Tube" {{ $material['jenis'] == 'Honed Tube' ? 'selected' : '' }}>Honed Tube</option>
+                                                </select>
+                                            </td>
+                                            <td contenteditable="false" class="editable"><input type="text" name="thickness" value="{{ $material['thickness'] }}" size="10" disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text" name="weight" value="{{ $material['weight'] }}" size="5" disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text" name="inner_diameter" value="{{ $material['inner_diameter'] }}" size="10" disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text" name="outer_diameter" value="{{ $material['outer_diameter'] }}" size="10" disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text" name="length" value="{{ $material['length'] }}" size="10" disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text" name="qty" value="{{ $material['qty'] }}" size="10" disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text" name="m1" value="{{ $material['m1'] }}" size="10" disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text" name="m2" value="{{ $material['m2'] }}" size="10" disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text" name="m3" value="{{ $material['m3'] }}" size="10" disabled></td>
+                                            <td contenteditable="false" class="editable">
+                                                <select name="ship" class="jenis-dropdown" style="width: 100px;" disabled>
+                                                    <option value="Deltamas" {{ $material['ship'] == 'Deltamas' ? 'selected' : '' }}>Deltamas</option>
+                                                    <option value="DS8" {{ $material['ship'] == 'DS8' ? 'selected' : '' }}>DS8</option>
+                                                </select>
+                                            </td>
+                                            <td contenteditable="false" class="editable"><input type="text" name="so" value="{{ $material['so'] }}" size="10" disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text" name="note" value="{{ $material['note'] }}" size="10" disabled></td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="15" style="text-align: center;">Data tidak ditemukan</td>
+                                        </tr>
+                                    @endforelse
+                                @else
+                                    @forelse ($materials as $index => $material)
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $material->type_materials ? $material->type_materials->type_name : 'N/A' }}</td>
+                                            <td>{{ $material['jenis'] }}</td>
+                                            <td>{{ $material['thickness'] }}</td>
+                                            <td>{{ $material['weight'] }}</td>
+                                            <td>{{ $material['inner_diameter'] }}</td>
+                                            <td>{{ $material['outer_diameter'] }}</td>
+                                            <td>{{ $material['length'] }}</td>
+                                            <td>{{ $material['qty'] }}</td>
+                                            <td>{{ $material['m1'] }}</td>
+                                            <td>{{ $material['m2'] }}</td>
+                                            <td>{{ $material['m3'] }}</td>
+                                            <td>{{ $material['ship'] }}</td>
+                                            <td>{{ $material['so'] }}</td>
+                                            <td>{{ $material['note'] }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="15" style="text-align: center;">Data tidak ditemukan</td>
+                                        </tr>
+                                    @endforelse
+                                @endif
                             </tbody>
+                            
                         </table>
                     </div>
-                    @if ($inquiry->status == 2)
+                    @if ($inquiry->status == 1)
                         @if ($isFromApproval)
                             <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm m-1">Kembali</a>
                         @else
-                            {{-- <a href="{{ route('formulirInquiry', $inquiry->id) }}"
-                                class="btn btn-secondary add-row-button btn-sm m-1">Correction</a> --}}
-                            <a href="{{ route('createinquiry') }}"
-                                class="btn btn-primary delete-row-button btn-sm m-1">Submit</a>
+                            <a href="{{ route('createinquiry1') }}" class="btn btn-primary delete-row-button btn-sm m-1">Submit</a>
                         @endif
+                    @elseif ($inquiry->status == 2)
+                        <a href="{{ route('createinquiry') }}" class="btn btn-primary delete-row-button btn-sm m-1">Submit</a>
                     @endif
+
+                    @if ($inquiry->status == 1)
+                            <button id="edit-button" class="btn btn-warning btn-sm m-1" onclick="enableEdit()">Edit</button>
+                            <button id="save-button" class="btn btn-success btn-sm m-1" onclick="saveChanges()" style="display: none;">Save</button>
+                    @endif
+
+
+                    {{-- @if ($inquiry->status == 1)
+                        <a href="{{ route('createinquiry') }}" class="btn btn-primary delete-row-button btn-sm m-1">Submit</a>
+                    @endif --}}
+
                     {{-- <a class="btn btn-secondary add-row-button btn-sm" onclick="goBack()">Kembali</a> --}}
                     <a href="{{ route('showFormSS.pdf', $inquiry->id) }}" class="btn btn-danger btn-sm m-1">
                         <i class="bi bi-file-earmark-pdf"></i> Download PDF
                     </a>
+                    
+                    
+                    
+                    
+
 
                     {{-- Action User Inventory --}}
                     <div class="d-flex justify-content-end">
@@ -333,8 +392,115 @@
                 window.history.back();
             }
         </script>
+        
+        <script>
+            function enableEdit() {
+                document.querySelectorAll('.editable').forEach(element => {
+                    element.querySelectorAll('input, select').forEach(input => {
+                        input.removeAttribute('disabled');
+                    });
+                });
 
+                // Pastikan aturan jenis material tetap berlaku setelah edit diaktifkan
+                document.querySelectorAll('select[name="jenis"]').forEach(select => {
+                    handleShapeChange(select);
+                });
 
+                document.getElementById('edit-button').style.display = 'none';
+                document.getElementById('save-button').style.display = 'inline-block';
+            }
+
+            function saveChanges() {
+                const rows = document.querySelectorAll('#table-body tr');
+                const data = Array.from(rows).map(row => {
+                    const cells = row.querySelectorAll('.editable');
+                    return {
+                        id_type: cells[0].querySelector('select').value,
+                        jenis: cells[1].querySelector('select').value,
+                        thickness: cells[2].querySelector('input').value,
+                        weight: cells[3].querySelector('input').value,
+                        inner_diameter: cells[4].querySelector('input').value,
+                        outer_diameter: cells[5].querySelector('input').value,
+                        length: cells[6].querySelector('input').value,
+                        qty: cells[7].querySelector('input').value,
+                        m1: cells[8].querySelector('input').value,
+                        m2: cells[9].querySelector('input').value,
+                        m3: cells[10].querySelector('input').value,
+                        ship: cells[11].querySelector('select').value,
+                        so: cells[12].querySelector('input').value,
+                        note: cells[13].querySelector('input').value,
+                    };
+                });
+
+                fetch('{{ route('updateInquiryDetails', $inquiry->id) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ materials: data })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Changes saved successfully');
+                        document.querySelectorAll('.editable').forEach(element => {
+                            element.querySelectorAll('input, select').forEach(input => {
+                                input.setAttribute('disabled', 'true');
+                            });
+                        });
+
+                        document.getElementById('edit-button').style.display = 'inline-block';
+                        document.getElementById('save-button').style.display = 'none';
+                    } else {
+                        alert('Failed to save changes');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while saving changes');
+                });
+            }
+
+            function handleShapeChange(selectElement) {
+                const row = selectElement.closest('tr');
+                const thicknessInput = row.querySelector('input[name="thickness"]');
+                const weightInput = row.querySelector('input[name="weight"]');
+                const innerDiameterInput = row.querySelector('input[name="inner_diameter"]');
+                const outerDiameterInput = row.querySelector('input[name="outer_diameter"]');
+
+                // Reset semua kolom agar tidak bisa diinput
+                if (thicknessInput) thicknessInput.setAttribute('disabled', 'true');
+                if (weightInput) weightInput.setAttribute('disabled', 'true');
+                if (innerDiameterInput) innerDiameterInput.setAttribute('disabled', 'true');
+                if (outerDiameterInput) outerDiameterInput.setAttribute('disabled', 'true');
+
+                // Aktifkan hanya input yang sesuai dengan jenis yang dipilih
+                if (selectElement.value === 'Flat') {
+                    if (thicknessInput) thicknessInput.removeAttribute('disabled');
+                    if (weightInput) weightInput.removeAttribute('disabled');
+                } else if (selectElement.value === 'Round') {
+                    if (outerDiameterInput) outerDiameterInput.removeAttribute('disabled');
+                } else if (selectElement.value === 'Honed Tube') {
+                    if (innerDiameterInput) innerDiameterInput.removeAttribute('disabled');
+                    if (outerDiameterInput) outerDiameterInput.removeAttribute('disabled');
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('select[name="jenis"]').forEach(select => {
+                    handleShapeChange(select); // Set awal saat halaman dimuat
+                    select.addEventListener('change', () => handleShapeChange(select));
+                });
+
+                // Pastikan input tetap terkunci sebelum tombol edit ditekan
+                document.querySelectorAll('.editable').forEach(element => {
+                    element.querySelectorAll('input, select').forEach(input => {
+                        input.setAttribute('disabled', 'true');
+                    });
+                });
+            });
+        </script>
 
         <script>
             function updateFileList() {
