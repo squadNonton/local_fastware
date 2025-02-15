@@ -1593,21 +1593,30 @@ public function viewformfpb(){
                     $fileNames = [];
                     $existingFiles = json_decode($purchaseOrder->file_name ?? '[]', true); // Mendapatkan file yang sudah ada
                     $nextNumber = count($existingFiles) + 1; // Menentukan nomor urut berikutnya
-
+                
                     foreach ($request->file('file') as $file) {
                         if ($file->isValid()) {
                             $originalName = $file->getClientOriginalName();
                             $fileName = pathinfo($originalName, PATHINFO_FILENAME);
                             $extension = $file->getClientOriginalExtension();
-                            $newFileName = 'adsi_' . $fileName . '_' . $nextNumber . '.' . $extension;
-
+                
+                            // Tambahkan nomor acak untuk menghindari duplikasi
+                            $randomNumber = rand(1000, 9999);
+                            $newFileName = 'adsi_' . $fileName . '(' . $randomNumber . ')_' . $nextNumber . '.' . $extension;
+                
+                            // Pastikan file tidak ada sebelum menyimpan
+                            while (file_exists(public_path('assets/pre_order/' . $newFileName))) {
+                                $randomNumber = rand(1000, 9999); // Buat nomor acak baru
+                                $newFileName = 'adsi_' . $fileName . '(' . $randomNumber . ')_' . $nextNumber . '.' . $extension;
+                            }
+                
                             $file->move(public_path('assets/pre_order'), $newFileName);
-
+                
                             $fileNames[] = $newFileName;
                             $nextNumber++; // Menambah nomor urut untuk file berikutnya
                         }
                     }
-
+                
                     $allFileNames = array_merge($existingFiles, $fileNames); // Menggabungkan file yang sudah ada dengan file baru
                     $purchaseOrder->file_name = json_encode($allFileNames); // Menyimpan nama file ke dalam kolom `file_name`
                 }
@@ -2459,38 +2468,54 @@ public function viewformfpb(){
     {
         // Cari data berdasarkan ID
         $mstPoPengajuan = MstPoPengajuan::find($id);
-    
+
         if (!$mstPoPengajuan) {
             return abort(404, 'Data tidak ditemukan.');
         }
-    
-        // Ambil daftar file dari kolom `file_name` (dengan asumsi JSON / array)
+
+        // Ambil daftar file dari kolom `file_name`
         $files = json_decode($mstPoPengajuan->file_name, true);
-    
-        if (empty($files) || !is_array($files)) {
+
+        // **Pastikan hasil selalu array**
+        $files = is_array($files) ? $files : (array) $files;
+
+        if (empty($files)) {
             return abort(404, 'Tidak ada file yang tersedia.');
         }
-    
+
         // Path direktori penyimpanan file
         $storagePath = public_path('assets/pre_order/');
+
+        // **Jika hanya ada satu file, langsung download**
+        if (count($files) === 1) {
+            $filePath = $storagePath . trim($files[0]); // Pastikan path bersih
+
+            if (file_exists($filePath)) {
+                return response()->download($filePath);
+            } else {
+                return abort(404, 'File tidak ditemukan: ' . $filePath);
+            }
+        }
+
+        // **Jika lebih dari satu file, buat file ZIP**
         $zipFileName = 'files_' . $id . '.zip';
         $zipFilePath = storage_path($zipFileName);
-    
-        // Buat file ZIP
+
         $zip = new ZipArchive;
         if ($zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
             foreach ($files as $file) {
+                $file = trim($file);
                 $filePath = $storagePath . $file;
+
                 if (file_exists($filePath)) {
-                    $zip->addFile($filePath, $file);
+                    $zip->addFile($filePath, basename($file));
                 }
             }
             $zip->close();
         } else {
             return abort(500, 'Gagal membuat file ZIP.');
         }
-    
-        // Kirim ZIP untuk diunduh
+
         return response()->download($zipFilePath)->deleteFileAfterSend(true);
     }
 

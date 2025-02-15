@@ -402,15 +402,14 @@
                                             {{ $item->no_so }}</td>
                                         @endif
 
-                                        <td class="{{ $item->status_2 == 8 ? 'disabled-cell' : '' }} no-print"
-                                            style="text-align: center;">
-                                            @if ($item->file)
-                                            <a href="{{ route('download.file', $item->id) }}"
-                                                class="btn btn-sm btn-primary" title="Download File">
-                                                <i class="fas fa-download"></i> Download
-                                            </a>
+                                        <td class="{{ $item->status_2 == 8 ? 'disabled-cell' : '' }} no-print" style="text-align: center;">
+                                            @if (!empty(json_decode($item->file_name, true)))  
+                                                <a href="{{ route('download.file', $item->id) }}" 
+                                                   class="btn btn-sm btn-primary" title="Download All Files">
+                                                    <i class="fas fa-download"></i> Download All
+                                                </a>
                                             @else
-                                            <span class="text-muted">No File</span>
+                                                <span class="text-muted">No File</span>
                                             @endif
                                         </td>
                                         <td class="{{ $item->status_2 == 8 ? 'disabled-cell' : '' }}">
