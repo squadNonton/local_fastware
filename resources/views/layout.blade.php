@@ -312,7 +312,7 @@
                                         'ABDUR RAHMAN AL FAAIZ',
                                         'YAN WALEM MANGINSELA',
                                         'VIVIAN ANGELIKA',
-                                        'Sony Stiawan',
+                                        'SONY STIAWAN',
                                         'FAJAR BAGASKARA',
                                     ];
                                 @endphp
@@ -368,7 +368,7 @@
                                                 'RAGIL ISHA RAHMANTO',
                                                 'ZAENAL ARIFIN',
                                                 'ABDUR RAHMAN AL FAAIZ',
-                                                'Sony Stiawan',
+                                                'SONY STIAWAN',
                                             ];
                                         @endphp
 
@@ -445,7 +445,7 @@
                                                 'YUDHI PRASETYO RAHMAWANTO',
                                                 'YULMAI RIDO WINANDA',
                                                 'YUNASIS PALGUNADI',
-                                                'Sony Stiawan',
+                                                'SONY STIAWAN',
                                             ];
                                         @endphp
 
@@ -887,6 +887,7 @@
                                         'Sony Stiawan',
                                         'FAJAR BAGASKARA',
                                         'M. IQBAL',
+                                        'SARAH EGA BUDI ASTUTI',
                                     ]))
                                     <li><a class="dropdown-item" href="{{ route('index.PO') }}">Form Pengajuan
                                             Barang/Jasa</a></li>
@@ -955,7 +956,7 @@
                                         Panawaran Subcont Project Sales
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="childDropdown">
-                                        @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'JESSICA PAUNE', 'RAGIL ISHA RAHMANTO']))
+                                        @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'JESSICA PAUNE', 'RAGIL ISHA RAHMANTO', 'SARAH EGA BUDI ASTUTI']))
                                             <li><a class="dropdown-item" href="{{ route('indexSales') }}">Form
                                                     Penawaran Subcont</a></li>
                                         @endif
@@ -1030,20 +1031,21 @@
                                     </ul>
                                 </li>
 
-                                <li>
+                                {{-- <li>
                                     <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown"
                                         role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         Inquiry Order Import
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="childDropdown">
-                                        <li><a class="dropdown-item" href="">Form Inquiry Import</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('createinquiryImport') }}">Form
+                                                Inquiry Import</a></li>
                                         <li><a class="dropdown-item" href="">Persetujuan Ka.Sie</a></li>
                                         <li><a class="dropdown-item" href="">Persetujuan Ka.Dept</a></li>
                                         <li><a class="dropdown-item" href="">Persetujuan Inventory</a></li>
                                         <li><a class="dropdown-item" href="">Overview Import</a></li>
                                         <li><a class="dropdown-item" href="">Overview Inquiry Import</a></li>
                                     </ul>
-                                </li>
+                                </li> --}}
                             </ul>
 
                         </li>

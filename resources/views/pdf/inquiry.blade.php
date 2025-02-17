@@ -215,31 +215,39 @@
                         <p style="color: crimson;">Proposed</p>
 
                         <p style="font-size: 8pt;">{{ $signatures['submitted'] }}</p>
-                        <small>Date : {{ now()->format('d/m/Y H:i') }}</small>
+                        <small>Date : {{ \Carbon\Carbon::parse($inquiry->created_at)->format('d/m/Y H:i') }}</small>
                     </td>
                     <td class="table-n1">
                         <p style="color: crimson;">Approved</p>
 
                         <p style="font-size: 8pt;">{{ $signatures['approved_kasie'] }}</p>
-                        <small>Date : {{ now()->format('d/m/Y H:i') }}</small>
+                        <small>
+                            Date : {{ \Carbon\Carbon::parse($inquiry->approved_kasie_at)->format('d/m/Y H:i') }}
+                        </small>
                     </td>
                     <td class="table-n1">
                         <p style="color: crimson;">Approved</p>
 
                         <p style="font-size: 8pt;">{{ $signatures['approved_kadept'] }}</p>
-                        <small>Date : {{ now()->format('d/m/Y H:i') }}</small>
+                        <small>
+                            Date : {{ \Carbon\Carbon::parse($inquiry->approved_kadept_at)->format('d/m/Y H:i') }}
+                        </small>
                     </td>
                     <td class="table-n1">
                         <p style="color: crimson;">Approved</p>
 
                         <p style="font-size: 8pt;">{{ $signatures['approved_inventory'] }}</p>
-                        <small>Date : {{ now()->format('d/m/Y H:i') }}</small>
+                        <small>
+                            Date : {{ \Carbon\Carbon::parse($inquiry->approved_inventory_at)->format('d/m/Y H:i') }}
+                        </small>
                     </td>
                     <td class="table-n1">
                         <p style="color: crimson;">Confirmed</p>
 
                         <p style="font-size: 8pt;">{{ $signatures['confirmed_purchasing'] }}</p>
-                        <small>Date : {{ now()->format('d/m/Y H:i') }}</small>
+                        <small>
+                            Date : {{ \Carbon\Carbon::parse($inquiry->confirmed_purchasing_at)->format('d/m/Y H:i') }}
+                        </small>
                     </td>
                 </tr>
             </tbody>

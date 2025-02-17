@@ -433,7 +433,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-start mt-4 mb-3">
                         <button class="btn btn-add btn-sm me-2" data-bs-toggle="modal" data-bs-target="#inquiryModal">
-                            <i class="bx bx-plus-medical fw-bold"> Tambah</i>
+                            <i class="bx bx-plus-medical fw-bold"> Add Local</i>
                         </button>
                         {{-- <h5 class="card-title1 font-sii text-center">Data Inquiry Sales View</h5> --}}
                     </div>
@@ -620,7 +620,7 @@
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="inquiryModalLabel">Form Inquiry</h5>
+                                <h5 class="modal-title" id="inquiryModalLabel">[Local] - Form Inquiry</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
@@ -637,8 +637,8 @@
                                     <div class="mb-3">
                                         <label for="jenis_inquiry" class="form-label fw-bold">Jenis Inquiry</label>
                                         <select class="form-select" id="jenis_inquiry" name="jenis_inquiry" required>
-                                            <option value="RO">Reguler Order</option>
-                                            <option value="SPOR">Spesial Order</option>
+                                            <option value="RO">Order Local</option>
+                                            {{-- <option value="SPOR">Spesial Order</option> --}}
                                         </select>
                                     </div>
                                     {{-- <div class="mb-3">
@@ -686,12 +686,14 @@
                     </div>
                 </div>
                 <!-- End Modal -->
+
+                <!-- Start Edit Inquiry Modal -->
                 <div class="modal fade" id="editInquiryModal" tabindex="-1" aria-labelledby="editInquiryModalLabel"
                     aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="editInquiryModalLabel">Edit Inquiry</h5>
+                                <h5 class="modal-title" id="editInquiryModalLabel">[Local] - Edit Form Inquiry</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
@@ -703,38 +705,34 @@
                                     @method('PUT')
                                     <input type="hidden" id="editInquiryId" name="inquiry_id">
                                     <div class="mb-3">
+                                        <label for="editloc_imp" class="form-label">Category</label>
+                                        <input type="text" class="form-control" id="editloc_imp" name="loc_imp"
+                                            value="Order Local" disabled required>
+                                    </div>
+                                    <div class="mb-3">
                                         <label for="editjenis_inquiry" class="form-label">Jenis Inquiry</label>
                                         <select class="form-select" id="editjenis_inquiry" name="jenis_inquiry" required
                                             disabled>
                                             <option value="RO">Reguler Order</option>
-                                            <option value="SPOR">Spesial Order</option>
+                                            {{-- <option value="SPOR">Spesial Order</option> --}}
                                         </select>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="editloc_imp" class="form-label">Category</label>
-                                        <input type="text" class="form-control" id="editloc_imp" name="loc_imp"
-                                            value="Local" disabled required>
-                                    </div>
-                                    <div class="mb-3 edit-searchable-dropdown">
-                                        <label for="search_edit_customer" class="form-label">Order from</label>
-                                        <input type="text" class="form-control" id="search_edit_customer"
-                                            placeholder="Search customer...">
-                                        <div id="edit_customer_list" class="dropdown-menu show"
-                                            style="width: 100%; display: none; max-height: 200px; overflow-y: auto;">
-                                            @foreach ($customers as $customer)
-                                                <div class="dropdown-item" data-value="{{ $customer->id }}">
-                                                    {{ $customer->name_customer }}</div>
-                                            @endforeach
+                                        <label for="id_customer" class="form-label fw-bold">Order from</label>
+                                        <div class="searchable-dropdown">
+                                            <input type="text" id="search_edit_customer" class="form-control"
+                                                placeholder="Search customer...">
+                                            <div id="edit_customer_list" class="dropdown-items"
+                                                style="display: none; max-height: 200px; overflow-y: auto;">
+                                                @foreach ($customers as $customer)
+                                                    <div data-value="{{ $customer->id }}">{{ $customer->name_customer }}
+                                                    </div>
+                                                @endforeach
+                                            </div>
                                         </div>
-                                        <input type="hidden" id="edit_id_customer" name="id_customer">
+                                        <input type="hidden" id="edit_id_customer" name="id_customer" required>
+                                        <div id="selected_customers_list"></div>
                                     </div>
-                                    {{-- <div class="mb-3">
-                                        <label for="editsupplier" class="form-label">Supplier</label>
-                                        <select class="form-select" id="editsupplier" name="supplier" required>
-                                            <option value="Daido Steel">Daido Steel</option>
-                                            <option value="Surya Metalindo">Surya Metalindo</option>
-                                        </select>
-                                    </div> --}}
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary"
                                             data-bs-dismiss="modal">Close</button>
@@ -745,7 +743,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- End Edit Inquiry Modal -->
             </div>
             </div>
@@ -853,6 +850,87 @@
                 });
             });
 
+            // function openEditInquiryModal(id) {
+            //     console.log('Opening modal for inquiry ID: ' + id);
+            //     $.ajax({
+            //         url: '{{ route('editInquiry', ['id' => ':id']) }}'.replace(':id', id),
+            //         type: 'GET',
+            //         success: function(response) {
+            //             console.log('Response:', response);
+
+            //             // Populate the form with the received data
+            //             $('#editjenis_inquiry').val(response.jenis_inquiry);
+            //             $('#search_edit_customer').val(response.customer_name);
+            //             $('#edit_id_customer').val(response.id_customer);
+            //             $('#editloc_imp').val(response.loc_imp);
+            //             // $('#editsupplier').val(response.supplier);
+            //             $('#editInquiryId').val(response.id);
+
+            //             // Populate the customer dropdown
+            //             const editDropdown = $('#edit_customer_list');
+            //             editDropdown.empty(); // Clear existing options
+            //             response.customers.forEach(customer => {
+            //                 const item = $('<div>').addClass('dropdown-item').attr('data-value',
+            //                     customer
+            //                     .id).text(customer.name_customer);
+            //                 item.on('click', function() {
+            //                     $('#search_edit_customer').val(customer.name_customer);
+            //                     $('#edit_id_customer').val(customer.id);
+            //                     editDropdown.hide();
+            //                 });
+            //                 editDropdown.append(item);
+            //             });
+
+            //             // Set the current customer name in the search input
+            //             $('#search_edit_customer').val(response.customer_name);
+
+            //             // Show the modal
+            //             $('#editInquiryModal').modal('show');
+
+            //             // Update inquiry on save
+            //             $('#editInquiryForm').off('submit').on('submit', function(e) {
+            //                 e.preventDefault(); // Mencegah form dari pengiriman default
+            //                 const inquiryId = $('#editInquiryId').val();
+            //                 const updateData = {
+            //                     jenis_inquiry: $('#editjenis_inquiry').val(),
+            //                     id_customer: $('#edit_id_customer').val(),
+            //                     loc_imp: $('#editloc_imp').val(),
+            //                     // supplier: $('#editsupplier').val(),
+            //                     _token: '{{ csrf_token() }}', // Sertakan token CSRF untuk keamanan
+            //                     _method: 'PUT', // Menggunakan metode PUT untuk update
+            //                 };
+
+            //                 $.ajax({
+            //                     url: '{{ route('updateinquiry', ['id' => ':id']) }}'
+            //                         .replace(':id',
+            //                             inquiryId),
+            //                     type: 'POST', // Gunakan POST karena kita menipu metode
+            //                     data: updateData,
+            //                     success: function(response) {
+            //                         // SweetAlert notification
+            //                         Swal.fire({
+            //                             title: 'Success!',
+            //                             text: 'Inquiry updated successfully.',
+            //                             icon: 'success',
+            //                             confirmButtonText: 'OK'
+            //                         }).then(() => {
+            //                             $('#editInquiryModal').modal(
+            //                                 'hide'); // Tutup modal
+            //                             location.reload(); // Reload halaman
+            //                         });
+            //                     },
+            //                     error: function(xhr) {
+            //                         console.log(xhr.responseText);
+            //                     }
+            //                 });
+            //             });
+            //         },
+            //         error: function(xhr) {
+            //             console.log(xhr.responseText);
+            //         }
+            //     });
+            // }
+
             function openEditInquiryModal(id) {
                 console.log('Opening modal for inquiry ID: ' + id);
                 $.ajax({
@@ -860,32 +938,48 @@
                     type: 'GET',
                     success: function(response) {
                         console.log('Response:', response);
-
                         // Populate the form with the received data
                         $('#editjenis_inquiry').val(response.jenis_inquiry);
                         $('#search_edit_customer').val(response.customer_name);
                         $('#edit_id_customer').val(response.id_customer);
                         $('#editloc_imp').val(response.loc_imp);
-                        // $('#editsupplier').val(response.supplier);
                         $('#editInquiryId').val(response.id);
 
-                        // Populate the customer dropdown
-                        const editDropdown = $('#edit_customer_list');
-                        editDropdown.empty(); // Clear existing options
+                        // Tampilkan dropdown dengan customer yang diambil dari response
+                        $('#edit_customer_list').empty(); // Clear existing options
                         response.customers.forEach(customer => {
-                            const item = $('<div>').addClass('dropdown-item').attr('data-value',
-                                customer
+                            const item = $('<div>').addClass('dropdown-item').attr('data-value', customer
                                 .id).text(customer.name_customer);
                             item.on('click', function() {
                                 $('#search_edit_customer').val(customer.name_customer);
                                 $('#edit_id_customer').val(customer.id);
-                                editDropdown.hide();
+                                $('#edit_customer_list')
+                                    .hide(); // Sembunyikan dropdown setelah memilih customer
                             });
-                            editDropdown.append(item);
+                            $('#edit_customer_list').append(item);
                         });
 
-                        // Set the current customer name in the search input
-                        $('#search_edit_customer').val(response.customer_name);
+                        // Event untuk mencari customer
+                        $('#search_edit_customer').on('input', function() {
+                            const filter = $(this).val().toLowerCase();
+                            $('#edit_customer_list').children('div').each(function() {
+                                const text = $(this).text().toLowerCase();
+                                $(this).toggle(text.indexOf(filter) > -1);
+                            });
+                            $('#edit_customer_list').toggle($('#edit_customer_list').children('div:visible')
+                                .length > 0);
+                        });
+
+                        $('#search_edit_customer').on('focus', function() {
+                            $('#edit_customer_list').show(); // Tampilkan dropdown saat fokus
+                        });
+
+                        // Sembunyikan dropdown jika klik di luar
+                        $(document).on('click', function(e) {
+                            if (!$(e.target).closest('.searchable-dropdown').length) {
+                                $('#edit_customer_list').hide(); // Sembunyikan dropdown jika klik di luar
+                            }
+                        });
 
                         // Show the modal
                         $('#editInquiryModal').modal('show');
@@ -898,15 +992,12 @@
                                 jenis_inquiry: $('#editjenis_inquiry').val(),
                                 id_customer: $('#edit_id_customer').val(),
                                 loc_imp: $('#editloc_imp').val(),
-                                // supplier: $('#editsupplier').val(),
                                 _token: '{{ csrf_token() }}', // Sertakan token CSRF untuk keamanan
                                 _method: 'PUT', // Menggunakan metode PUT untuk update
                             };
-
                             $.ajax({
-                                url: '{{ route('updateinquiry', ['id' => ':id']) }}'
-                                    .replace(':id',
-                                        inquiryId),
+                                url: '{{ route('updateinquiry', ['id' => ':id']) }}'.replace(':id',
+                                    inquiryId),
                                 type: 'POST', // Gunakan POST karena kita menipu metode
                                 data: updateData,
                                 success: function(response) {

@@ -420,20 +420,13 @@
                 color: red;
             }
         </style>
-        {{-- <div class="pagetitle">
-        <h1>Halaman Inquiry</h1>
-        <nav>
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item active">Menu Inquiry Sales</li>
-            </ol>
-        </nav>
-    </div> --}}
+
         <section class="">
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-start mt-4 mb-3">
-                        <button class="btn btn-add btn-sm me-2" data-bs-toggle="modal" data-bs-target="#inquiryModal">
-                            <i class="bx bx-plus-medical fw-bold"> Tambah</i>
+                        <button class="btn btn-add btn-sm me-2" data-bs-toggle="modal" data-bs-target="#inquiryImportModal">
+                            <i class="bx bx-plus-medical fw-bold"> Add Import</i>
                         </button>
                         {{-- <h5 class="card-title1 font-sii text-center">Data Inquiry Sales View</h5> --}}
                     </div>
@@ -534,17 +527,6 @@
                                                 @endif
                                             </td>
 
-                                            {{-- <td>
-                                                @if ($inquiry->attach_file)
-                                                    <a href="{{ asset('assets/files/' . $inquiry->attach_file) }}"
-                                                        target="_blank">
-                                                        <i class="fas fa-file-alt"></i>
-                                                    </a>
-                                                @else
-                                                    <i class="fas fa-times"></i> No File
-                                                @endif
-                                            </td> --}}
-
                                             <td>
                                                 @php
                                                     // Ambil update progress terbaru
@@ -566,14 +548,6 @@
 
                                             <td>{{ $inquiry->est_date }}</td>
 
-                                            {{-- <td>
-                                    @if ($inquiry->status == 0)
-                                    <button type="button" class="btn btn-danger" title="Data tidak aktif">
-                                        <i class="bi bi-exclamation-octagon"></i>
-                                    </button>
-                                    @endif
-                                </td> --}}
-
                                             <td>
                                                 @if ($inquiry->status == 1)
                                                     <a class="btn btn-custom-edit m-1 btn-sm" title="Edit">
@@ -593,11 +567,7 @@
                                                     href="{{ route('showFormSS', $inquiry->id) }}">
                                                     <i class="bi bi-eye-fill"></i>
                                                 </a>
-                                                {{-- <a href="#" class="btn btn-info m-1 btn-sm"
-                                                    onclick="showProgressModal1({{ $inquiry->id }}); return false;"
-                                                    title="Show Detail Inquiry">
-                                                    <i class="bi bi-info-square-fill"></i>
-                                                </a> --}}
+
                                                 @if ($inquiry->status == 1)
                                                     <a class="btn btn-custom-delete m-1 btn-sm" title="Delete">
                                                         <i class="bi bi-trash-fill"
@@ -615,12 +585,12 @@
                 <!-- End Table with stripped rows -->
 
                 <!-- Modal Add-->
-                <div class="modal fade" id="inquiryModal" tabindex="-1" aria-labelledby="inquiryModalLabel"
+                <div class="modal fade" id="inquiryImportModal" tabindex="-1" aria-labelledby="inquiryModalLabel"
                     aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="inquiryModalLabel">Form Inquiry</h5>
+                                <h5 class="modal-title" id="inquiryModalLabel">Form Inquiry Import</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
@@ -628,32 +598,20 @@
                                 <form action="{{ route('storeinquiry') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
                                     <div class="mb-3">
-                                        <label for="loc_imp" class="form-label fw-bold">Category <span
+                                        <label for="loc_imp" class="form-label fw-bold">Jenis Inquiry <span
                                                 class="disabledform">
                                                 [*Form Disabled]</span></label>
                                         <input type="text" class="form-control" id="loc_imp" name="loc_imp"
-                                            value="Local" disabled required>
+                                            value="Import" disabled required>
                                     </div>
+
                                     <div class="mb-3">
-                                        <label for="jenis_inquiry" class="form-label fw-bold">Jenis Inquiry</label>
-                                        <select class="form-select" id="jenis_inquiry" name="jenis_inquiry" required>
-                                            <option value="RO">Reguler Order</option>
-                                            <option value="SPOR">Spesial Order</option>
-                                        </select>
+                                        <label for="jenis_inquiry" class="form-label fw-bold">Category <span
+                                                class="disabledform">
+                                                [*Form Disabled]</span></label>
+                                        <input type="text" class="form-control" id="jenis_inquiry" name="jenis_inquiry"
+                                            value="Order Import" disabled required>
                                     </div>
-                                    {{-- <div class="mb-3">
-                                        <label for="id_customer" class="form-label">Order from</label>
-                                        <div class="searchable-dropdown">
-                                            <input type="text" id="search_customer" placeholder="Select Customer">
-                                            <div class="dropdown-items" id="customer_list">
-                                                @foreach ($customers as $customer)
-                                                    <div data-value="{{ $customer->id }}">{{ $customer->name_customer }}
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                        <input type="hidden" id="id_customer" name="id_customer" required>
-                                    </div> --}}
 
                                     <div class="mb-3">
                                         <label for="id_customer" class="form-label fw-bold">Order from</label>
@@ -669,15 +627,10 @@
                                         <input type="hidden" id="id_customer" name="id_customer" required>
                                         <div id="selected_customers_list"></div>
                                     </div>
-                                    {{-- <div class="mb-3">
-                                        <label for="supplier" class="form-label">Supplier</label>
-                                        <select class="form-select" id="supplier" name="supplier" required>
-                                            <option value="Daido Steel">Daido Steel</option>
-                                            <option value="Surya Metalindo">Surya Metalindo</option>
-                                        </select>
-                                    </div> --}}
+
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-danger"
+                                            data-bs-dismiss="modal">Close</button>
                                         <button type="submit" class="btn btn-primary">Submit</button>
                                     </div>
                                 </form>
@@ -686,8 +639,8 @@
                     </div>
                 </div>
                 <!-- End Modal -->
-                <div class="modal fade" id="editInquiryModal" tabindex="-1" aria-labelledby="editInquiryModalLabel"
-                    aria-hidden="true">
+                <div class="modal fade" id="editInquiryImportModal" tabindex="-1"
+                    aria-labelledby="editInquiryModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -710,11 +663,13 @@
                                             <option value="SPOR">Spesial Order</option>
                                         </select>
                                     </div>
+
                                     <div class="mb-3">
                                         <label for="editloc_imp" class="form-label">Category</label>
                                         <input type="text" class="form-control" id="editloc_imp" name="loc_imp"
-                                            value="Local" disabled required>
+                                            value="Import" disabled required>
                                     </div>
+
                                     <div class="mb-3 edit-searchable-dropdown">
                                         <label for="search_edit_customer" class="form-label">Order from</label>
                                         <input type="text" class="form-control" id="search_edit_customer"
@@ -728,13 +683,7 @@
                                         </div>
                                         <input type="hidden" id="edit_id_customer" name="id_customer">
                                     </div>
-                                    {{-- <div class="mb-3">
-                                        <label for="editsupplier" class="form-label">Supplier</label>
-                                        <select class="form-select" id="editsupplier" name="supplier" required>
-                                            <option value="Daido Steel">Daido Steel</option>
-                                            <option value="Surya Metalindo">Surya Metalindo</option>
-                                        </select>
-                                    </div> --}}
+
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary"
                                             data-bs-dismiss="modal">Close</button>
@@ -799,6 +748,360 @@
                 });
             });
         </script>
+
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const locImpSelect = document.getElementById('loc_imp'); // Dropdown, tetapi hanya untuk Local
+                const searchInput = document.getElementById('search_customer');
+                const customerList = document.getElementById('customer_list');
+                const hiddenInput = document.getElementById('id_customer');
+                const selectedCustomersList = document.getElementById('selected_customers_list');
+
+                // Tampilkan dropdown dan menangani perubahan kategori
+                locImpSelect.value = 'Import'; // Set default ke Import
+                customerList.style.display = 'block'; // Selalu tampilkan daftar customer
+
+                // Mencari customer berdasarkan input
+                searchInput.addEventListener('input', function() {
+                    const filter = searchInput.value.toLowerCase();
+                    const items = customerList.getElementsByTagName('div');
+
+                    for (let i = 0; i < items.length; i++) {
+                        const txtValue = items[i].textContent || items[i].innerText;
+                        items[i].style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? '' : 'none';
+                    }
+                });
+
+                // Menangani pemilihan customer
+                customerList.addEventListener('click', function(e) {
+                    if (e.target && e.target.matches('div[data-value]')) {
+                        const selectedValue = e.target.getAttribute('data-value');
+                        const selectedText = e.target.textContent;
+
+                        // Untuk Import, set satu customer dan tidak mengizinkan pemilihan lebih
+                        searchInput.value = selectedText; // Tampilkan nama customer
+                        hiddenInput.value = selectedValue; // Set ID customer
+                        customerList.style.display = 'none'; // Sembunyikan daftar
+                        selectedCustomersList.innerHTML = ''; // Kosongkan daftar, hanya satu yang terpilih
+                        selectedCustomersList.innerHTML = '<span class="selected-customer">' + selectedText +
+                            '</span>'; // Tampilkan customer terpilih
+                    }
+                });
+
+                // Menangani fokus input
+                searchInput.addEventListener('focus', function() {
+                    customerList.style.display = 'block'; // Tampilkan dropdown saat mencari
+                });
+
+                // Menyembunyikan dropdown jika klik di luar
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.searchable-dropdown')) {
+                        customerList.style.display = 'none'; // Sembunyikan dropdown jika klik di luar
+                    }
+                });
+            });
+
+            function openEditInquiryImportModal(id) {
+                console.log('Opening modal for inquiry ID: ' + id);
+                $.ajax({
+                    url: '{{ route('editInquiry', ['id' => ':id']) }}'.replace(':id', id),
+                    type: 'GET',
+                    success: function(response) {
+                        console.log('Response:', response);
+
+                        // Populate the form with the received data
+                        $('#editjenis_inquiry').val(response.jenis_inquiry);
+                        $('#search_edit_customer').val(response.customer_name);
+                        $('#edit_id_customer').val(response.id_customer);
+                        $('#editloc_imp').val(response.loc_imp);
+                        // $('#editsupplier').val(response.supplier);
+                        $('#editInquiryId').val(response.id);
+
+                        // Populate the customer dropdown
+                        const editDropdown = $('#edit_customer_list');
+                        editDropdown.empty(); // Clear existing options
+                        response.customers.forEach(customer => {
+                            const item = $('<div>').addClass('dropdown-item').attr('data-value',
+                                customer
+                                .id).text(customer.name_customer);
+                            item.on('click', function() {
+                                $('#search_edit_customer').val(customer.name_customer);
+                                $('#edit_id_customer').val(customer.id);
+                                editDropdown.hide();
+                            });
+                            editDropdown.append(item);
+                        });
+
+                        // Set the current customer name in the search input
+                        $('#search_edit_customer').val(response.customer_name);
+
+                        // Show the modal
+                        $('#editInquiryImportModal').modal('show');
+
+                        // Update inquiry on save
+                        $('#editInquiryForm').off('submit').on('submit', function(e) {
+                            e.preventDefault(); // Mencegah form dari pengiriman default
+                            const inquiryId = $('#editInquiryId').val();
+                            const updateData = {
+                                jenis_inquiry: $('#editjenis_inquiry').val(),
+                                id_customer: $('#edit_id_customer').val(),
+                                loc_imp: $('#editloc_imp').val(),
+                                // supplier: $('#editsupplier').val(),
+                                _token: '{{ csrf_token() }}', // Sertakan token CSRF untuk keamanan
+                                _method: 'PUT', // Menggunakan metode PUT untuk update
+                            };
+
+                            $.ajax({
+                                url: '{{ route('updateinquiry', ['id' => ':id']) }}'
+                                    .replace(':id',
+                                        inquiryId),
+                                type: 'POST', // Gunakan POST karena kita menipu metode
+                                data: updateData,
+                                success: function(response) {
+                                    // SweetAlert notification
+                                    Swal.fire({
+                                        title: 'Success!',
+                                        text: 'Inquiry updated successfully.',
+                                        icon: 'success',
+                                        confirmButtonText: 'OK'
+                                    }).then(() => {
+                                        $('#editInquiryImportModal').modal(
+                                            'hide'); // Tutup modal
+                                        location.reload(); // Reload halaman
+                                    });
+                                },
+                                error: function(xhr) {
+                                    console.log(xhr.responseText);
+                                }
+                            });
+                        });
+                    },
+                    error: function(xhr) {
+                        console.log(xhr.responseText);
+                    }
+                });
+            }
+
+            $.noConflict();
+            jQuery(document).ready(function($) {
+                const dataTable = new simpleDatatables.DataTable("#inquiryTable", {
+                    searchable: true, // Aktifkan fitur pencarian
+                    perPage: 10, // Jumlah entri data per halaman
+                    perPageSelect: [5, 10, 20, 150], // Opsi jumlah entri data per halaman
+                    dataProps: {
+                        // Fungsi untuk menghasilkan format yang diinginkan
+                        "Urutan": (value, data) => {
+                            // Mendapatkan indeks baris data saat ini
+                            const index = data.tableData.id;
+
+                            // Mendapatkan nilai dari kolom "RO" atau "SPOR"
+                            const spoOrRo = data[index][0].startsWith("RO") ? "RO" : "SPOR";
+
+                            // Mendapatkan nilai dari kolom "Bulan"
+                            const month = data[index][1];
+
+                            // Mendapatkan nilai dari kolom "Tahun"
+                            const year = data[index][2];
+
+                            // Menghasilkan urutan sesuai format yang diinginkan
+                            const order = (index + 1).toString().padStart(3, '0');
+                            return `${spoOrRo}/${month}/${year}/${order}`;
+                        }
+                    }
+                });
+            });
+
+            //delete
+            function deleteInquiry(id) {
+                Swal.fire({
+                    title: "Apakah Anda yakin?",
+                    text: "Anda akan menghapus inquiry ini!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '{{ route('deleteinquiry', '') }}/' + id,
+                            type: 'DELETE',
+                            data: {
+                                '_token': '{{ csrf_token() }}'
+                            },
+                            success: function(response) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Inquiry telah berhasil dihapus!',
+                                    'success'
+                                ).then((result) => {
+                                    // Jika pengguna menekan tombol 'OK', refresh halaman
+                                    if (result.isConfirmed) {
+                                        location.reload();
+                                    }
+                                })
+                                // Anda bisa menambahkan kode untuk menghapus baris tabel atau memperbarui tampilan di sini
+                            }
+                        });
+                    }
+                })
+            }
+
+            function showProgressModal1(id) {
+                // Tampilkan modal
+                $('#progressHistoryModal1').modal('show');
+
+                // Ambil data progress untuk inquiry tersebut
+                $.ajax({
+                    url: '{{ route('progressHistory', '') }}/' + id, // Pastikan route-nya sesuai
+                    method: 'GET',
+                    success: function(response) {
+                        const historyBody = $('#historyBody');
+                        historyBody.empty(); // Bersihkan data sebelumnya
+
+                        // Menambahkan data response ke dalam tabel
+                        response.progressUpdates.forEach((progress, index) => {
+                            historyBody.append(`
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${new Date(progress.created_at).toLocaleString()}</td>
+                        <td>${progress.user.name}</td>
+                        <td>${progress.description}</td>
+                    </tr>
+                `);
+                        });
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        Swal.fire('Error!', 'An error occurred while fetching progress history.',
+                            'error');
+                    }
+                });
+            }
+
+            // report
+            document.getElementById('exportReportBtn').addEventListener('click', function() {
+                // Get the table element
+                var table = document.getElementById('inquiryTable');
+
+                // Create a workbook and add a worksheet
+                var wb = XLSX.utils.table_to_book(table, {
+                    sheet: "Inquiry Report"
+                });
+                var ws = wb.Sheets["Inquiry Report"];
+
+                // Filter out unwanted columns (Note, File, is Active, Actions)
+                // Define the columns we want to keep (1-based index: No, Kode Inq., Type Inq., Type, Size, Supplier, Qty, Order From, Create By, To Approve, To Validate)
+                var columnsToKeep = [1, 2, 3, 4, 5, 6, 7];
+
+                // Get the range of the worksheet
+                var range = XLSX.utils.decode_range(ws['!ref']);
+
+                // Create a new worksheet to store the filtered data
+                var newWsData = [];
+
+                for (var R = range.s.r; R <= range.e.r; ++R) {
+                    var newRow = [];
+                    for (var C = range.s.c; C <= range.e.c; ++C) {
+                        if (columnsToKeep.includes(C + 1)) {
+                            var cellAddress = {
+                                c: C,
+                                r: R
+                            };
+                            var cellRef = XLSX.utils.encode_cell(cellAddress);
+                            newRow.push(ws[cellRef] ? ws[cellRef].v : null);
+                        }
+                    }
+                    newWsData.push(newRow);
+                }
+
+                // Create a new worksheet with the filtered data
+                var newWs = XLSX.utils.aoa_to_sheet(newWsData);
+
+                // Apply auto filter to the header row
+                newWs['!autofilter'] = {
+                    ref: `A1:K${newWsData.length}`
+                };
+
+                // Adjust column widths
+                var colWidths = [{
+                        wpx: 40
+                    }, // No
+                    {
+                        wpx: 100
+                    }, // Kode Inq.
+
+                    {
+                        wpx: 120
+                    }, // Supplier
+
+                    {
+                        wpx: 100
+                    }, // Order From
+                    {
+                        wpx: 100
+                    }, // Create By
+                    {
+                        wpx: 100
+                    }, // To Approve
+                    {
+                        wpx: 100
+                    } // To Validate
+                ];
+                newWs['!cols'] = colWidths;
+
+                // Replace the old worksheet with the new one
+                wb.Sheets["Inquiry Report"] = newWs;
+
+                // Write the workbook to a file
+                XLSX.writeFile(wb, 'Inquiry_Report.xlsx');
+            });
+        </script>
+
+        <script>
+            var inputCount = 1; // Untuk menghitung jumlah input yang ada
+
+            function addInput() {
+                inputCount++;
+                var html = `<div class="mb-3">
+                         <label for="supplier" class="form-label">Type</label>
+                        <input type="text" class="form-control type-input" name="type[]" required>
+                    </div>
+                    <div class="mb-3">
+                          <label for="supplier" class="form-label">Size</label>
+                        <input type="text" class="form-control size-input" name="size[]" required>
+                    </div>`;
+                $('#inputContainer').append(html);
+            }
+        </script>
+
+        <script>
+            function handleCategoryChange() {
+                const locImpSelect = document.getElementById('loc_imp');
+                const otherContainer = document.getElementById('other-container');
+                const customerInput = document.getElementById('search_customer');
+
+                if (locImpSelect.value === 'Import') {
+                    customerInput.disabled = true; // Disable customer input
+                    otherContainer.style.display = 'block'; // Show other input
+                } else {
+                    customerInput.disabled = false; // Enable customer input
+                    otherContainer.style.display = 'none'; // Hide other input
+                }
+            }
+
+            function addOtherField() {
+                const additionalFieldsContainer = document.getElementById('additional-fields');
+                const newOtherField = document.createElement('input');
+                newOtherField.type = 'text';
+                newOtherField.name = 'other[]';
+                newOtherField.placeholder = 'Enter other...';
+                newOtherField.classList.add('form-control');
+                additionalFieldsContainer.appendChild(newOtherField);
+            }
+        </script>
+
 
     </main><!-- End #main -->
 @endsection

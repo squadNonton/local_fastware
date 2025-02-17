@@ -31,7 +31,7 @@ class InquirySalesController extends Controller
         return view('inquiry.create', compact('inquiries', 'customers'));
     }
 
-        public function createInquirySales1()
+    public function createInquirySales1()
     {
         $statuses = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -317,6 +317,7 @@ class InquirySalesController extends Controller
         $inquiry->status = 4; // Menandakan status "Approve Ka.Sie"
         // Simpan ID pengguna yang melakukan approve
         $inquiry->kasie_id = Auth::user()->id; // Ambil ID pengguna yang login
+        $inquiry->approved_kasie_at = now();
         $inquiry->save();
 
         // Ketika menyetujui oleh Ka.Sie
@@ -373,6 +374,7 @@ class InquirySalesController extends Controller
         $inquiry->status = 3; // Menandakan status "Approve Ka.Dept"
         // Simpan ID pengguna yang melakukan approve
         $inquiry->kadept_id = Auth::user()->id; // Ambil ID pengguna yang login
+        $inquiry->approved_kadept_at = now();
         $inquiry->save();
 
         // Ketika menyetujui oleh Ka.Dept
@@ -417,6 +419,7 @@ class InquirySalesController extends Controller
         $inquiry->status = 8; // Menandakan status "Approve Inventory"
         // Simpan ID pengguna yang melakukan approve
         $inquiry->inventory_id = Auth::user()->id; // Ambil ID pengguna yang login
+        $inquiry->approved_inventory_at = now();
         $inquiry->save();
 
         // Ketika menyetujui oleh Inventory
@@ -466,6 +469,7 @@ class InquirySalesController extends Controller
         // Ubah status inquiry menjadi "Confirm Purchasing" (status 9)
         $inquiry->status = 9; // Menandakan status "Confirm Purchasing"
         $inquiry->purchasing_id = Auth::user()->id; // Ambil ID pengguna yang login
+        $inquiry->confirmed_purchasing_at = now();
         $inquiry->save();
 
         // Ketika Confirm by Procurement
@@ -512,67 +516,66 @@ class InquirySalesController extends Controller
     }
 
     public function updateInquiryDetails(Request $request, $id)
-{
-    // Validasi input
-    $request->validate([
-        'materials.*.id_type' => 'required|integer',
-        'materials.*.jenis' => 'required|string',
-        'materials.*.thickness' => 'nullable|numeric',
-        'materials.*.weight' => 'nullable|numeric',
-        'materials.*.inner_diameter' => 'nullable|numeric',
-        'materials.*.outer_diameter' => 'nullable|numeric',
-        'materials.*.length' => 'nullable|numeric',
-        'materials.*.qty' => 'required|integer',
-        'materials.*.m1' => 'nullable|numeric',
-        'materials.*.m2' => 'nullable|numeric',
-        'materials.*.m3' => 'nullable|numeric',
-        'materials.*.ship' => 'required|string',
-        'materials.*.so' => 'nullable|string',
-        'materials.*.note' => 'nullable|string',
-    ]);
+    {
+        // Validasi input
+        $request->validate([
+            'materials.*.id_type' => 'required|integer',
+            'materials.*.jenis' => 'required|string',
+            'materials.*.thickness' => 'nullable|numeric',
+            'materials.*.weight' => 'nullable|numeric',
+            'materials.*.inner_diameter' => 'nullable|numeric',
+            'materials.*.outer_diameter' => 'nullable|numeric',
+            'materials.*.length' => 'nullable|numeric',
+            'materials.*.qty' => 'required|integer',
+            'materials.*.m1' => 'nullable|numeric',
+            'materials.*.m2' => 'nullable|numeric',
+            'materials.*.m3' => 'nullable|numeric',
+            'materials.*.ship' => 'required|string',
+            'materials.*.so' => 'nullable|string',
+            'materials.*.note' => 'nullable|string',
+        ]);
 
-    // Temukan inquiry berdasarkan ID
-    $inquiry = InquirySales::findOrFail($id);
+        // Temukan inquiry berdasarkan ID
+        $inquiry = InquirySales::findOrFail($id);
 
-    $updatedMaterials = [];
+        $updatedMaterials = [];
 
-    // Update data materials
-    foreach ($request->materials as $materialData) {
-        $material = DetailInquiry::where('id_inquiry', $id)
-            ->where('id_type', $materialData['id_type'])
-            ->first();
+        // Update data materials
+        foreach ($request->materials as $materialData) {
+            $material = DetailInquiry::where('id_inquiry', $id)
+                ->where('id_type', $materialData['id_type'])
+                ->first();
 
-        if ($material) {
-            $jenis = $materialData['jenis'];
+            if ($material) {
+                $jenis = $materialData['jenis'];
 
-            // Perbarui hanya nilai yang sesuai dengan jenisnya
-            $material->jenis = $jenis;
-            $material->thickness = ($jenis === 'Flat') ? $materialData['thickness'] : null;
-            $material->weight = ($jenis === 'Flat') ? $materialData['weight'] : null;
-            $material->inner_diameter = ($jenis === 'Honed Tube') ? $materialData['inner_diameter'] : null;
-            $material->outer_diameter = ($jenis === 'Round' || $jenis === 'Honed Tube') ? $materialData['outer_diameter'] : null;
-            $material->length = $materialData['length'];
-            $material->qty = $materialData['qty'];
-            $material->m1 = $materialData['m1'];
-            $material->m2 = $materialData['m2'];
-            $material->m3 = $materialData['m3'];
-            $material->ship = $materialData['ship'];
-            $material->so = $materialData['so'];
-            $material->note = $materialData['note'];
-            $material->save();
+                // Perbarui hanya nilai yang sesuai dengan jenisnya
+                $material->jenis = $jenis;
+                $material->thickness = ($jenis === 'Flat') ? $materialData['thickness'] : null;
+                $material->weight = ($jenis === 'Flat') ? $materialData['weight'] : null;
+                $material->inner_diameter = ($jenis === 'Honed Tube') ? $materialData['inner_diameter'] : null;
+                $material->outer_diameter = ($jenis === 'Round' || $jenis === 'Honed Tube') ? $materialData['outer_diameter'] : null;
+                $material->length = $materialData['length'];
+                $material->qty = $materialData['qty'];
+                $material->m1 = $materialData['m1'];
+                $material->m2 = $materialData['m2'];
+                $material->m3 = $materialData['m3'];
+                $material->ship = $materialData['ship'];
+                $material->so = $materialData['so'];
+                $material->note = $materialData['note'];
+                $material->save();
 
-            // Tambahkan data yang sudah diperbarui ke dalam array
-            $updatedMaterials[] = $material;
+                // Tambahkan data yang sudah diperbarui ke dalam array
+                $updatedMaterials[] = $material;
+            }
         }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data berhasil diperbarui!',
+            'updatedMaterials' => $updatedMaterials // Kirim data terbaru ke frontend
+        ]);
     }
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Data berhasil diperbarui!',
-        'updatedMaterials' => $updatedMaterials // Kirim data terbaru ke frontend
-    ]);
-
-}
 
     // public function confirmPurchase($id)
     // {
@@ -622,6 +625,7 @@ class InquirySalesController extends Controller
     //         'progress' => $progressUpdate
     //     ]);
     // }
+
 
     public function finishInquiry($id)
     {

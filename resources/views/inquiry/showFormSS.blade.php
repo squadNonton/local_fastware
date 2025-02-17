@@ -110,7 +110,7 @@
                             <label>Create By :</label>
                             <div class="form-value">{{ $inquiry->create_by }}</div>
                         </div>
-                        <div class="form-group">    
+                        <div class="form-group">
                             <label>Category :</label>
                             <div class="form-value">{{ $inquiry->loc_imp }}</div>
                         </div>
@@ -158,46 +158,80 @@
                                     <th style="width: 50px; text-align:center;">Remark</th>
                                 </tr>
                             </thead>
-                        
+
                             <tbody id="table-body">
                                 @if ($inquiry->status == 1)
                                     @forelse ($materials as $index => $material)
                                         <tr>
                                             <td>{{ $index + 1 }}</td>
                                             <td contenteditable="false" class="editable">
-                                                <select name="id_type" class="material-dropdown" style="width: 180px;" disabled>
+                                                <select name="id_type" class="material-dropdown" style="width: 180px;"
+                                                    disabled>
                                                     <option value="" disabled selected>Cari Material...</option>
                                                     @foreach ($typeMaterials as $type)
-                                                        <option value="{{ $type->id }}" {{ $material->id_type == $type->id ? 'selected' : '' }}>
+                                                        <option value="{{ $type->id }}"
+                                                            {{ $material->id_type == $type->id ? 'selected' : '' }}>
                                                             {{ $type->type_name }}
                                                         </option>
                                                     @endforeach
                                                 </select>
                                             </td>
                                             <td contenteditable="false" class="editable">
-                                                <select name="jenis" class="jenis-dropdown" style="width: 80px;" disabled onchange="handleShapeChange(this)">
-                                                    <option value="Flat" {{ $material['jenis'] == 'Flat' ? 'selected' : '' }}>Flat</option>
-                                                    <option value="Round" {{ $material['jenis'] == 'Round' ? 'selected' : '' }}>Round</option>
-                                                    <option value="Honed Tube" {{ $material['jenis'] == 'Honed Tube' ? 'selected' : '' }}>Honed Tube</option>
+                                                <select name="jenis" class="jenis-dropdown" style="width: 80px;" disabled
+                                                    onchange="handleShapeChange(this)">
+                                                    <option value="Flat"
+                                                        {{ $material['jenis'] == 'Flat' ? 'selected' : '' }}>Flat</option>
+                                                    <option value="Round"
+                                                        {{ $material['jenis'] == 'Round' ? 'selected' : '' }}>Round
+                                                    </option>
+                                                    <option value="Honed Tube"
+                                                        {{ $material['jenis'] == 'Honed Tube' ? 'selected' : '' }}>Honed
+                                                        Tube</option>
                                                 </select>
                                             </td>
-                                            <td contenteditable="false" class="editable"><input type="text" name="thickness" value="{{ $material['thickness'] }}" size="10" disabled></td>
-                                            <td contenteditable="false" class="editable"><input type="text" name="weight" value="{{ $material['weight'] }}" size="5" disabled></td>
-                                            <td contenteditable="false" class="editable"><input type="text" name="inner_diameter" value="{{ $material['inner_diameter'] }}" size="10" disabled></td>
-                                            <td contenteditable="false" class="editable"><input type="text" name="outer_diameter" value="{{ $material['outer_diameter'] }}" size="10" disabled></td>
-                                            <td contenteditable="false" class="editable"><input type="text" name="length" value="{{ $material['length'] }}" size="10" disabled></td>
-                                            <td contenteditable="false" class="editable"><input type="text" name="qty" value="{{ $material['qty'] }}" size="10" disabled></td>
-                                            <td contenteditable="false" class="editable"><input type="text" name="m1" value="{{ $material['m1'] }}" size="10" disabled></td>
-                                            <td contenteditable="false" class="editable"><input type="text" name="m2" value="{{ $material['m2'] }}" size="10" disabled></td>
-                                            <td contenteditable="false" class="editable"><input type="text" name="m3" value="{{ $material['m3'] }}" size="10" disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text"
+                                                    name="thickness" value="{{ $material['thickness'] }}" size="10"
+                                                    disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text"
+                                                    name="weight" value="{{ $material['weight'] }}" size="5"
+                                                    disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text"
+                                                    name="inner_diameter" value="{{ $material['inner_diameter'] }}"
+                                                    size="10" disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text"
+                                                    name="outer_diameter" value="{{ $material['outer_diameter'] }}"
+                                                    size="10" disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text"
+                                                    name="length" value="{{ $material['length'] }}" size="10"
+                                                    disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text"
+                                                    name="qty" value="{{ $material['qty'] }}" size="10" disabled>
+                                            </td>
+                                            <td contenteditable="false" class="editable"><input type="text"
+                                                    name="m1" value="{{ $material['m1'] }}" size="10" disabled>
+                                            </td>
+                                            <td contenteditable="false" class="editable"><input type="text"
+                                                    name="m2" value="{{ $material['m2'] }}" size="10"
+                                                    disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text"
+                                                    name="m3" value="{{ $material['m3'] }}" size="10"
+                                                    disabled></td>
                                             <td contenteditable="false" class="editable">
-                                                <select name="ship" class="jenis-dropdown" style="width: 100px;" disabled>
-                                                    <option value="Deltamas" {{ $material['ship'] == 'Deltamas' ? 'selected' : '' }}>Deltamas</option>
-                                                    <option value="DS8" {{ $material['ship'] == 'DS8' ? 'selected' : '' }}>DS8</option>
+                                                <select name="ship" class="jenis-dropdown" style="width: 100px;"
+                                                    disabled>
+                                                    <option value="Deltamas"
+                                                        {{ $material['ship'] == 'Deltamas' ? 'selected' : '' }}>Deltamas
+                                                    </option>
+                                                    <option value="DS8"
+                                                        {{ $material['ship'] == 'DS8' ? 'selected' : '' }}>DS8</option>
                                                 </select>
                                             </td>
-                                            <td contenteditable="false" class="editable"><input type="text" name="so" value="{{ $material['so'] }}" size="10" disabled></td>
-                                            <td contenteditable="false" class="editable"><input type="text" name="note" value="{{ $material['note'] }}" size="10" disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text"
+                                                    name="so" value="{{ $material['so'] }}" size="10"
+                                                    disabled></td>
+                                            <td contenteditable="false" class="editable"><input type="text"
+                                                    name="note" value="{{ $material['note'] }}" size="10"
+                                                    disabled></td>
                                         </tr>
                                     @empty
                                         <tr>
@@ -208,7 +242,8 @@
                                     @forelse ($materials as $index => $material)
                                         <tr>
                                             <td>{{ $index + 1 }}</td>
-                                            <td>{{ $material->type_materials ? $material->type_materials->type_name : 'N/A' }}</td>
+                                            <td>{{ $material->type_materials ? $material->type_materials->type_name : 'N/A' }}
+                                            </td>
                                             <td>{{ $material['jenis'] }}</td>
                                             <td>{{ $material['thickness'] }}</td>
                                             <td>{{ $material['weight'] }}</td>
@@ -230,22 +265,25 @@
                                     @endforelse
                                 @endif
                             </tbody>
-                            
+
                         </table>
                     </div>
                     @if ($inquiry->status == 1)
                         @if ($isFromApproval)
                             <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm m-1">Kembali</a>
                         @else
-                            <a href="{{ route('createinquiry1') }}" class="btn btn-primary delete-row-button btn-sm m-1">Submit</a>
+                            <a href="{{ route('createinquiry1') }}"
+                                class="btn btn-primary delete-row-button btn-sm m-1">Submit</a>
                         @endif
                     @elseif ($inquiry->status == 2)
-                        <a href="{{ route('createinquiry') }}" class="btn btn-primary delete-row-button btn-sm m-1">Submit</a>
+                        <a href="{{ route('createinquiry') }}"
+                            class="btn btn-primary delete-row-button btn-sm m-1">Submit</a>
                     @endif
 
                     @if ($inquiry->status == 1)
-                            <button id="edit-button" class="btn btn-warning btn-sm m-1" onclick="enableEdit()">Edit</button>
-                            <button id="save-button" class="btn btn-success btn-sm m-1" onclick="saveChanges()" style="display: none;">Save</button>
+                        <button id="edit-button" class="btn btn-warning btn-sm m-1" onclick="enableEdit()">Edit</button>
+                        <button id="save-button" class="btn btn-success btn-sm m-1" onclick="saveChanges()"
+                            style="display: none;">Save</button>
                     @endif
 
 
@@ -257,25 +295,56 @@
                     <a href="{{ route('showFormSS.pdf', $inquiry->id) }}" class="btn btn-danger btn-sm m-1">
                         <i class="bi bi-file-earmark-pdf"></i> Download PDF
                     </a>
-                    
-                    
-                    
-                    
 
+                    @if ($inquiry->status == 2)
+                        {{-- Action User Kasie --}}
+                        <div class="d-flex justify-content-end">
+                            @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'ILHAM CHOLID', 'JUN JOHAMIN PD', 'ANDIK TOTOK SISWOYO']))
+                                <a href="#" class="btn btn-primary btn-sm m-1"
+                                    onclick="approveInquiry({{ $inquiry->id }}); return false;">
+                                    <i class="bi bi-check-square-fill fs-6"> Approve</i>
+                                </a>
+                                <a href="#" class="btn btn-danger btn-sm m-1"
+                                    onclick="rejectInquiry({{ $inquiry->id }}); return false;">
+                                    <i class="bi bi-file-x-fill fs-6"> Reject</i>
+                                </a>
+                            @endif
+                        </div>
+                    @endif
+                    {{-- End-Code --}}
 
-                    {{-- Action User Inventory --}}
-                    <div class="d-flex justify-content-end">
-                        @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'RANGGA FADILLAH']))
-                            <a href="#" class="btn btn-primary btn-sm m-1"
-                                onclick="approveInventory({{ $inquiry->id }}); return false;">
-                                <i class="bi bi-check-square-fill fs-6"> Approve</i>
-                            </a>
-                            <a href="#" class="btn btn-danger btn-sm m-1"
-                                onclick="rejectInventory({{ $inquiry->id }}); return false;">
-                                <i class="bi bi-file-x-fill fs-6"> Reject</i>
-                            </a>
-                        @endif
-                    </div>
+                    @if ($inquiry->status == 4)
+                        {{-- Action User Dephead --}}
+                        <div class="d-flex justify-content-end">
+                            @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'YULMAI RIDO WINANDA', 'ANDIK TOTOK SISWOYO']))
+                                <a href="#" class="btn btn-primary btn-sm m-1"
+                                    onclick="approveKaDept({{ $inquiry->id }}); return false;">
+                                    <i class="bi bi-check-square-fill fs-6"> Approve</i>
+                                </a>
+                                <a href="#" class="btn btn-danger btn-sm m-1"
+                                    onclick="rejectKaDept({{ $inquiry->id }}); return false;">
+                                    <i class="bi bi-file-x-fill fs-6"> Reject</i>
+                                </a>
+                            @endif
+                        </div>
+                    @endif
+                    {{-- End-Code --}}
+
+                    @if ($inquiry->status == 3)
+                        {{-- Action User Inventory --}}
+                        <div class="d-flex justify-content-end">
+                            @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'RANGGA FADILLAH']))
+                                <a href="#" class="btn btn-primary btn-sm m-1"
+                                    onclick="approveInventory({{ $inquiry->id }}); return false;">
+                                    <i class="bi bi-check-square-fill fs-6"> Approve</i>
+                                </a>
+                                <a href="#" class="btn btn-danger btn-sm m-1"
+                                    onclick="rejectInventory({{ $inquiry->id }}); return false;">
+                                    <i class="bi bi-file-x-fill fs-6"> Reject</i>
+                                </a>
+                            @endif
+                        </div>
+                    @endif
                     {{-- End-Code --}}
                 </div>
             </div>
@@ -290,7 +359,8 @@
                                     <label for="attachments" class="fw-bold mt-2">Upload Attachments (PDF, PNG, JPG,
                                         JPEG)</label>
                                     <input type="file" id="attachments" name="attachments[]" multiple
-                                        accept=".pdf,.png,.jpg,.jpeg" class="form-control mt-2" onchange="updateFileList()">
+                                        accept=".pdf,.png,.jpg,.jpeg" class="form-control mt-2"
+                                        onchange="updateFileList()">
 
                                     <button type="button" class="btn btn-success mt-3 btn-sm"
                                         onclick="uploadFiles({{ $inquiry->id }})"
@@ -392,7 +462,7 @@
                 window.history.back();
             }
         </script>
-        
+
         <script>
             function enableEdit() {
                 document.querySelectorAll('.editable').forEach(element => {
@@ -433,33 +503,35 @@
                 });
 
                 fetch('{{ route('updateInquiryDetails', $inquiry->id) }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({ materials: data })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Changes saved successfully');
-                        document.querySelectorAll('.editable').forEach(element => {
-                            element.querySelectorAll('input, select').forEach(input => {
-                                input.setAttribute('disabled', 'true');
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            materials: data
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Changes saved successfully');
+                            document.querySelectorAll('.editable').forEach(element => {
+                                element.querySelectorAll('input, select').forEach(input => {
+                                    input.setAttribute('disabled', 'true');
+                                });
                             });
-                        });
 
-                        document.getElementById('edit-button').style.display = 'inline-block';
-                        document.getElementById('save-button').style.display = 'none';
-                    } else {
-                        alert('Failed to save changes');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while saving changes');
-                });
+                            document.getElementById('edit-button').style.display = 'inline-block';
+                            document.getElementById('save-button').style.display = 'none';
+                        } else {
+                            alert('Failed to save changes');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while saving changes');
+                    });
             }
 
             function handleShapeChange(selectElement) {
@@ -560,6 +632,94 @@
                     error: function(xhr) {
                         console.error(xhr.responseText);
                         alert('Error while uploading files');
+                    }
+                });
+            }
+        </script>
+
+        <script>
+            function approveInquiry(id) {
+                $.ajax({
+                    url: '{{ route('approveKaSie', '') }}/' + id,
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        Swal.fire('Success!', 'Inquiry approved successfully.', 'success').then(() => {
+                            $('a.btn-approve, a.btn-reject').attr('disabled', true);
+
+                            // Alihkan ke halaman approval inventory
+                            window.location.href = '{{ route('showApprovalKaSie') }}';
+                            // location.reload(); // Reload halaman
+                        });
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+
+            function rejectInquiry(id) {
+                $.ajax({
+                    url: '{{ route('rejectKaSie', '') }}/' + id, // Buat route untuk reject
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        Swal.fire('Success!', 'Inquiry rejected successfully.', 'success').then(() => {
+                            location.reload(); // Reload halaman
+                        });
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+        </script>
+
+        <script>
+            function approveKaDept(id) {
+                $.ajax({
+                    url: '{{ route('approveKaDept', '') }}/' + id,
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}' // Sertakan token CSRF
+                    },
+                    success: function(response) {
+                        Swal.fire('Success!', 'Inquiry approved successfully.', 'success');
+                        // location.reload(); // Reload halaman untuk melihat update
+                        $('a.btn-approve, a.btn-reject').attr('disabled', true);
+
+                        // Alihkan ke halaman approval inventory
+                        window.location.href = '{{ route('showApprovalKaDept') }}';
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        Swal.fire('Error!', 'An error occurred while approving the inquiry.', 'error');
+                    }
+                });
+            }
+
+            function rejectKaDept(id) {
+                $.ajax({
+                    url: '{{ route('rejectKaDept', '') }}/' + id,
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        Swal.fire('Success!', 'Inquiry rejected successfully.', 'success');
+                        // location.reload(); // Reload halaman untuk melihat update
+                        $('a.btn-approve, a.btn-reject').attr('disabled', true);
+
+                        // Alihkan ke halaman approval inventory
+                        window.location.href = '{{ route('showApprovalKaDept') }}';
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        Swal.fire('Error!', 'An error occurred while rejecting the inquiry.', 'error');
                     }
                 });
             }
