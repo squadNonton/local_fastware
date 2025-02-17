@@ -455,9 +455,9 @@ public function overviewfpb()
     return view('po_pengajuan.overviewfpb', compact('data'));
 }
 
-public function viewformfpb(){
-    // Mengambil nomor FPB terakhir atau yang sedang aktif
-    $latestPoPengajuan = MstPoPengajuan::latest('created_at')->first();
+public function viewformfpb($id) {
+    // Mengambil data FPB berdasarkan ID yang diklik
+    $latestPoPengajuan = MstPoPengajuan::find($id);
 
     if (!$latestPoPengajuan) {
         return abort(404); // Jika tidak ada data FPB
@@ -483,26 +483,18 @@ public function viewformfpb(){
 
     if ($latestPoPengajuan->kategori_po == 'IT') {
         $userAccHeader = 'IT';
-        $trsPoPengajuanIT = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
-            ->where('status', 4)
-            ->select('modified_at')
-            ->first();
-        $userAccbody = $trsPoPengajuanIT ? $trsPoPengajuanIT->modified_at : '';
     } elseif ($latestPoPengajuan->kategori_po == 'GA') {
         $userAccHeader = 'GA';
-        $trsPoPengajuanGA = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
-            ->where('status', 4)
-            ->select('modified_at')
-            ->first();
-        $userAccbody = $trsPoPengajuanGA ? $trsPoPengajuanGA->modified_at : '';
     } elseif (in_array($latestPoPengajuan->kategori_po, ['Consumable', 'Spareparts', 'Indirect Material'])) {
         $userAccHeader = 'Warehouse';
-        $trsPoPengajuan = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
-            ->where('status', 4)
-            ->select('modified_at')
-            ->first();
-        $userAccbody = $trsPoPengajuan ? $trsPoPengajuan->modified_at : '';
     }
+    
+    $trsPoPengajuan = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
+        ->where('status', 4)
+        ->select('modified_at')
+        ->first();
+
+    $userAccbody = $trsPoPengajuan ? $trsPoPengajuan->modified_at : '';
 
     // Mengambil semua transaksi berdasarkan ID FPB
     $matchingTrsPoPengajuans = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
