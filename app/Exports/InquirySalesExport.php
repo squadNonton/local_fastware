@@ -20,6 +20,7 @@ class InquirySalesExport implements FromCollection, WithHeadings, WithMapping, W
     {
         return DB::table('inquiry_sales')
             ->join('detail_inquiry', 'inquiry_sales.id', '=', 'detail_inquiry.id_inquiry')
+            ->join('type_materials', 'detail_inquiry.id_type', '=', 'type_materials.id')
             ->select([
                 DB::raw('ROW_NUMBER() OVER (ORDER BY inquiry_sales.created_at DESC) AS nomor_urut'),
                 'inquiry_sales.id_customer', 'inquiry_sales.kode_inquiry', 'inquiry_sales.type_order',
@@ -27,7 +28,7 @@ class InquirySalesExport implements FromCollection, WithHeadings, WithMapping, W
                 'inquiry_sales.supplier', 'inquiry_sales.create_by AS sales_person', 'inquiry_sales.progress',
                 'inquiry_sales.refnopo AS ref_po', 'inquiry_sales.attach_file AS files', 'inquiry_sales.status',
                 'inquiry_sales.created_at', 'inquiry_sales.updated_at', 'inquiry_sales.modified_by',
-                'detail_inquiry.id_type AS raw_material', 'detail_inquiry.jenis AS shapes', 
+                'type_materials.type_name AS raw_material', 'detail_inquiry.jenis AS shapes', 
                 'detail_inquiry.thickness', 'detail_inquiry.inner_diameter', 'detail_inquiry.outer_diameter',
                 'detail_inquiry.weight', 'detail_inquiry.length', 'detail_inquiry.qty AS qty_unit',
                 'detail_inquiry.m1 AS forecast_month_1', 'detail_inquiry.m2 AS forecast_month_2', 
@@ -56,17 +57,53 @@ class InquirySalesExport implements FromCollection, WithHeadings, WithMapping, W
     }
 
     /**
-     * Mengatur gaya pada Excel.
-     *
-     * @param Worksheet $sheet
-     * @return array
-     */
-    public function styles(Worksheet $sheet)
-    {
-        return [
-            1 => ['font' => ['bold' => true]], // Membuat baris pertama (heading) bold
-        ];
+ * Mengatur gaya pada Excel.
+ *
+ * @param Worksheet $sheet
+ * @return array
+ */
+public function styles(Worksheet $sheet)
+{
+    $highestColumn = $sheet->getHighestColumn();
+    $highestRow = $sheet->getHighestRow();
+
+    // Membuat header tebal
+    $headerRange = 'A1:' . $highestColumn . '1';
+    $sheet->getStyle($headerRange)->getFont()->setBold(true);
+
+    // Mengaktifkan wrap text untuk semua sel agar isi tidak terpotong
+    $contentRange = 'A1:' . $highestColumn . $highestRow;
+    $sheet->getStyle($contentRange)->getAlignment()->setWrapText(true);
+
+    // Loop setiap kolom untuk mencari teks terpanjang dan menyesuaikan ukuran kolomnya
+    foreach (range('A', $highestColumn) as $column) {
+        $maxLength = 0;
+
+        // Loop setiap baris dalam kolom ini (termasuk header)
+        for ($row = 1; $row <= $highestRow; $row++) {
+            $cellValue = $sheet->getCell($column . $row)->getValue();
+            if ($cellValue) {
+                $length = mb_strlen($cellValue); // Hitung panjang teks
+                if ($length > $maxLength) {
+                    $maxLength = $length; // Simpan teks terpanjang
+                }
+            }
+        }
+
+        // Set ukuran kolom mengikuti teks terpanjang dengan padding tambahan
+        $columnWidth = min($maxLength + 2, 50); // Batas maksimal lebar kolom = 50
+        $sheet->getColumnDimension($column)->setWidth($columnWidth);
     }
+
+    // Mengaktifkan auto height untuk setiap baris agar tinggi menyesuaikan isi
+    for ($row = 1; $row <= $highestRow; $row++) {
+        $sheet->getRowDimension($row)->setRowHeight(-1);
+    }
+}
+
+
+    
+
 
     /**
      * Memetakan data untuk ekspor ke Excel.
