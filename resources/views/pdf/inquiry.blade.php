@@ -123,80 +123,77 @@
             <h1>Detail Inquiry</h1>
         </div>
 
-        <table class="table-n">
-            <thead class="table-n">
-                <tr class="table-n">
-                    <th style="width: 20%;" class="table-n">Create By</th>
-                    <th style="width: 20%;" class="table-n">Category</th>
-                    <th style="width: 20%;" class="table-n">Reference</th>
-                    <th style="width: 20%;" class="table-n">Customer</th>
-                    <th style="width: 20%;" class="table-n">Supplier</th>
-                    <th style="width: 20%;" class="table-n">Date Create</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="table-n">
-                    <td class="table-n">{{ $inquiry->create_by }}</td>
-                    <td class="table-n">{{ $inquiry->loc_imp }}</td>
-                    <td class="table-n">{{ $inquiry->kode_inquiry }}</td>
-                    <td class="table-n">{{ $inquiry->customer ? $inquiry->customer->name_customer : '-' }}</td>
-                    <td class="table-n">{{ $inquiry->supplier ? $inquiry->supplier : '-' }}</td>
-                    <td class="table-n">{{ $inquiry->created_at }}</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 25px;">No</th>
-                    <th style="width: 100px;">Raw Material</th>
-                    <th style="width: 50px;">Shapes</th>
-                    <th style="width: 40px;text-align:center;">Thickness</th>
-                    <th style="width: 40px;text-align:center;">Width</th>
-                    <th style="width: 40px; text-align:center;">Inner Dia</th>
-                    <th style="width: 40px; text-align:center;">Outer Dia</th>
-                    <th style="width: 50px;text-align:center;">Length</th>
-                    <th style="width: 50px; text-align:center;">Qty
-                        <p style="font-size: 9pt; text-align:center;">(in Pcs)</p>
-                    </th>
-                    <th style="width: 50px; text-align:center;">Forecast Month 1</th>
-                    <th style="width: 50px; text-align:center;">Forecast Month 2</th>
-                    <th style="width: 50px; text-align:center;">Forecast Month 3</th>
-                    <th style="width: 70px; text-align:center;">Ship-to</th>
-                    <th style="width: 50px; text-align:center;">Sales Order</th>
-                    {{-- <th style="width: 50px; text-align:center;">PO Number</th> --}}
-                    <th style="width: 50px;">Remark</th>
-                </tr>
-            </thead>
-            <tbody id="table-body">
-                @forelse ($materials as $index => $material)
-                    <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $material->type_materials ? $material->type_materials->type_name : 'N/A' }}</td>
-                        <td>{{ $material['jenis'] }}</td>
-                        <td style="text-align:center;">{{ $material['thickness'] }}</td>
-                        <td style="text-align:center;">{{ $material['weight'] }}</td>
-                        <td style="text-align:center;">{{ $material['inner_diameter'] }}</td>
-                        <td style="text-align:center;">{{ $material['outer_diameter'] }}</td>
-                        <td style="text-align:center;">{{ $material['length'] }}</td>
-                        <td style="text-align:center;">{{ $material['qty'] }}</td>
-                        <td style="text-align:center;">{{ $material['m1'] }}</td>
-                        <td style="text-align:center;">{{ $material['m2'] }}</td>
-                        <td style="text-align:center;">{{ $material['m3'] }}</td>
-                        <td style="text-align:center;">{{ $material['ship'] }}</td>
-                        <td>{{ $material['so'] }}</td>
-                        {{-- <td>{{ $material['nopo'] }}</td> --}}
-                        <td>{{ $material['note'] }}</td>
+        @if($inquiry) <!-- Check if $inquiry data exists -->
+            <table class="table-n">
+                <thead class="table-n">
+                    <tr class="table-n">
+                        @if($inquiry->create_by) <th style="width: 20%;" class="table-n">Create By</th> @endif
+                        @if($inquiry->loc_imp) <th style="width: 20%;" class="table-n">Category</th> @endif
+                        @if($inquiry->kode_inquiry) <th style="width: 20%;" class="table-n">Reference</th> @endif
+                        @if($inquiry->customer) <th style="width: 20%;" class="table-n">Customer</th> @endif
+                        @if($inquiry->supplier) <th style="width: 20%;" class="table-n">Supplier</th> @endif
+                        @if($inquiry->created_at) <th style="width: 20%;" class="table-n">Date Create</th> @endif
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="16" style="text-align: center;">Data tidak ditemukan</td>
+                </thead>
+                <tbody>
+                    <tr class="table-n">
+                        @if($inquiry->create_by) <td class="table-n">{{ $inquiry->create_by }}</td> @endif
+                        @if($inquiry->loc_imp) <td class="table-n">{{ $inquiry->loc_imp }}</td> @endif
+                        @if($inquiry->kode_inquiry) <td class="table-n">{{ $inquiry->kode_inquiry }}</td> @endif
+                        @if($inquiry->customer) <td class="table-n">{{ $inquiry->customer->name_customer ?? '-' }}</td> @endif
+                        @if($inquiry->supplier) <td class="table-n">{{ $inquiry->supplier }}</td> @endif
+                        @if($inquiry->created_at) <td class="table-n">{{ $inquiry->created_at }}</td> @endif
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        @endif
 
+        @if($materials->isNotEmpty()) <!-- Check if there are materials data -->
+            <table>
+                <thead>
+                    <tr>
+                        @if($materials->first()->type_materials) <th style="width: 100px;">Raw Material</th> @endif
+                        @if($materials->first()->jenis) <th style="width: 50px;">Shapes</th> @endif
+                        @if($materials->first()->thickness) <th style="width: 40px;text-align:center;">Thickness</th> @endif
+                        @if($materials->first()->weight) <th style="width: 40px;text-align:center;">Width</th> @endif
+                        @if($materials->first()->inner_diameter) <th style="width: 40px; text-align:center;">Inner Dia</th> @endif
+                        @if($materials->first()->outer_diameter) <th style="width: 40px; text-align:center;">Outer Dia</th> @endif
+                        @if($materials->first()->length) <th style="width: 50px;text-align:center;">Length</th> @endif
+                        @if($materials->first()->qty) <th style="width: 50px; text-align:center;">Qty</th> @endif
+                        @if($materials->first()->m1) <th style="width: 50px; text-align:center;">Forecast Month 1</th> @endif
+                        @if($materials->first()->m2) <th style="width: 50px; text-align:center;">Forecast Month 2</th> @endif
+                        @if($materials->first()->m3) <th style="width: 50px; text-align:center;">Forecast Month 3</th> @endif
+                        @if($materials->first()->ship) <th style="width: 70px; text-align:center;">Ship-to</th> @endif
+                        @if($materials->first()->so) <th style="width: 50px; text-align:center;">Sales Order</th> @endif
+                        <th style="width: 50px;">Remark</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    @foreach ($materials as $index => $material)
+                        <tr>
+                            @if($material->type_materials) <td>{{ $material->type_materials->type_name ?? 'N/A' }}</td> @endif
+                            @if($material['jenis']) <td>{{ $material['jenis'] }}</td> @endif
+                            @if($material['thickness']) <td style="text-align:center;">{{ $material['thickness'] }}</td> @endif
+                            @if($material['weight']) <td style="text-align:center;">{{ $material['weight'] }}</td> @endif
+                            @if($material['inner_diameter']) <td style="text-align:center;">{{ $material['inner_diameter'] }}</td> @endif
+                            @if($material['outer_diameter']) <td style="text-align:center;">{{ $material['outer_diameter'] }}</td> @endif
+                            @if($material['length']) <td style="text-align:center;">{{ $material['length'] }}</td> @endif
+                            @if($material['qty']) <td style="text-align:center;">{{ $material['qty'] }}</td> @endif
+                            @if($material['m1']) <td style="text-align:center;">{{ $material['m1'] }}</td> @endif
+                            @if($material['m2']) <td style="text-align:center;">{{ $material['m2'] }}</td> @endif
+                            @if($material['m3']) <td style="text-align:center;">{{ $material['m3'] }}</td> @endif
+                            @if($material['ship']) <td style="text-align:center;">{{ $material['ship'] }}</td> @endif
+                            @if($material['so']) <td>{{ $material['so'] }}</td> @endif
+                            <td>{{ $material['note'] }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @else
+            <p>No materials data found.</p> <!-- Display message if no materials data -->
+        @endif
+
+        @if($signatures) <!-- Check if $signatures data exists -->
         <h4>Signature Details :</h4>
         <table class="table-n1">
             <thead class="table-n1">
@@ -209,49 +206,44 @@
                 </tr>
             </thead>
             <tbody>
-                {{-- <td class="table-n1">{{ $inquiry->create_by }}</td> --}}
                 <tr class="table-n1">
                     <td class="table-n1">
                         <p style="color: crimson;">Proposed</p>
-
                         <p style="font-size: 8pt;">{{ $signatures['submitted'] }}</p>
                         <small>Date : {{ \Carbon\Carbon::parse($inquiry->created_at)->format('d/m/Y H:i') }}</small>
                     </td>
                     <td class="table-n1">
-                        <p style="color: crimson;">Approved</p>
-
+                        <p style="color: crimson;">{{ $inquiry->kasie ? 'Approved' : 'Waiting Approval' }}</p>
                         <p style="font-size: 8pt;">{{ $signatures['approved_kasie'] }}</p>
                         <small>
-                            Date : {{ \Carbon\Carbon::parse($inquiry->approved_kasie_at)->format('d/m/Y H:i') }}
+                            Date : {{ $inquiry->approved_kasie_at ? \Carbon\Carbon::parse($inquiry->approved_kasie_at)->format('d/m/Y H:i') : 'N/A' }}
                         </small>
                     </td>
                     <td class="table-n1">
-                        <p style="color: crimson;">Approved</p>
-
+                        <p style="color: crimson;">{{ $inquiry->kadept ? 'Approved' : 'Waiting Approval' }}</p>
                         <p style="font-size: 8pt;">{{ $signatures['approved_kadept'] }}</p>
                         <small>
-                            Date : {{ \Carbon\Carbon::parse($inquiry->approved_kadept_at)->format('d/m/Y H:i') }}
+                            Date : {{ $inquiry->approved_kadept_at ? \Carbon\Carbon::parse($inquiry->approved_kadept_at)->format('d/m/Y H:i') : 'N/A' }}
                         </small>
                     </td>
                     <td class="table-n1">
-                        <p style="color: crimson;">Approved</p>
-
+                        <p style="color: crimson;">{{ $inquiry->inventory ? 'Approved' : 'Waiting Approval' }}</p>
                         <p style="font-size: 8pt;">{{ $signatures['approved_inventory'] }}</p>
                         <small>
-                            Date : {{ \Carbon\Carbon::parse($inquiry->approved_inventory_at)->format('d/m/Y H:i') }}
+                            Date : {{ $inquiry->approved_inventory_at ? \Carbon\Carbon::parse($inquiry->approved_inventory_at)->format('d/m/Y H:i') : 'N/A' }}
                         </small>
                     </td>
                     <td class="table-n1">
-                        <p style="color: crimson;">Confirmed</p>
-
+                        <p style="color: crimson;">{{ $inquiry->purchasing ? 'Confirmed' : 'Waiting Confirmation' }}</p>
                         <p style="font-size: 8pt;">{{ $signatures['confirmed_purchasing'] }}</p>
                         <small>
-                            Date : {{ \Carbon\Carbon::parse($inquiry->confirmed_purchasing_at)->format('d/m/Y H:i') }}
+                            Date : {{ $inquiry->confirmed_purchasing_at ? \Carbon\Carbon::parse($inquiry->confirmed_purchasing_at)->format('d/m/Y H:i') : 'N/A' }}
                         </small>
                     </td>
                 </tr>
             </tbody>
         </table>
+        @endif
     </div>
 </body>
 
