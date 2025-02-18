@@ -21,9 +21,10 @@ class InquirySalesExport implements FromCollection, WithHeadings, WithMapping, W
         return DB::table('inquiry_sales')
             ->join('detail_inquiry', 'inquiry_sales.id', '=', 'detail_inquiry.id_inquiry')
             ->join('type_materials', 'detail_inquiry.id_type', '=', 'type_materials.id')
+            ->join('customers', 'inquiry_sales.id_customer', '=', 'customers.id')
             ->select([
                 DB::raw('ROW_NUMBER() OVER (ORDER BY inquiry_sales.created_at DESC) AS nomor_urut'),
-                'inquiry_sales.id_customer', 'inquiry_sales.kode_inquiry', 'inquiry_sales.type_order',
+                'customers.name_customer', 'inquiry_sales.kode_inquiry', 'inquiry_sales.type_order',
                 'inquiry_sales.jenis_inquiry', 'inquiry_sales.loc_imp', 'inquiry_sales.est_date',
                 'inquiry_sales.supplier', 'inquiry_sales.create_by AS sales_person', 'inquiry_sales.progress',
                 'inquiry_sales.refnopo AS ref_po', 'inquiry_sales.attach_file AS files', 'inquiry_sales.status',
@@ -114,7 +115,7 @@ public function styles(Worksheet $sheet)
     public function map($inquiry): array
     {
         return [
-            $inquiry->nomor_urut, $inquiry->id_customer, $inquiry->kode_inquiry, $inquiry->type_order, 
+            $inquiry->nomor_urut, $inquiry->name_customer, $inquiry->kode_inquiry, $inquiry->type_order, 
             $inquiry->jenis_inquiry, $inquiry->loc_imp, $inquiry->est_date, $inquiry->supplier, 
             $inquiry->sales_person, $inquiry->progress, $inquiry->ref_po, $inquiry->files, 
             $inquiry->status, $inquiry->created_at, $inquiry->updated_at, $inquiry->modified_by,
