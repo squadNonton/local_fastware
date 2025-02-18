@@ -301,6 +301,8 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/editInquiry/{id}', [InquirySalesController::class, 'editInquiry'])->name('editInquiry');
     Route::delete('/deleteinquiry/{id}', [InquirySalesController::class, 'delete'])->name('deleteinquiry');
 
+    Route::get('/export-inquiry', [InquirySalesController::class, 'exportInquiry'])->name('export.inquiry');
+
 
     // km
     Route::get('/km', [KmPengajuanController::class, 'pengajuanKM'])->name('pengajuanKM');

@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use PDF;
+use App\Exports\InquirySalesExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class InquirySalesController extends Controller
 {
@@ -646,6 +648,11 @@ class InquirySalesController extends Controller
         return response()->json(['success' => 'Inquiry marked as finished.']);
     }
 
+    public function exportInquiry()
+    {
+        return Excel::download(new InquirySalesExport, 'inquiry_sales.xlsx');
+    }
+
     public function showProgressHistory($id)
     {
         $inquiry = InquirySales::findOrFail($id);
@@ -658,29 +665,33 @@ class InquirySalesController extends Controller
     }
 
     public function generatePDF($id)
-    {
-        // Ambil data inquiry berdasarkan ID
-        $inquiry = InquirySales::with(['details.type_materials', 'kasie', 'kadept', 'inventory', 'purchasing'])->findOrFail($id);
-        $materials = DetailInquiry::where('id_inquiry', $inquiry->id)->with('type_materials')->get();
+{
+    // Ambil data inquiry berdasarkan ID
+    $inquiry = InquirySales::with(['details.type_materials', 'kasie', 'kadept', 'inventory', 'purchasing'])->findOrFail($id);
+    $materials = DetailInquiry::where('id_inquiry', $inquiry->id)->with('type_materials')->get();
 
-        // Ambil nama pengguna yang melakukan submit
-        $submittedBy = $inquiry->create_by;
+    // Ambil nama pengguna yang melakukan submit
+    $submittedBy = $inquiry->create_by;
 
-        // Ambil nama dari relasi
-        $signatures = [
-            'submitted' => $submittedBy,
-            'approved_kasie' => $inquiry->kasie ? $inquiry->kasie->name : 'Waiting Approval',
-            'approved_kadept' => $inquiry->kadept ? $inquiry->kadept->name : 'Waiting Approval',
-            'approved_inventory' => $inquiry->inventory ? $inquiry->inventory->name : 'Waiting Approval',
-            'confirmed_purchasing' => $inquiry->purchasing ? $inquiry->purchasing->name : 'Waiting Approval',
-        ];
+    // Ambil nama dan status approval dengan logika if-else
+    $signatures = [
+        'submitted' => $submittedBy,
+        'approved_kasie' => $inquiry->kasie ? $inquiry->kasie->name : 'Waiting Approval',
+        'approved_kasie_date' => $inquiry->kasie ? ($inquiry->kasie->approval_date ?: null) : null,
+        'approved_kadept' => $inquiry->kadept ? $inquiry->kadept->name : 'Waiting Approval',
+        'approved_kadept_date' => $inquiry->kadept ? ($inquiry->kadept->approval_date ?: null) : null,
+        'approved_inventory' => $inquiry->inventory ? $inquiry->inventory->name : 'Waiting Approval',
+        'approved_inventory_date' => $inquiry->inventory ? ($inquiry->inventory->approval_date ?: null) : null,
+        'confirmed_purchasing' => $inquiry->purchasing ? $inquiry->purchasing->name : 'Waiting Approval',
+        'confirmed_purchasing_date' => $inquiry->purchasing ? ($inquiry->purchasing->approval_date ?: null) : null,
+    ];
 
-        // Konversi ke PDF dengan orientasi landscape
-        $pdf = PDF::loadView('pdf.inquiry', compact('inquiry', 'materials', 'signatures'))
-            ->setPaper('a4', 'landscape');
+    // Konversi ke PDF dengan orientasi landscape
+    $pdf = PDF::loadView('pdf.inquiry', compact('inquiry', 'materials', 'signatures'))
+        ->setPaper('a4', 'landscape');
 
-        return $pdf->download('ADSI_FormInquiry.pdf');
-    }
+    return $pdf->download('ADSI_FormInquiry.pdf');
+}
 
     public function uploadFile(Request $request)
     {
