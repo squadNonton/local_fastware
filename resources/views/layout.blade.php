@@ -1031,7 +1031,7 @@
                                     </ul>
                                 </li>
 
-                                {{-- <li>
+                                <li>
                                     <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown"
                                         role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         Inquiry Order Import
@@ -1045,7 +1045,7 @@
                                         <li><a class="dropdown-item" href="">Overview Import</a></li>
                                         <li><a class="dropdown-item" href="">Overview Inquiry Import</a></li>
                                     </ul>
-                                </li> --}}
+                                </li>
                             </ul>
 
                         </li>
@@ -1422,6 +1422,9 @@
                                     ];
                                 @endphp
                                 @if (in_array(Auth::user()->name, $allowedUsers))
+                                    <li><a class="dropdown-item" href="{{ route('upload.json') }}">Upload JSON to
+                                            CSV</a>
+                                    </li>
                                     <li><a class="dropdown-item" href="{{ route('showSS') }}">Form Sumbang Saran</a>
                                     </li>
                                     <li><a class="dropdown-item" href="{{ route('forumSS') }}">Overview Sumbang

@@ -525,6 +525,10 @@
                                                     CV. DWI PUTRA TEKNINDO</option>
                                                 <option value="CV. DWI PUTRA TEKNINDO">
                                                     PT INTI ATLAS INDONESIA</option>
+                                                <option value="CV. DWI PUTRA TEKNINDO">
+                                                    PT GAYA STEEL</option>
+                                                <option value="CV. GLOBAL METAL INDONESIA">
+                                                    CV. GLOBAL METAL INDONESIA</option>
                                                 <!-- Tambahkan opsi lain jika diperlukan -->
                                             </select>
                                         </div>

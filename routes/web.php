@@ -21,6 +21,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\MadingController;
 use App\Http\Controllers\PoPengajuanController;
 use App\Http\Controllers\PengajuanSubcontController;
+use App\Http\Controllers\JsonToCsvController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -493,4 +494,7 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     Route::put('/pengajuan-subcont/{id}', [PengajuanSubcontController::class, 'update'])->name('pengajuan-subcont.update');
     Route::delete('/pengajuan-subcont/{id}', [PengajuanSubcontController::class, 'delete'])->name('pengajuan-subcont.destroy');
+
+    Route::get('/upload-json', [JsonToCsvController::class, 'showUploadForm'])->name('upload.json');
+    Route::post('/convert-json-to-csv', [JsonToCsvController::class, 'convert'])->name('convert.json');
 });

@@ -376,7 +376,7 @@
                                                         {{ $item->no_so }}</td>
                                                 @endif
                                                 <td class="{{ $item->status_2 == 8 ? 'disabled-cell' : '' }} no-print">
-                                                    @if ($item->file)
+                                                    @if ($item->file_name)
                                                         <a href="{{ route('download.file', $item->id) }}"
                                                             class="btn btn-sm btn-primary" title="Download File"
                                                             {{ $item->status_2 == 8 ? 'disabled' : '' }}>
@@ -632,19 +632,19 @@
             </div>
             </div>
         </section>
-                        <!-- jQuery -->
-                        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-                        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
-                        <script>
-                            $(document).ready(function() {
-                                // Hover function for dropdowns
-                                $('.nav-item.dropdown').hover(function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
-                                }, function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
-                                });
-                            });
-                            </script>
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
+        <script>
+            $(document).ready(function() {
+                // Hover function for dropdowns
+                $('.nav-item.dropdown').hover(function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+                }, function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
+                });
+            });
+        </script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
