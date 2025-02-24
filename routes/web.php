@@ -287,6 +287,13 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     // Inquiry Order Import
     Route::get('createinquiryImport', [InquirySalesController::class, 'createInquirySalesImport'])->name('createinquiryImport');
+    Route::get('createinquiryImport1', [InquirySalesController::class, 'createInquirySalesImport1'])->name('createinquiryImport1');
+    Route::post('storeinquiryImport', [InquirySalesController::class, 'storeInquiryImport'])->name('storeinquiryImport');
+    Route::get('showFormSSimport/{id}', [InquirySalesController::class, 'showFormSSimport'])->name('showFormSSimport');
+    Route::get('formulirInquiryimport/{id}', [InquirySalesController::class, 'formulirInquiryImport'])->name('formulirInquiryimport');
+    Route::post('/inquiry/previewSSImport', [InquirySalesController::class, 'previewSSImport'])->name('inquiry.previewSSImport');
+    Route::delete('/deleteInquiryDetailImport/{id}', [InquirySalesController::class, 'deleteInquiryDetailImport'])->name('deleteInquiryDetailImport');
+    Route::put('updateInquiryDetailsImport/{id}', [InquirySalesController::class, 'updateInquiryDetailsImport'])->name('updateInquiryDetailsImport');
 
 
     Route::post('/inquiry/update-details/{id}', [InquirySalesController::class, 'updateInquiryDetails'])->name('updateInquiryDetails');

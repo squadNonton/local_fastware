@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\User;
 use App\Models\DetailInquiry;
+use App\Models\DetailInquiryImport;
 use App\Models\InquirySales;
 use App\Models\TypeMaterial;
 use App\Models\TrxDboProgPurchase;
@@ -185,6 +187,16 @@ class InquirySalesController extends Controller
         return view('inquiry.formulirInquiry', compact('inquiry', 'materials', 'typeMaterials'));
     }
 
+    public function formulirInquiryImport($id)
+    {
+        $inquiry = InquirySales::with('details.type_materials')->findOrFail($id);
+        $materials = DetailInquiryImport::where('id_inquiry', $inquiry->id)->with('type_materials')->get();
+        $typeMaterials = TypeMaterial::all();
+        $customers = Customer::all();
+
+        return view('inquiry.formulirInquiryimport', compact('inquiry', 'materials', 'typeMaterials', 'customers'));
+    }
+
     public function previewSS(Request $request)
     {
         // Validasi input
@@ -281,6 +293,78 @@ class InquirySalesController extends Controller
         return response()->json(['message' => 'Detail Inquiry saved successfully']);
     }
 
+    public function previewSSImport(Request $request)
+{
+    // Validasi input
+    $request->validate([
+        'id_inquiry' => 'required|integer',
+        'materials' => 'required|array',
+        'materials.*.id_type' => 'required|integer',
+        'materials.*.jenis' => 'required|string',
+        'materials.*.thickness' => 'nullable|string',
+        'materials.*.weight' => 'nullable|string',
+        'materials.*.inner_diameter' => 'nullable|string',
+        'materials.*.outer_diameter' => 'nullable|string',
+        'materials.*.length' => 'nullable|string',
+        'materials.*.qty' => 'required|string',
+        'materials.*.m1' => 'required|string',
+        'materials.*.m2' => 'nullable|string',
+        'materials.*.m3' => 'nullable|string',
+        'materials.*.ship' => 'required|string',
+        'materials.*.so' => 'required|string',
+        'materials.*.note' => 'required|string',
+        'materials.*.name_customer' => 'required|string', // Nama customer untuk mencari ID
+    ]);
+
+    // Ambil ID pengguna yang login dari tabel users
+    $user_id = auth()->id();
+    $id_inquiry = $request->id_inquiry;
+
+    Log::info('Processing Inquiry', ['id_inquiry' => $id_inquiry, 'user_id' => $user_id]);
+
+    foreach ($request->materials as $material) {
+        // Cari ID customer berdasarkan nama
+        $customer = Customer::where('name_customer', $material['name_customer'])->first();
+
+        if (!$customer) {
+            Log::warning('Customer not found', ['name_customer' => $material['name_customer']]);
+            return response()->json(['message' => 'Customer not found: ' . $material['name_customer']], 404);
+        }
+
+        // Simpan data sebagai inputan baru ke tabel detail_inquiry_import
+        $newDetail = new DetailInquiryImport();
+        $newDetail->id_inquiry = $id_inquiry;
+        $newDetail->id_type = $material['id_type'];
+        $newDetail->jenis = $material['jenis'];
+        $newDetail->thickness = $material['thickness'];
+        $newDetail->weight = $material['weight'];
+        $newDetail->inner_diameter = $material['inner_diameter'];
+        $newDetail->outer_diameter = $material['outer_diameter'];
+        $newDetail->length = $material['length'];
+        $newDetail->qty = $material['qty'];
+        $newDetail->m1 = $material['m1'];
+        $newDetail->m2 = $material['m2'];
+        $newDetail->m3 = $material['m3'];
+        $newDetail->ship = $material['ship'];
+        $newDetail->so = $material['so'];
+        $newDetail->note = $material['note'];
+        $newDetail->create_by = $user_id; // ID user dari tabel users
+        $newDetail->customer = $customer->id; // ID customer dari tabel customers
+        $newDetail->save();
+    }
+
+    Log::info('Inquiry status updated to 1', ['id_inquiry' => $id_inquiry]);
+
+    // Log transaksi inquiry
+    TrxDboProgPurchase::create([
+        'inquiry_id' => $id_inquiry,
+        'user_id' => $user_id,
+        'description' => 'Inquiry Submitted'
+    ]);
+
+    return response()->json(['message' => 'Detail Inquiry saved successfully']);
+}
+
     public function showFormSS(Request $request, $id)
     {
         $inquiry = InquirySales::with('details.type_materials')->findOrFail($id);
@@ -309,6 +393,41 @@ class InquirySalesController extends Controller
         $isFromApproval = request()->query('source') === 'approval';
         return view('inquiry.showFormSS', compact('inquiry', 'materials', 'typeMaterials', 'progressUpdates', 'uploadedFiles', 'isFromApproval'));
     }
+
+    public function showFormSSimport(Request $request, $id)
+        {
+            $inquiry = InquirySales::with('detailInquiryImport.type_materials')->findOrFail($id);
+
+            // Fetch all detail inquiries based on id_inquiry from the main inquiry
+            $materials = DetailInquiryImport::where('id_inquiry', $inquiry->id)->with('type_materials')->get();
+
+            $typeMaterials = TypeMaterial::all(); // Ambil semua data TypeMaterial, sesuaikan dengan kebutuhan
+
+
+            // Ambil semua nama file yang ter-upload
+            $uploadedFiles = DetailInquiryImport::where('id_inquiry', $inquiry->id)
+                ->pluck('file')
+                ->flatMap(function ($file) {
+                    return json_decode($file) ?? []; // Kembalikan array kosong jika null
+                })
+                ->toArray();
+
+            // $progressUpdates = TrxDboProgPurchase::where('inquiry_id', $id)->with('user')->get();
+            $progressUpdates = TrxDboProgPurchase::where('inquiry_id', $id)
+                ->with('user')
+                ->orderBy('created_at', 'desc') // Urutkan berdasarkan created_at menurun
+                ->get();
+
+            //customer
+            $customers = Customer::all();
+
+                // Fetch all users (partners)
+            $users = User::all();
+
+            // Cek apakah berasal dari halaman approval
+            $isFromApproval = request()->query('source') === 'approval';
+            return view('inquiry.showFormSSimport', compact('inquiry', 'materials', 'typeMaterials', 'progressUpdates', 'uploadedFiles', 'isFromApproval', 'customers', 'users'));
+        }
 
     public function approveKaSie($id)
     {

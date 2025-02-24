@@ -430,159 +430,468 @@
                         </button>
                         {{-- <h5 class="card-title1 font-sii text-center">Data Inquiry Sales View</h5> --}}
                     </div>
-
-                    <!-- Table with stripped rows -->
-                    @if ($inquiries->isEmpty())
-                        <div class="eempty">
-                            <p class="ps-3 mt-3">--- Not Found Inquiry Sales ---</p>
-                        </div>
-                    @else
-                        <div class="table-responsive">
-                            <table class="table table-1" id="inquiryTable">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">No</th>
-                                        <th scope="col">Create By</th>
-                                        <th scope="col">Reference</th>
-                                        <th scope="col">Category</th>
-                                        <th scope="col">Supplier</th>
-                                        <th scope="col">Customer</th>
-                                        <th scope="col">Status</th>
-                                        <th scope="col">Ship to</th>
-                                        <th scope="col">Last Update</th>
-                                        <th scope="col">Est. Date</th>
-                                        <th scope="col">Actions</th>
-                                        {{-- <th scope="col">is Active</th> --}}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($inquiries as $inquiry)
-                                        <tr>
-                                            <th scope="row">{{ $loop->iteration }}</th>
-                                            <td>{{ $inquiry->create_by }}</td>
-                                            <td>{{ $inquiry->kode_inquiry }}</td>
-                                            <td>{{ $inquiry->loc_imp }}</td>
-                                            <td>{{ $inquiry->supplier }}</td>
-                                            <td>{{ $inquiry->customer ? $inquiry->customer->name_customer : 'N/A' }}</td>
-                                            {{-- <td>{{ $inquiry->note }}</td> --}}
-                                            @php
-                                                $statusDescriptions = [
-                                                    1 => 'Draft',
-                                                    2 => 'Open',
-                                                    3 => 'Approve Ka.Dept',
-                                                    4 => 'Approve Ka.Sie',
-                                                    5 => 'On Progress',
-                                                    6 => 'Finished',
-                                                    7 => 'Rejected',
-                                                    8 => 'Approve Inventory',
-                                                    9 => 'Confirm Purchasing',
-                                                ];
-
-                                                // Mendefinisikan kelas tombol berdasarkan status
-                                                $buttonClasses = [
-                                                    1 => 'btn-secondary', // Draft
-                                                    2 => 'btn-success', // Open
-                                                    3 => 'btn-danger', // Approve Ka.Dept
-                                                    4 => 'btn-info', // Approve Ka.Sie
-                                                    5 => 'btn-warning', // On Progress
-                                                    6 => 'btn-primary', // Finished
-                                                    7 => 'btn-danger', // Rejected
-                                                    8 => 'btn-danger', // Approve Inventory
-                                                    9 => 'btn-warning', // Confirm Purchasing
-                                                ];
-                                            @endphp
-
-                                            <td class="btn-stts">
-                                                <button
-                                                    class="btn btn-sm 
-                                                        {{ $buttonClasses[$inquiry->status] ?? 'btn-light' }} 
-                                                        {{ $inquiry->status == 1 ? 'btn-custom-draft' : '' }}
-                                                        {{ $inquiry->status == 2 ? 'btn-custom-open' : '' }}
-                                                        {{ $inquiry->status == 3 ? 'btn-custom-approve-dept' : '' }}
-                                                        {{ $inquiry->status == 4 ? 'btn-custom-approve-sie' : '' }}
-                                                        {{ $inquiry->status == 5 ? 'btn-custom-in-progress' : '' }}
-                                                        {{ $inquiry->status == 6 ? 'btn-custom-finished' : '' }}
-                                                        {{ $inquiry->status == 7 ? 'btn-custom-rejected' : '' }}
-                                                        {{ $inquiry->status == 8 ? 'btn-custom-inventory' : '' }}
-                                                        {{ $inquiry->status == 9 ? 'btn-custom-confirm-purchasing' : '' }}">
-                                                    {{ $statusDescriptions[$inquiry->status] ?? 'Unknown' }}
-                                                </button>
-                                            </td>
-                                            <td>
-                                                @if ($inquiry->details->isNotEmpty())
-                                                    @php
-                                                        // Ambil semua nilai ship dari detail
-                                                        $ships = $inquiry->details->pluck('ship')->unique(); // Mengambil nilai unik
-                                                    @endphp
-
-                                                    @if ($ships->count() === 1)
-                                                        <p>{{ $ships->first() }}</p>
-                                                    @else
-                                                        @foreach ($ships as $ship)
-                                                            <p>{{ $ship }}</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Inquiry region 1</h5>
+                                    
+                                    @php
+                                        // Ambil pengguna yang sedang login
+                                        $user = Auth::user();
+                        
+                                        // Filter inquiry berdasarkan region 1
+                                        $filteredInquiries = $inquiries->where('region', 1);
+                                    @endphp
+                                    
+                                    @if ($user && in_array($user->id, [1, 99]))
+                                        @if ($filteredInquiries->isEmpty())
+                                            <div class="eempty">
+                                                <p class="ps-3 mt-3">--- Not Found Inquiry Sales ---</p>
+                                            </div>
+                                        @else
+                                            <div class="table-responsive">
+                                                <table class="table table-1" id="inquiryTable1">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col">No</th>
+                                                            <th scope="col">Create By</th>
+                                                            <th scope="col">Reference</th>
+                                                            <th scope="col">Category</th>
+                                                            <th scope="col">Supplier</th>
+                                                            <th scope="col">Status</th>
+                                                            <th scope="col">Last Update</th>
+                                                            <th scope="col">Est. Date</th>
+                                                            <th scope="col">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($filteredInquiries as $inquiry)
+                                                            <tr>
+                                                                <th scope="row">{{ $loop->iteration }}</th>
+                                                                <td>{{ $inquiry->create_by }}</td>
+                                                                <td>{{ $inquiry->kode_inquiry }}</td>
+                                                                <td>{{ $inquiry->loc_imp }}</td>
+                                                                <td>{{ $inquiry->supplier }}</td>
+                                                                @php
+                                                                    $statusDescriptions = [
+                                                                        1 => 'Draft',
+                                                                        2 => 'Open',
+                                                                        3 => 'Approve Ka.Dept',
+                                                                        4 => 'Approve Ka.Sie',
+                                                                        5 => 'On Progress',
+                                                                        6 => 'Finished',
+                                                                        7 => 'Rejected',
+                                                                        8 => 'Approve Inventory',
+                                                                        9 => 'Confirm Purchasing',
+                                                                    ];
+                        
+                                                                    $buttonClasses = [
+                                                                        1 => 'btn-secondary',
+                                                                        2 => 'btn-success',
+                                                                        3 => 'btn-danger',
+                                                                        4 => 'btn-info',
+                                                                        5 => 'btn-warning',
+                                                                        6 => 'btn-primary',
+                                                                        7 => 'btn-danger',
+                                                                        8 => 'btn-danger',
+                                                                        9 => 'btn-warning',
+                                                                    ];
+                                                                @endphp
+                        
+                                                                <td class="btn-stts">
+                                                                    <button class="btn btn-sm {{ $buttonClasses[$inquiry->status] ?? 'btn-light' }}">
+                                                                        {{ $statusDescriptions[$inquiry->status] ?? 'Unknown' }}
+                                                                    </button>
+                                                                </td>
+                                                                <td>
+                                                                    @php
+                                                                        $progress = App\Models\TrxDboProgPurchase::where('inquiry_id', $inquiry->id)->latest()->first();
+                                                                        $lastUpdateMessage = $progress && $progress->description !== 'No updates yet' ? $progress->description : 'No updates yet';
+                                                                    @endphp
+                                                                    {{ $lastUpdateMessage }}
+                                                                </td>
+                                                                <td>{{ $inquiry->est_date }}</td>
+                                                                <td>
+                                                                    @if ($inquiry->status == 1)
+                                                                        <a class="btn btn-custom-edit m-1 btn-sm" title="Edit">
+                                                                            <i class="bi bi-pencil-fill" onclick="openEditInquiryModal({{ $inquiry->id }})"></i>
+                                                                        </a>
+                                                                    @endif
+                                                                    <a class="btn btn-custom-view m-1 btn-sm" title="View Form" href="{{ route('showFormSSimport', $inquiry->id) }}">
+                                                                        <i class="bi bi-eye-fill"></i>
+                                                                    </a>
+                                                                    @if ($inquiry->status == 1)
+                                                                        <a class="btn btn-custom-delete m-1 btn-sm" title="Delete">
+                                                                            <i class="bi bi-trash-fill" onclick="deleteInquiry({{ $inquiry->id }})"></i>
+                                                                        </a>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
                                                         @endforeach
-                                                    @endif
-                                                @else
-                                                    --- No Shipping Options ---
-                                                @endif
-                                            </td>
-
-                                            <td>
-                                                @php
-                                                    // Ambil update progress terbaru
-                                                    $progress = App\Models\TrxDboProgPurchase::where(
-                                                        'inquiry_id',
-                                                        $inquiry->id,
-                                                    )
-                                                        ->latest()
-                                                        ->first();
-
-                                                    // Jika inquiry belum pernah memiliki progress, tampilkan "No updates yet"
-                                                    $lastUpdateMessage =
-                                                        $progress && $progress->description !== 'No updates yet'
-                                                            ? $progress->description
-                                                            : 'No updates yet';
-                                                @endphp
-                                                {{ $lastUpdateMessage }}
-                                            </td>
-
-                                            <td>{{ $inquiry->est_date }}</td>
-
-                                            <td>
-                                                @if ($inquiry->status == 1)
-                                                    <a class="btn btn-custom-edit m-1 btn-sm" title="Edit">
-                                                        <i class="bi bi-pencil-fill"
-                                                            onclick="openEditInquiryModal({{ $inquiry->id }})"></i>
-                                                    </a>
-                                                @endif
-                                                @if ($inquiry->status == 1)
-                                                    <a class="btn btn-custom-form m-1 btn-sm"
-                                                        href="{{ route('formulirInquiry', ['id' => $inquiry->id]) }}"
-                                                        title="Formulir Inquiry">
-                                                        <i class="bi bi-file-earmark-arrow-up-fill"></i>
-                                                    </a>
-                                                @endif
-
-                                                <a class="btn btn-custom-view m-1 btn-sm" title="View Form"
-                                                    href="{{ route('showFormSS', $inquiry->id) }}">
-                                                    <i class="bi bi-eye-fill"></i>
-                                                </a>
-
-                                                @if ($inquiry->status == 1)
-                                                    <a class="btn btn-custom-delete m-1 btn-sm" title="Delete">
-                                                        <i class="bi bi-trash-fill"
-                                                            onclick="deleteInquiry({{ $inquiry->id }})"></i>
-                                                    </a>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="eempty">
+                                            <p class="ps-3 mt-3 text-danger">You do not have permission to view this data.</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
-                    @endif
-                </div>
-                <!-- End Table with stripped rows -->
+                        
+                        
+                    
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Inquiry region 2</h5>
+                                    
+                                    @php
+                                        // Ambil pengguna yang sedang login
+                                        $user = Auth::user();
+                        
+                                        // Filter inquiry berdasarkan region 1
+                                        $filteredInquiries = $inquiries->where('region', 2);
+                                    @endphp
+                                    
+                                    @if ($user && in_array($user->id, [1, 45]))
+                                        @if ($filteredInquiries->isEmpty())
+                                            <div class="eempty">
+                                                <p class="ps-3 mt-3">--- Not Found Inquiry Sales ---</p>
+                                            </div>
+                                        @else
+                                            <div class="table-responsive">
+                                                <table class="table table-1" id="inquiryTable2">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col">No</th>
+                                                            <th scope="col">Create By</th>
+                                                            <th scope="col">Reference</th>
+                                                            <th scope="col">Category</th>
+                                                            <th scope="col">Supplier</th>
+                                                            <th scope="col">Status</th>
+                                                            <th scope="col">Last Update</th>
+                                                            <th scope="col">Est. Date</th>
+                                                            <th scope="col">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($filteredInquiries as $inquiry)
+                                                            <tr>
+                                                                <th scope="row">{{ $loop->iteration }}</th>
+                                                                <td>{{ $inquiry->create_by }}</td>
+                                                                <td>{{ $inquiry->kode_inquiry }}</td>
+                                                                <td>{{ $inquiry->loc_imp }}</td>
+                                                                <td>{{ $inquiry->supplier }}</td>
+                                                                @php
+                                                                    $statusDescriptions = [
+                                                                        1 => 'Draft',
+                                                                        2 => 'Open',
+                                                                        3 => 'Approve Ka.Dept',
+                                                                        4 => 'Approve Ka.Sie',
+                                                                        5 => 'On Progress',
+                                                                        6 => 'Finished',
+                                                                        7 => 'Rejected',
+                                                                        8 => 'Approve Inventory',
+                                                                        9 => 'Confirm Purchasing',
+                                                                    ];
+                        
+                                                                    $buttonClasses = [
+                                                                        1 => 'btn-secondary',
+                                                                        2 => 'btn-success',
+                                                                        3 => 'btn-danger',
+                                                                        4 => 'btn-info',
+                                                                        5 => 'btn-warning',
+                                                                        6 => 'btn-primary',
+                                                                        7 => 'btn-danger',
+                                                                        8 => 'btn-danger',
+                                                                        9 => 'btn-warning',
+                                                                    ];
+                                                                @endphp
+                        
+                                                                <td class="btn-stts">
+                                                                    <button class="btn btn-sm {{ $buttonClasses[$inquiry->status] ?? 'btn-light' }}">
+                                                                        {{ $statusDescriptions[$inquiry->status] ?? 'Unknown' }}
+                                                                    </button>
+                                                                </td>
+                                                                <td>
+                                                                    @php
+                                                                        $progress = App\Models\TrxDboProgPurchase::where('inquiry_id', $inquiry->id)->latest()->first();
+                                                                        $lastUpdateMessage = $progress && $progress->description !== 'No updates yet' ? $progress->description : 'No updates yet';
+                                                                    @endphp
+                                                                    {{ $lastUpdateMessage }}
+                                                                </td>
+                                                                <td>{{ $inquiry->est_date }}</td>
+                                                                <td>
+                                                                    @if ($inquiry->status == 1)
+                                                                        <a class="btn btn-custom-edit m-1 btn-sm" title="Edit">
+                                                                            <i class="bi bi-pencil-fill" onclick="openEditInquiryModal({{ $inquiry->id }})"></i>
+                                                                        </a>
+                                                                    @endif
+                                                                    @if ($inquiry->status == 1)
+                                                                        <a class="btn btn-custom-form m-1 btn-sm" href="{{ route('formulirInquiryimport', ['id' => $inquiry->id]) }}" title="Formulir Inquiry">
+                                                                            <i class="bi bi-file-earmark-arrow-up-fill"></i>
+                                                                        </a>
+                                                                    @endif
+                                                                    <a class="btn btn-custom-view m-1 btn-sm" title="View Form" href="{{ route('showFormSSimport', $inquiry->id) }}">
+                                                                        <i class="bi bi-eye-fill"></i>
+                                                                    </a>
+                                                                    @if ($inquiry->status == 1)
+                                                                        <a class="btn btn-custom-delete m-1 btn-sm" title="Delete">
+                                                                            <i class="bi bi-trash-fill" onclick="deleteInquiry({{ $inquiry->id }})"></i>
+                                                                        </a>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="eempty">
+                                            <p class="ps-3 mt-3 text-danger">You do not have permission to view this data.</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Inquiry region 3</h5>
+                                    
+                                    @php
+                                        // Ambil pengguna yang sedang login
+                                        $user = Auth::user();
+                        
+                                        // Filter inquiry berdasarkan region 1
+                                        $filteredInquiries = $inquiries->where('region', 3);
+                                    @endphp
+                                    
+                                    @if ($user && in_array($user->id, [1, 72]))
+                                        @if ($filteredInquiries->isEmpty())
+                                            <div class="eempty">
+                                                <p class="ps-3 mt-3">--- Not Found Inquiry Sales ---</p>
+                                            </div>
+                                        @else
+                                            <div class="table-responsive">
+                                                <table class="table table-1" id="inquiryTable3">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col">No</th>
+                                                            <th scope="col">Create By</th>
+                                                            <th scope="col">Reference</th>
+                                                            <th scope="col">Category</th>
+                                                            <th scope="col">Supplier</th>
+                                                            <th scope="col">Status</th>
+                                                            <th scope="col">Last Update</th>
+                                                            <th scope="col">Est. Date</th>
+                                                            <th scope="col">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($filteredInquiries as $inquiry)
+                                                            <tr>
+                                                                <th scope="row">{{ $loop->iteration }}</th>
+                                                                <td>{{ $inquiry->create_by }}</td>
+                                                                <td>{{ $inquiry->kode_inquiry }}</td>
+                                                                <td>{{ $inquiry->loc_imp }}</td>
+                                                                <td>{{ $inquiry->supplier }}</td>
+                                                                @php
+                                                                    $statusDescriptions = [
+                                                                        1 => 'Draft',
+                                                                        2 => 'Open',
+                                                                        3 => 'Approve Ka.Dept',
+                                                                        4 => 'Approve Ka.Sie',
+                                                                        5 => 'On Progress',
+                                                                        6 => 'Finished',
+                                                                        7 => 'Rejected',
+                                                                        8 => 'Approve Inventory',
+                                                                        9 => 'Confirm Purchasing',
+                                                                    ];
+                        
+                                                                    $buttonClasses = [
+                                                                        1 => 'btn-secondary',
+                                                                        2 => 'btn-success',
+                                                                        3 => 'btn-danger',
+                                                                        4 => 'btn-info',
+                                                                        5 => 'btn-warning',
+                                                                        6 => 'btn-primary',
+                                                                        7 => 'btn-danger',
+                                                                        8 => 'btn-danger',
+                                                                        9 => 'btn-warning',
+                                                                    ];
+                                                                @endphp
+                        
+                                                                <td class="btn-stts">
+                                                                    <button class="btn btn-sm {{ $buttonClasses[$inquiry->status] ?? 'btn-light' }}">
+                                                                        {{ $statusDescriptions[$inquiry->status] ?? 'Unknown' }}
+                                                                    </button>
+                                                                </td>
+                                                                <td>
+                                                                    @php
+                                                                        $progress = App\Models\TrxDboProgPurchase::where('inquiry_id', $inquiry->id)->latest()->first();
+                                                                        $lastUpdateMessage = $progress && $progress->description !== 'No updates yet' ? $progress->description : 'No updates yet';
+                                                                    @endphp
+                                                                    {{ $lastUpdateMessage }}
+                                                                </td>
+                                                                <td>{{ $inquiry->est_date }}</td>
+                                                                <td>
+                                                                    @if ($inquiry->status == 1)
+                                                                        <a class="btn btn-custom-edit m-1 btn-sm" title="Edit">
+                                                                            <i class="bi bi-pencil-fill" onclick="openEditInquiryModal({{ $inquiry->id }})"></i>
+                                                                        </a>
+                                                                    @endif
+                                                                    @if ($inquiry->status == 1)
+                                                                        <a class="btn btn-custom-form m-1 btn-sm" href="{{ route('formulirInquiryimport', ['id' => $inquiry->id]) }}" title="Formulir Inquiry">
+                                                                            <i class="bi bi-file-earmark-arrow-up-fill"></i>
+                                                                        </a>
+                                                                    @endif
+                                                                    <a class="btn btn-custom-view m-1 btn-sm" title="View Form" href="{{ route('showFormSSimport', $inquiry->id) }}">
+                                                                        <i class="bi bi-eye-fill"></i>
+                                                                    </a>
+                                                                    @if ($inquiry->status == 1)
+                                                                        <a class="btn btn-custom-delete m-1 btn-sm" title="Delete">
+                                                                            <i class="bi bi-trash-fill" onclick="deleteInquiry({{ $inquiry->id }})"></i>
+                                                                        </a>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="eempty">
+                                            <p class="ps-3 mt-3 text-danger">You do not have permission to view this data.</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Inquiry region 4</h5>
+                                    
+                                    @php
+                                        // Ambil pengguna yang sedang login
+                                        $user = Auth::user();
+                        
+                                        // Filter inquiry berdasarkan region 1
+                                        $filteredInquiries = $inquiries->where('region', 4);
+                                    @endphp
+                                    
+                                    @if ($user && in_array($user->id, [1, 65]))
+                                        @if ($filteredInquiries->isEmpty())
+                                            <div class="eempty">
+                                                <p class="ps-3 mt-3">--- Not Found Inquiry Sales ---</p>
+                                            </div>
+                                        @else
+                                            <div class="table-responsive">
+                                                <table class="table table-1" id="inquiryTable4">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col">No</th>
+                                                            <th scope="col">Create By</th>
+                                                            <th scope="col">Reference</th>
+                                                            <th scope="col">Category</th>
+                                                            <th scope="col">Supplier</th>
+                                                            <th scope="col">Status</th>
+                                                            <th scope="col">Last Update</th>
+                                                            <th scope="col">Est. Date</th>
+                                                            <th scope="col">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($filteredInquiries as $inquiry)
+                                                            <tr>
+                                                                <th scope="row">{{ $loop->iteration }}</th>
+                                                                <td>{{ $inquiry->create_by }}</td>
+                                                                <td>{{ $inquiry->kode_inquiry }}</td>
+                                                                <td>{{ $inquiry->loc_imp }}</td>
+                                                                <td>{{ $inquiry->supplier }}</td>
+                                                                @php
+                                                                    $statusDescriptions = [
+                                                                        1 => 'Draft',
+                                                                        2 => 'Open',
+                                                                        3 => 'Approve Ka.Dept',
+                                                                        4 => 'Approve Ka.Sie',
+                                                                        5 => 'On Progress',
+                                                                        6 => 'Finished',
+                                                                        7 => 'Rejected',
+                                                                        8 => 'Approve Inventory',
+                                                                        9 => 'Confirm Purchasing',
+                                                                    ];
+                        
+                                                                    $buttonClasses = [
+                                                                        1 => 'btn-secondary',
+                                                                        2 => 'btn-success',
+                                                                        3 => 'btn-danger',
+                                                                        4 => 'btn-info',
+                                                                        5 => 'btn-warning',
+                                                                        6 => 'btn-primary',
+                                                                        7 => 'btn-danger',
+                                                                        8 => 'btn-danger',
+                                                                        9 => 'btn-warning',
+                                                                    ];
+                                                                @endphp
+                        
+                                                                <td class="btn-stts">
+                                                                    <button class="btn btn-sm {{ $buttonClasses[$inquiry->status] ?? 'btn-light' }}">
+                                                                        {{ $statusDescriptions[$inquiry->status] ?? 'Unknown' }}
+                                                                    </button>
+                                                                </td>
+                                                                <td>
+                                                                    @php
+                                                                        $progress = App\Models\TrxDboProgPurchase::where('inquiry_id', $inquiry->id)->latest()->first();
+                                                                        $lastUpdateMessage = $progress && $progress->description !== 'No updates yet' ? $progress->description : 'No updates yet';
+                                                                    @endphp
+                                                                    {{ $lastUpdateMessage }}
+                                                                </td>
+                                                                <td>{{ $inquiry->est_date }}</td>
+                                                                <td>
+                                                                    @if ($inquiry->status == 1)
+                                                                        <a class="btn btn-custom-edit m-1 btn-sm" title="Edit">
+                                                                            <i class="bi bi-pencil-fill" onclick="openEditInquiryModal({{ $inquiry->id }})"></i>
+                                                                        </a>
+                                                                    @endif
+                                                                    @if ($inquiry->status == 1)
+                                                                        <a class="btn btn-custom-form m-1 btn-sm" href="{{ route('formulirInquiryimport', ['id' => $inquiry->id]) }}" title="Formulir Inquiry">
+                                                                            <i class="bi bi-file-earmark-arrow-up-fill"></i>
+                                                                        </a>
+                                                                    @endif
+                                                                    <a class="btn btn-custom-view m-1 btn-sm" title="View Form" href="{{ route('showFormSSimport', $inquiry->id) }}">
+                                                                        <i class="bi bi-eye-fill"></i>
+                                                                    </a>
+                                                                    @if ($inquiry->status == 1)
+                                                                        <a class="btn btn-custom-delete m-1 btn-sm" title="Delete">
+                                                                            <i class="bi bi-trash-fill" onclick="deleteInquiry({{ $inquiry->id }})"></i>
+                                                                        </a>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="eempty">
+                                            <p class="ps-3 mt-3 text-danger">You do not have permission to view this data.</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                 <!-- Modal Add-->
                 <div class="modal fade" id="inquiryImportModal" tabindex="-1" aria-labelledby="inquiryModalLabel"
@@ -595,22 +904,23 @@
                                     aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form action="{{ route('storeinquiry') }}" method="POST" enctype="multipart/form-data">
+                                <form action="{{ route('storeinquiryImport') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
                                     <div class="mb-3">
                                         <label for="loc_imp" class="form-label fw-bold">Jenis Inquiry <span
                                                 class="disabledform">
                                                 [*Form Disabled]</span></label>
-                                        <input type="text" class="form-control" id="loc_imp" name="loc_imp"
-                                            value="Import" disabled required>
+                                                <input type="text" class="form-control" id="loc_imp" name="loc_imp"
+                                                value="Import" readonly required>
                                     </div>
 
                                     <div class="mb-3">
                                         <label for="jenis_inquiry" class="form-label fw-bold">Category <span
                                                 class="disabledform">
                                                 [*Form Disabled]</span></label>
-                                        <input type="text" class="form-control" id="jenis_inquiry" name="jenis_inquiry"
-                                            value="Order Import" disabled required>
+                                                <input type="text" class="form-control" value="Order Import" readonly>
+                                                <input type="hidden" name="jenis_inquiry" value="IM">
+                                                
                                     </div>
 
                                     <div class="mb-3">
@@ -627,18 +937,36 @@
                                         <input type="hidden" id="id_customer" name="id_customer" required>
                                         <div id="selected_customers_list"></div>
                                     </div>
-
+                
+                                    <!-- Region (Searchable Dropdown) -->
+                                    <div class="mb-3">
+                                        <label for="id_region" class="form-label fw-bold">Region</label>
+                                        <div class="position-relative">
+                                            <select class="form-select" id="id_region" name="region" required>
+                                                <option value="" disabled selected>Pilih Region</option>
+                                                @foreach ([1, 2, 3, 4] as $region)
+                                                    <option value="{{ $region }}" {{ old('region', $inquiry->region ?? '') == $region ? 'selected' : '' }}>
+                                                        Region {{ $region }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                
+                                    <!-- Modal Footer -->
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-danger"
-                                            data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
                                         <button type="submit" class="btn btn-primary">Submit</button>
                                     </div>
+                
                                 </form>
                             </div>
                         </div>
                     </div>
                 </div>
                 <!-- End Modal -->
+                
                 <div class="modal fade" id="editInquiryImportModal" tabindex="-1"
                     aria-labelledby="editInquiryModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
@@ -749,7 +1077,38 @@
             });
         </script>
 
+        <script>
+            function showDropdown(id) {
+                document.getElementById(id).style.display = "block";
+            }
 
+            function filterDropdown(inputId, listId) {
+                let input = document.getElementById(inputId).value.toLowerCase();
+                let items = document.querySelectorAll(`#${listId} .dropdown-item`);
+                items.forEach(item => {
+                    if (item.textContent.toLowerCase().includes(input)) {
+                        item.style.display = "block";
+                    } else {
+                        item.style.display = "none";
+                    }
+                });
+            }
+
+            function selectItem(element, hiddenInputId, displayInputId) {
+                let value = element.getAttribute("data-value");
+                let text = element.textContent;
+                document.getElementById(displayInputId).value = text;
+                document.getElementById(hiddenInputId).value = value;
+                document.getElementById(element.parentElement.id).style.display = "none";
+            }
+
+            document.addEventListener("click", function (event) {
+                if (!event.target.closest(".position-relative")) {
+                    document.querySelectorAll(".dropdown-menu").forEach(menu => menu.style.display = "none");
+                }
+            });
+        </script>
+        
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const locImpSelect = document.getElementById('loc_imp'); // Dropdown, tetapi hanya untuk Local
@@ -757,28 +1116,28 @@
                 const customerList = document.getElementById('customer_list');
                 const hiddenInput = document.getElementById('id_customer');
                 const selectedCustomersList = document.getElementById('selected_customers_list');
-
+        
                 // Tampilkan dropdown dan menangani perubahan kategori
                 locImpSelect.value = 'Import'; // Set default ke Import
                 customerList.style.display = 'block'; // Selalu tampilkan daftar customer
-
+        
                 // Mencari customer berdasarkan input
                 searchInput.addEventListener('input', function() {
                     const filter = searchInput.value.toLowerCase();
                     const items = customerList.getElementsByTagName('div');
-
+        
                     for (let i = 0; i < items.length; i++) {
                         const txtValue = items[i].textContent || items[i].innerText;
                         items[i].style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? '' : 'none';
                     }
                 });
-
+        
                 // Menangani pemilihan customer
                 customerList.addEventListener('click', function(e) {
                     if (e.target && e.target.matches('div[data-value]')) {
                         const selectedValue = e.target.getAttribute('data-value');
                         const selectedText = e.target.textContent;
-
+        
                         // Untuk Import, set satu customer dan tidak mengizinkan pemilihan lebih
                         searchInput.value = selectedText; // Tampilkan nama customer
                         hiddenInput.value = selectedValue; // Set ID customer
@@ -788,12 +1147,12 @@
                             '</span>'; // Tampilkan customer terpilih
                     }
                 });
-
+        
                 // Menangani fokus input
                 searchInput.addEventListener('focus', function() {
                     customerList.style.display = 'block'; // Tampilkan dropdown saat mencari
                 });
-
+        
                 // Menyembunyikan dropdown jika klik di luar
                 document.addEventListener('click', function(e) {
                     if (!e.target.closest('.searchable-dropdown')) {
@@ -801,7 +1160,7 @@
                     }
                 });
             });
-
+        
             function openEditInquiryImportModal(id) {
                 console.log('Opening modal for inquiry ID: ' + id);
                 $.ajax({
@@ -809,7 +1168,7 @@
                     type: 'GET',
                     success: function(response) {
                         console.log('Response:', response);
-
+        
                         // Populate the form with the received data
                         $('#editjenis_inquiry').val(response.jenis_inquiry);
                         $('#search_edit_customer').val(response.customer_name);
@@ -817,7 +1176,7 @@
                         $('#editloc_imp').val(response.loc_imp);
                         // $('#editsupplier').val(response.supplier);
                         $('#editInquiryId').val(response.id);
-
+        
                         // Populate the customer dropdown
                         const editDropdown = $('#edit_customer_list');
                         editDropdown.empty(); // Clear existing options
@@ -832,13 +1191,13 @@
                             });
                             editDropdown.append(item);
                         });
-
+        
                         // Set the current customer name in the search input
                         $('#search_edit_customer').val(response.customer_name);
-
+        
                         // Show the modal
                         $('#editInquiryImportModal').modal('show');
-
+        
                         // Update inquiry on save
                         $('#editInquiryForm').off('submit').on('submit', function(e) {
                             e.preventDefault(); // Mencegah form dari pengiriman default
@@ -851,7 +1210,7 @@
                                 _token: '{{ csrf_token() }}', // Sertakan token CSRF untuk keamanan
                                 _method: 'PUT', // Menggunakan metode PUT untuk update
                             };
-
+        
                             $.ajax({
                                 url: '{{ route('updateinquiry', ['id' => ':id']) }}'
                                     .replace(':id',
@@ -882,10 +1241,10 @@
                     }
                 });
             }
-
+        
             $.noConflict();
             jQuery(document).ready(function($) {
-                const dataTable = new simpleDatatables.DataTable("#inquiryTable", {
+                const dataTable1 = new simpleDatatables.DataTable("#inquiryTable1", {
                     searchable: true, // Aktifkan fitur pencarian
                     perPage: 10, // Jumlah entri data per halaman
                     perPageSelect: [5, 10, 20, 150], // Opsi jumlah entri data per halaman
@@ -894,16 +1253,94 @@
                         "Urutan": (value, data) => {
                             // Mendapatkan indeks baris data saat ini
                             const index = data.tableData.id;
-
+        
                             // Mendapatkan nilai dari kolom "RO" atau "SPOR"
                             const spoOrRo = data[index][0].startsWith("RO") ? "RO" : "SPOR";
-
+        
                             // Mendapatkan nilai dari kolom "Bulan"
                             const month = data[index][1];
-
+        
                             // Mendapatkan nilai dari kolom "Tahun"
                             const year = data[index][2];
-
+        
+                            // Menghasilkan urutan sesuai format yang diinginkan
+                            const order = (index + 1).toString().padStart(3, '0');
+                            return `${spoOrRo}/${month}/${year}/${order}`;
+                        }
+                    }
+                });
+        
+                const dataTable2 = new simpleDatatables.DataTable("#inquiryTable2", {
+                    searchable: true, // Aktifkan fitur pencarian
+                    perPage: 10, // Jumlah entri data per halaman
+                    perPageSelect: [5, 10, 20, 150], // Opsi jumlah entri data per halaman
+                    dataProps: {
+                        // Fungsi untuk menghasilkan format yang diinginkan
+                        "Urutan": (value, data) => {
+                            // Mendapatkan indeks baris data saat ini
+                            const index = data.tableData.id;
+        
+                            // Mendapatkan nilai dari kolom "RO" atau "SPOR"
+                            const spoOrRo = data[index][0].startsWith("RO") ? "RO" : "SPOR";
+        
+                            // Mendapatkan nilai dari kolom "Bulan"
+                            const month = data[index][1];
+        
+                            // Mendapatkan nilai dari kolom "Tahun"
+                            const year = data[index][2];
+        
+                            // Menghasilkan urutan sesuai format yang diinginkan
+                            const order = (index + 1).toString().padStart(3, '0');
+                            return `${spoOrRo}/${month}/${year}/${order}`;
+                        }
+                    }
+                });
+        
+                const dataTable3 = new simpleDatatables.DataTable("#inquiryTable3", {
+                    searchable: true, // Aktifkan fitur pencarian
+                    perPage: 10, // Jumlah entri data per halaman
+                    perPageSelect: [5, 10, 20, 150], // Opsi jumlah entri data per halaman
+                    dataProps: {
+                        // Fungsi untuk menghasilkan format yang diinginkan
+                        "Urutan": (value, data) => {
+                            // Mendapatkan indeks baris data saat ini
+                            const index = data.tableData.id;
+        
+                            // Mendapatkan nilai dari kolom "RO" atau "SPOR"
+                            const spoOrRo = data[index][0].startsWith("RO") ? "RO" : "SPOR";
+        
+                            // Mendapatkan nilai dari kolom "Bulan"
+                            const month = data[index][1];
+        
+                            // Mendapatkan nilai dari kolom "Tahun"
+                            const year = data[index][2];
+        
+                            // Menghasilkan urutan sesuai format yang diinginkan
+                            const order = (index + 1).toString().padStart(3, '0');
+                            return `${spoOrRo}/${month}/${year}/${order}`;
+                        }
+                    }
+                });
+        
+                const dataTable4 = new simpleDatatables.DataTable("#inquiryTable4", {
+                    searchable: true, // Aktifkan fitur pencarian
+                    perPage: 10, // Jumlah entri data per halaman
+                    perPageSelect: [5, 10, 20, 150], // Opsi jumlah entri data per halaman
+                    dataProps: {
+                        // Fungsi untuk menghasilkan format yang diinginkan
+                        "Urutan": (value, data) => {
+                            // Mendapatkan indeks baris data saat ini
+                            const index = data.tableData.id;
+        
+                            // Mendapatkan nilai dari kolom "RO" atau "SPOR"
+                            const spoOrRo = data[index][0].startsWith("RO") ? "RO" : "SPOR";
+        
+                            // Mendapatkan nilai dari kolom "Bulan"
+                            const month = data[index][1];
+        
+                            // Mendapatkan nilai dari kolom "Tahun"
+                            const year = data[index][2];
+        
                             // Menghasilkan urutan sesuai format yang diinginkan
                             const order = (index + 1).toString().padStart(3, '0');
                             return `${spoOrRo}/${month}/${year}/${order}`;
@@ -911,7 +1348,7 @@
                     }
                 });
             });
-
+        
             //delete
             function deleteInquiry(id) {
                 Swal.fire({
@@ -947,11 +1384,11 @@
                     }
                 })
             }
-
+        
             function showProgressModal1(id) {
                 // Tampilkan modal
                 $('#progressHistoryModal1').modal('show');
-
+        
                 // Ambil data progress untuk inquiry tersebut
                 $.ajax({
                     url: '{{ route('progressHistory', '') }}/' + id, // Pastikan route-nya sesuai
@@ -959,17 +1396,17 @@
                     success: function(response) {
                         const historyBody = $('#historyBody');
                         historyBody.empty(); // Bersihkan data sebelumnya
-
+        
                         // Menambahkan data response ke dalam tabel
                         response.progressUpdates.forEach((progress, index) => {
                             historyBody.append(`
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${new Date(progress.created_at).toLocaleString()}</td>
-                        <td>${progress.user.name}</td>
-                        <td>${progress.description}</td>
-                    </tr>
-                `);
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${new Date(progress.created_at).toLocaleString()}</td>
+                                <td>${progress.user.name}</td>
+                                <td>${progress.description}</td>
+                            </tr>
+                        `);
                         });
                     },
                     error: function(xhr) {
@@ -979,28 +1416,28 @@
                     }
                 });
             }
-
+        
             // report
             document.getElementById('exportReportBtn').addEventListener('click', function() {
                 // Get the table element
                 var table = document.getElementById('inquiryTable');
-
+        
                 // Create a workbook and add a worksheet
                 var wb = XLSX.utils.table_to_book(table, {
                     sheet: "Inquiry Report"
                 });
                 var ws = wb.Sheets["Inquiry Report"];
-
+        
                 // Filter out unwanted columns (Note, File, is Active, Actions)
                 // Define the columns we want to keep (1-based index: No, Kode Inq., Type Inq., Type, Size, Supplier, Qty, Order From, Create By, To Approve, To Validate)
                 var columnsToKeep = [1, 2, 3, 4, 5, 6, 7];
-
+        
                 // Get the range of the worksheet
                 var range = XLSX.utils.decode_range(ws['!ref']);
-
+        
                 // Create a new worksheet to store the filtered data
                 var newWsData = [];
-
+        
                 for (var R = range.s.r; R <= range.e.r; ++R) {
                     var newRow = [];
                     for (var C = range.s.c; C <= range.e.c; ++C) {
@@ -1015,15 +1452,15 @@
                     }
                     newWsData.push(newRow);
                 }
-
+        
                 // Create a new worksheet with the filtered data
                 var newWs = XLSX.utils.aoa_to_sheet(newWsData);
-
+        
                 // Apply auto filter to the header row
                 newWs['!autofilter'] = {
                     ref: `A1:K${newWsData.length}`
                 };
-
+        
                 // Adjust column widths
                 var colWidths = [{
                         wpx: 40
@@ -1031,11 +1468,11 @@
                     {
                         wpx: 100
                     }, // Kode Inq.
-
+        
                     {
                         wpx: 120
                     }, // Supplier
-
+        
                     {
                         wpx: 100
                     }, // Order From
@@ -1050,38 +1487,38 @@
                     } // To Validate
                 ];
                 newWs['!cols'] = colWidths;
-
+        
                 // Replace the old worksheet with the new one
                 wb.Sheets["Inquiry Report"] = newWs;
-
+        
                 // Write the workbook to a file
                 XLSX.writeFile(wb, 'Inquiry_Report.xlsx');
             });
         </script>
-
+        
         <script>
             var inputCount = 1; // Untuk menghitung jumlah input yang ada
-
+        
             function addInput() {
                 inputCount++;
                 var html = `<div class="mb-3">
-                         <label for="supplier" class="form-label">Type</label>
-                        <input type="text" class="form-control type-input" name="type[]" required>
-                    </div>
-                    <div class="mb-3">
-                          <label for="supplier" class="form-label">Size</label>
-                        <input type="text" class="form-control size-input" name="size[]" required>
-                    </div>`;
+                                 <label for="supplier" class="form-label">Type</label>
+                                <input type="text" class="form-control type-input" name="type[]" required>
+                            </div>
+                            <div class="mb-3">
+                                  <label for="supplier" class="form-label">Size</label>
+                                <input type="text" class="form-control size-input" name="size[]" required>
+                            </div>`;
                 $('#inputContainer').append(html);
             }
         </script>
-
+        
         <script>
             function handleCategoryChange() {
                 const locImpSelect = document.getElementById('loc_imp');
                 const otherContainer = document.getElementById('other-container');
                 const customerInput = document.getElementById('search_customer');
-
+        
                 if (locImpSelect.value === 'Import') {
                     customerInput.disabled = true; // Disable customer input
                     otherContainer.style.display = 'block'; // Show other input
@@ -1090,7 +1527,7 @@
                     otherContainer.style.display = 'none'; // Hide other input
                 }
             }
-
+        
             function addOtherField() {
                 const additionalFieldsContainer = document.getElementById('additional-fields');
                 const newOtherField = document.createElement('input');
