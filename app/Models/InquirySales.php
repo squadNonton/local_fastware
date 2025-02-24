@@ -44,6 +44,11 @@ class InquirySales extends Model
         return $this->hasMany(DetailInquiry::class, 'id_inquiry');
     }
 
+    public  function detailInquiryImport()
+    {
+        return $this->hasMany(DetailInquiryImport::class, 'id_inquiry');
+    }
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class, 'id_customer');
