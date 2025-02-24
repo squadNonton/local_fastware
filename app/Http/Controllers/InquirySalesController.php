@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use PDF;
 use App\Exports\InquirySalesExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Response;
 
 class InquirySalesController extends Controller
 {
@@ -113,6 +114,67 @@ class InquirySalesController extends Controller
         ]);
 
         return redirect()->route('createinquiry')->with('success', 'Inquiry successfully saved.');
+    }
+
+    public function storeInquiryImport(Request $request)
+    {
+        $request->validate([
+            'jenis_inquiry' => 'required',
+            'id_customer' => 'required',
+            'region' => 'required',
+            // 'supplier' => 'required',
+
+        ]);
+
+        // Generate inquiry code
+        $jenisInquiry = $request->jenis_inquiry;
+        $currentMonth = Carbon::now()->format('m');
+        $currentYear = Carbon::now()->format('Y');
+
+        // Ambil nomor urut
+        $lastKodeInquiry = InquirySales::where('jenis_inquiry', $jenisInquiry)
+            ->whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', $currentMonth)
+            ->orderBy('kode_inquiry', 'desc')
+            ->first();
+
+        $nextNumber = 1;
+        if ($lastKodeInquiry) {
+            $lastKodeParts = explode('/', $lastKodeInquiry->kode_inquiry);
+            $nextNumber = intval(end($lastKodeParts)) + 1;
+        }
+
+        $kodeInquiry = sprintf('%s/%02d/%04d/%03d', $jenisInquiry, $currentMonth, $currentYear, $nextNumber);
+
+        // Simpan data inquiry baru
+        $inquiry = new InquirySales();
+        $inquiry->kode_inquiry = $kodeInquiry;
+        $inquiry->jenis_inquiry = $jenisInquiry;
+        $inquiry->id_customer = $request->id_customer;
+        $inquiry->loc_imp = 'Import';
+        $inquiry->region = $request->region;
+        // $inquiry->supplier = $request->supplier;
+        // $inquiry->to_approve = 'Waiting';
+        // $inquiry->to_validate = 'Waiting';
+        $inquiry->status = 1;
+        $inquiry->is_active = 1;
+        $inquiry->create_by = Auth::user()->name;
+        $inquiry->save();
+
+        // Simpan progres awal sebagai "No updates yet"
+        $progress = new TrxDboProgPurchase();
+        $progress->inquiry_id = $inquiry->id;
+        $progress->description = '---- No updates yet ----'; // Set default
+        $progress->save();
+
+        // Ketika membuat Inquiry
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $inquiry->id,
+            'user_id' => auth()->id(),
+            'description' => 'Inquiry created.'
+        ]);
+
+        return redirect()->route('createinquiryImport')->with('success', 'Inquiry successfully saved.');
     }
 
 
@@ -696,6 +758,74 @@ class InquirySalesController extends Controller
             'message' => 'Data berhasil diperbarui!',
             'updatedMaterials' => $updatedMaterials // Kirim data terbaru ke frontend
         ]);
+    }
+
+    public function updateInquiryDetailsImport(Request $request, $id)
+{
+    // Validasi data
+    $validatedData = $request->validate([
+        'id' => 'required|exists:inquiry_details,id',
+        'id_type' => 'required|exists:type_materials,id',
+        'jenis' => 'required|in:Flat,Round,Honed Tube',
+        'thickness' => 'required_if:jenis,Flat',
+        'weight' => 'required_if:jenis,Flat',
+        'inner_diameter' => 'required_if:jenis,Round,Honed Tube',
+        'outer_diameter' => 'required_if:jenis,Round,Honed Tube',
+        'length' => 'required',
+        'qty' => 'required',
+        'm1' => 'required',
+        'm2' => 'required',
+        'm3' => 'required',
+        'ship' => 'required|in:Deltamas,DS8',
+        'so' => 'required',
+        'note' => 'nullable',
+        'customer' => 'required|exists:customers,id',
+    ]);
+
+    // Temukan detail inquiry berdasarkan ID
+    $inquiryDetail = DetailInquiryImport::findOrFail($validatedData['id']);
+
+    // Perbarui data detail inquiry
+    $inquiryDetail->update([
+        'id_type' => $validatedData['id_type'],
+        'jenis' => $validatedData['jenis'],
+        'thickness' => $validatedData['thickness'],
+        'weight' => $validatedData['weight'],
+        'inner_diameter' => $validatedData['inner_diameter'],
+        'outer_diameter' => $validatedData['outer_diameter'],
+        'length' => $validatedData['length'],
+        'qty' => $validatedData['qty'],
+        'm1' => $validatedData['m1'],
+        'm2' => $validatedData['m2'],
+        'm3' => $validatedData['m3'],
+        'ship' => $validatedData['ship'],
+        'so' => $validatedData['so'],
+        'note' => $validatedData['note'],
+        'customer' => $validatedData['customer'],
+    ]);
+
+    // Kembalikan respons JSON
+    return response()->json(['success' => true]);
+}
+
+
+
+
+
+
+    public function deleteInquiryDetailImport($id)
+    {
+        try {
+            $material = DetailInquiryImport::find($id); // Ganti dengan model yang sesuai
+            if (!$material) {
+                return Response::json(['success' => false, 'message' => 'Material not found'], 404);
+            }
+
+            $material->delete();
+            return Response::json(['success' => true, 'message' => 'Material deleted successfully']);
+        } catch (\Exception $e) {
+            return Response::json(['success' => false, 'message' => 'Failed to delete material'], 500);
+        }
     }
 
     // public function confirmPurchase($id)
