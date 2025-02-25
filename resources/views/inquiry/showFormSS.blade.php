@@ -268,23 +268,17 @@
 
                         </table>
                     </div>
+                    @if ($isFromApproval)
+                    <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm m-1">Kembali</a>
+                @else
+                    <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm m-1">Kembali</a>
                     @if ($inquiry->status == 1)
-                        @if ($isFromApproval)
-                            <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm m-1">Kembali</a>
-                        @else
-                            <a href="{{ route('createinquiry1') }}"
-                                class="btn btn-primary delete-row-button btn-sm m-1">Submit</a>
-                        @endif
-                    @elseif ($inquiry->status == 2)
-                        <a href="{{ route('createinquiry') }}"
-                            class="btn btn-primary delete-row-button btn-sm m-1">Submit</a>
+                        <form action="{{ route('createinquiry1', ['id' => $inquiry->id]) }}" method="GET" class="d-inline">
+                            <input type="hidden" name="id" value="{{ $inquiry->id }}">
+                            <button type="submit" class="btn btn-primary btn-sm m-1">Submit</button>
+                        </form>
                     @endif
-
-                    @if ($inquiry->status == 1)
-                        <button id="edit-button" class="btn btn-warning btn-sm m-1" onclick="enableEdit()">Edit</button>
-                        <button id="save-button" class="btn btn-success btn-sm m-1" onclick="saveChanges()"
-                            style="display: none;">Save</button>
-                    @endif
+                @endif
 
 
                     {{-- @if ($inquiry->status == 1)

@@ -237,22 +237,19 @@
                 </div>
 
             </form>
-                @if ($inquiry->status == 1)
-                    @if ($isFromApproval)
-                        <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm m-1">Kembali</a>
-                    @else
-                        <a href="{{ route('createinquiryImport1') }}"
-                            class="btn btn-primary delete-row-button btn-sm m-1">Submit</a>
-                    @endif
-                @elseif ($inquiry->status == 2)
-                    <a href="{{ route('createinquiryImport') }}"
-                        class="btn btn-primary delete-row-button btn-sm m-1">Submit</a>
-                @endif
-
-                @if ($inquiry->status == 1)
+                @if ($isFromApproval)
+                    <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm m-1">Kembali</a>
+                @else
+                    <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm m-1">Kembali</a>
+                    @if ($inquiry->status == 1)
+                        <form action="{{ route('createinquiryImport1', ['id' => $inquiry->id]) }}" method="GET" class="d-inline">
+                            <input type="hidden" name="id" value="{{ $inquiry->id }}">
+                            <button type="submit" class="btn btn-primary btn-sm m-1">Submit</button>
+                        </form>
                         <a class="btn btn-custom-form m-1 btn-sm" href="{{ route('formulirInquiryimport', ['id' => $inquiry->id]) }}" title="Formulir Inquiry">
                             <i class="bi bi-file-earmark-arrow-up-fill"></i>
                         </a>
+                    @endif
                 @endif
 
                 <a href="{{ route('showFormSS.pdf', $inquiry->id) }}" class="btn btn-danger btn-sm m-1">

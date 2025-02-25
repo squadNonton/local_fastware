@@ -36,15 +36,21 @@ class InquirySalesController extends Controller
         return view('inquiry.create', compact('inquiries', 'customers'));
     }
 
-    public function createInquirySales1()
+    public function createInquirySalesImport1(Request $request, $id)
     {
         $statuses = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-        // Update status dari 1 menjadi 2 sebelum mengambil data
-        InquirySales::where('status', 1)->update(['status' => 2]);
+        // Pastikan ID inquiry valid
+        $inquiry = InquirySales::findOrFail($id);
+
+        // Update status inquiry yang dipilih saja
+        if ($inquiry->status == 1) {
+            $inquiry->update(['status' => 2]);
+        }
 
         // Ambil data inquiry setelah update
-        $inquiries = InquirySales::with('customer')
+        $inquiry = InquirySales::with('customer')
+            ->where('id', $id)
             ->whereIn('status', $statuses)
             ->where('is_active', 1)
             ->orderByRaw('FIELD(status, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9)')
@@ -54,7 +60,34 @@ class InquirySalesController extends Controller
 
         $customers = Customer::all();
 
-        return view('inquiry.create', compact('inquiries', 'customers'));
+        return redirect()->route('createinquiryImport');
+    }
+
+    public function createInquirySales1(Request $request, $id)
+    {
+        $statuses = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+        // Pastikan ID inquiry valid
+        $inquiry = InquirySales::findOrFail($id);
+
+        // Update status inquiry yang dipilih saja
+        if ($inquiry->status == 1) {
+            $inquiry->update(['status' => 2]);
+        }
+
+        // Ambil data inquiry setelah update
+        $inquiry = InquirySales::with('customer')
+            ->where('id', $id)
+            ->whereIn('status', $statuses)
+            ->where('is_active', 1)
+            ->orderByRaw('FIELD(status, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9)')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->unique('kode_inquiry');
+
+        $customers = Customer::all();
+
+        return redirect()->route('createinquiry');
     }
 
     public function storeInquirySales(Request $request)
