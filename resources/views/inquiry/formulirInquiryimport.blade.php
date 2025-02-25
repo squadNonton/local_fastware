@@ -838,14 +838,25 @@
     });
 
     cells[13].appendChild(shipDropdown);
-
-    // Kolom 15: SO Number
+    
     let soInput = document.createElement("input");
     soInput.type = "text";
     soInput.name = "so";
     soInput.size = 10;
     soInput.required = true;
+    soInput.maxLength = 4;
+    soInput.pattern = "\\d{4}"; // Hanya menerima 4 digit angka
+
+    // Mencegah input kurang atau lebih dari 4 angka
+    soInput.addEventListener("input", function () {
+        this.value = this.value.replace(/\D/g, ""); // Hanya angka
+        if (this.value.length > 4) {
+            this.value = this.value.slice(0, 4); // Potong jika lebih dari 4
+        }
+    });
+
     cells[14].appendChild(soInput);
+
 
     // Kolom 16: Note
     let noteInput = document.createElement("input");
@@ -1009,113 +1020,138 @@ function initializeSearchableDropdown(searchInput, dropdownMenu, hiddenInput, na
         create_by: createBy, // Pastikan ID user login terisi
         materials: []
     };
+    var hasInvalidSO = false; // Flag untuk validasi SO
 
     rows.forEach(function(row) {
-            var idTypeElement = row.querySelector('select[name="id_type"]');
-            var jenisElement = row.querySelector('select[name="jenis"]');
-            var thicknessElement = row.querySelector('input[name="thickness"]');
-            var weightElement = row.querySelector('input[name="weight"]');
-            var innerDiameterElement = row.querySelector('input[name="inner_diameter"]');
-            var outerDiameterElement = row.querySelector('input[name="outer_diameter"]');
-            var lengthElement = row.querySelector('input[name="length"]');
-            var qtyElement = row.querySelector('input[name="qty"]');
-            var m1Element = row.querySelector('input[name="m1"]');
-            var m2Element = row.querySelector('input[name="m2"]');
-            var m3Element = row.querySelector('input[name="m3"]');
-            var shipElement = row.querySelector('select[name="ship"]');
-            var soElement = row.querySelector('input[name="so"]');
-            var noteElement = row.querySelector('input[name="note"]');
-            var customerElement = row.querySelector('input[name="customer"]');
-            var nameCustomerElement = row.querySelector('input[name="name_customer"]');
+        var idTypeElement = row.querySelector('select[name="id_type"]');
+        var jenisElement = row.querySelector('select[name="jenis"]');
+        var thicknessElement = row.querySelector('input[name="thickness"]');
+        var weightElement = row.querySelector('input[name="weight"]');
+        var innerDiameterElement = row.querySelector('input[name="inner_diameter"]');
+        var outerDiameterElement = row.querySelector('input[name="outer_diameter"]');
+        var lengthElement = row.querySelector('input[name="length"]');
+        var qtyElement = row.querySelector('input[name="qty"]');
+        var m1Element = row.querySelector('input[name="m1"]');
+        var m2Element = row.querySelector('input[name="m2"]');
+        var m3Element = row.querySelector('input[name="m3"]');
+        var shipElement = row.querySelector('select[name="ship"]');
+        var soElement = row.querySelector('input[name="so"]');
+        var noteElement = row.querySelector('input[name="note"]');
+        var customerElement = row.querySelector('input[name="customer"]');
+        var nameCustomerElement = row.querySelector('input[name="name_customer"]');
 
-            if (idTypeElement && jenisElement && idTypeElement.value !== "" && jenisElement.value !== "") {
-                var rowData = {
-                    id_type: idTypeElement.value,
-                    jenis: jenisElement.value,
-                    thickness: thicknessElement ? thicknessElement.value : null,
-                    weight: weightElement ? weightElement.value : null,
-                    inner_diameter: innerDiameterElement ? innerDiameterElement.value : null,
-                    outer_diameter: outerDiameterElement ? outerDiameterElement.value : null,
-                    length: lengthElement ? lengthElement.value : null,
-                    qty: qtyElement ? qtyElement.value : null,
-                    m1: m1Element ? m1Element.value : null,
-                    m2: m2Element ? m2Element.value : null,
-                    m3: m3Element ? m3Element.value : null,
-                    ship: shipElement ? shipElement.value : null,
-                    so: soElement ? soElement.value : null,
-                    note: noteElement ? noteElement.value : null,
-                    customer: customerElement ? customerElement.value : null, // Ambil ID customer dari input hidden
-                    name_customer: nameCustomerElement ? nameCustomerElement.value : null // Ambil nama customer dari input hidden
-                };
-                data.materials.push(rowData);
+        if (idTypeElement && jenisElement && idTypeElement.value !== "" && jenisElement.value !== "") {
+            var soValue = soElement ? soElement.value.trim() : "";
+
+            var isValidSO = /^\d{4}$/.test(soValue);
+
+            if (!isValidSO) {
+                hasInvalidSO = true; // Set flag jika ada SO tidak valid
+                soElement.classList.add("is-invalid"); // Tambahkan class untuk error styling
+            } else {
+                soElement.classList.remove("is-invalid"); // Hapus class jika valid
             }
-        });
+            var formattedSO = `SO/${new Date().getFullYear()}/${String(soValue).padStart(4, '0')}`;
 
-        if (data.materials.length === 0) {
-            alert('Silakan tambahkan material terlebih dahulu.');
-            return;
+            var rowData = {
+                id_type: idTypeElement.value,
+                jenis: jenisElement.value,
+                thickness: thicknessElement ? thicknessElement.value : null,
+                weight: weightElement ? weightElement.value : null,
+                inner_diameter: innerDiameterElement ? innerDiameterElement.value : null,
+                outer_diameter: outerDiameterElement ? outerDiameterElement.value : null,
+                length: lengthElement ? lengthElement.value : null,
+                qty: qtyElement ? qtyElement.value : null,
+                m1: m1Element ? m1Element.value : null,
+                m2: m2Element ? m2Element.value : null,
+                m3: m3Element ? m3Element.value : null,
+                ship: shipElement ? shipElement.value : null,
+                so: formattedSO, // Gunakan SO yang sudah diformat
+                note: noteElement ? noteElement.value : null,
+                customer: customerElement ? customerElement.value : null, // Ambil ID customer dari input hidden
+                name_customer: nameCustomerElement ? nameCustomerElement.value : null // Ambil nama customer dari input hidden
+            };
+            data.materials.push(rowData);
         }
+    });
 
-        // Validasi data sebelum dikirim
-        var isValid = data.materials.every(material =>
-            material.id_type && material.jenis && material.qty && material.m1 && material.so && material.note && material.customer && material.name_customer
-        );
-
-        if (!isValid) {
-            alert('Mohon lengkapi semua field yang diperlukan.');
-            return;
-        }
-
-        // Kirim data dengan AJAX
-        $.ajax({
-            url: '{{ route('inquiry.previewSSImport') }}',
-            method: 'POST',
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-            dataType: 'json', // Pastikan menerima JSON dari server
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            beforeSend: function () {
-                Swal.fire({
-                    title: 'Menyimpan...',
-                    text: 'Harap tunggu',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-            },
-            success: function (response) {
-                Swal.fire({
-                    title: 'Sukses!',
-                    text: 'Inquiry berhasil disimpan',
-                    icon: 'success',
-                    timer: 2000,
-                    timerProgressBar: true,
-                    willClose: () => {
-                        window.location.href = '{{ route('showFormSSimport', $inquiry->id) }}';
-                    }
-                });
-            },
-            error: function (xhr) {
-                console.error('Error occurred:', xhr);
-                var errorMessage = 'Terjadi kesalahan saat menyimpan data.';
-
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    errorMessage = xhr.responseJSON.message;
-                }
-
-                Swal.fire({
-                    title: 'Error!',
-                    text: errorMessage,
-                    icon: 'error',
-                    timer: 3000,
-                    timerProgressBar: true
-                });
-            }
-        });
+    if (data.materials.length === 0) {
+        alert('Silakan tambahkan material terlebih dahulu.');
+        return;
     }
+
+    // Validasi data sebelum dikirim
+    var isValid = data.materials.every(material =>
+        material.id_type && material.jenis && material.qty && material.m1 && material.so && material.note && material.customer && material.name_customer
+    );
+
+    if (!isValid) {
+        alert('Mohon lengkapi semua field yang diperlukan.');
+        return;
+    }
+
+    // Jika ada SO yang tidak valid, tampilkan alert dan hentikan proses
+    if (hasInvalidSO) {
+        Swal.fire({
+            title: "Error!",
+            text: "Kolom SO harus diisi dengan 4 digit angka!",
+            icon: "error",
+            timer: 3000,
+            timerProgressBar: true
+        });
+        return;
+    }
+
+    // Kirim data dengan AJAX
+    $.ajax({
+        url: '{{ route('inquiry.previewSSImport') }}',
+        method: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        dataType: 'json', // Pastikan menerima JSON dari server
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        beforeSend: function () {
+            Swal.fire({
+                title: 'Menyimpan...',
+                text: 'Harap tunggu',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        },
+        success: function (response) {
+            Swal.fire({
+                title: 'Sukses!',
+                text: 'Inquiry berhasil disimpan',
+                icon: 'success',
+                timer: 2000,
+                timerProgressBar: true,
+                willClose: () => {
+                    window.location.href = '{{ route('showFormSSimport', $inquiry->id) }}';
+                }
+            });
+        },
+        error: function (xhr) {
+            console.error('Error occurred:', xhr);
+            var errorMessage = 'Terjadi kesalahan saat menyimpan data.';
+
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMessage = xhr.responseJSON.message;
+            }
+
+            Swal.fire({
+                title: 'Error!',
+                text: errorMessage,
+                icon: 'error',
+                timer: 3000,
+                timerProgressBar: true
+            });
+        }
+    });
+}
 
 
 
