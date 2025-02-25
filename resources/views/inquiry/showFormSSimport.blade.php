@@ -178,153 +178,59 @@
                         
 
                         <tbody id="table-body">
-                            @if ($inquiry->status == 1)
-                                @forelse ($materials as $index => $material)
-                                    <tr data-id="{{ $material->id }}">
-                                        <td>{{ $index + 1 }}</td>
-                                        <td contenteditable="false" class="editable">
-                                            <select name="id_type" class="material-dropdown" style="width: 180px;"
-                                                disabled>
-                                                <option value="" disabled selected>Cari Material...</option>
-                                                @foreach ($typeMaterials as $type)
-                                                    <option value="{{ $type->id }}"
-                                                        {{ $material->id_type == $type->id ? 'selected' : '' }}>
-                                                        {{ $type->type_name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </td>
-                                        <td contenteditable="false" class="editable">
-                                            <select name="jenis" class="jenis-dropdown" style="width: 80px;" disabled
-                                                onchange="handleShapeChange(this)">
-                                                <option value="Flat"
-                                                    {{ $material['jenis'] == 'Flat' ? 'selected' : '' }}>Flat</option>
-                                                <option value="Round"
-                                                    {{ $material['jenis'] == 'Round' ? 'selected' : '' }}>Round
-                                                </option>
-                                                <option value="Honed Tube"
-                                                    {{ $material['jenis'] == 'Honed Tube' ? 'selected' : '' }}>Honed
-                                                    Tube</option>
-                                            </select>
-                                        </td>
-                                        <td contenteditable="false" class="editable"><input type="text"
-                                                name="thickness" value="{{ $material['thickness'] }}" size="10"
-                                                disabled></td>
-                                        <td contenteditable="false" class="editable"><input type="text"
-                                                name="weight" value="{{ $material['weight'] }}" size="5"
-                                                disabled></td>
-                                        <td contenteditable="false" class="editable"><input type="text"
-                                                name="inner_diameter" value="{{ $material['inner_diameter'] }}"
-                                                size="10" disabled></td>
-                                        <td contenteditable="false" class="editable"><input type="text"
-                                                name="outer_diameter" value="{{ $material['outer_diameter'] }}"
-                                                size="10" disabled></td>
-                                        <td contenteditable="false" class="editable"><input type="text"
-                                                name="length" value="{{ $material['length'] }}" size="10"
-                                                disabled></td>
-                                        <td contenteditable="false" class="editable"><input type="text"
-                                                name="qty" value="{{ $material['qty'] }}" size="10" disabled>
-                                        </td>
-                                        <td contenteditable="false" class="editable"><input type="text"
-                                                name="m1" value="{{ $material['m1'] }}" size="10" disabled>
-                                        </td>
-                                        <td contenteditable="false" class="editable"><input type="text"
-                                                name="m2" value="{{ $material['m2'] }}" size="10"
-                                                disabled></td>
-                                        <td contenteditable="false" class="editable"><input type="text"
-                                                name="m3" value="{{ $material['m3'] }}" size="10"
-                                                disabled></td>
-                                        <td contenteditable="false" class="editable">
-                                            <select name="ship" class="jenis-dropdown" style="width: 100px;"
-                                                disabled>
-                                                <option value="Deltamas"
-                                                    {{ $material['ship'] == 'Deltamas' ? 'selected' : '' }}>Deltamas
-                                                </option>
-                                                <option value="DS8"
-                                                    {{ $material['ship'] == 'DS8' ? 'selected' : '' }}>DS8</option>
-                                            </select>
-                                        </td>
-                                        <td contenteditable="false" class="editable"><input type="text"
-                                                name="so" value="{{ $material['so'] }}" size="10"
-                                                disabled></td>
-                                        <td contenteditable="false" class="editable"><input type="text"
-                                                name="note" value="{{ $material['note'] }}" size="10"
-                                                disabled></td>
-                                        <td contenteditable="false" class="editable">
-                                            <select name="customer" class="customer-dropdown" style="width: 100px;" disabled>
-                                                @foreach ($customers as $customer)
-                                                    <option value="{{ $customer->id }}" {{ $material->customer == $customer->id ? 'selected' : '' }}>
-                                                        {{ $customer->name_customer }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            <input type="hidden" name="materials[{{ $index }}][customer]" value="{{ $material->customer }}" required>
-                                        </td>
-                                                
-                                        <td contenteditable="false" class="editable">
-                                            @php
-                                                $partnerName = '';
-                                                foreach ($users as $user) {
-                                                    if ($user->id == $material->create_by) {
-                                                        $partnerName = $user->name;
-                                                        break;
-                                                    }
-                                                }
-                                            @endphp
-                                            <label>{{ $partnerName }}</label>
-                                        </td>
-                                        <td>
-                                            @if ($material->create_by == Auth::id())
-                                            <button class="btn btn-warning btn-sm edit-button" onclick="toggleEdit(event, this)">Edit</button>
-                                                <button class="btn btn-danger btn-sm" onclick="deleteRow({{ $material->id }})">Delete</button>
-                                            @endif
-                                        </td>
-                                        
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="18" style="text-align: center;">Data tidak ditemukan</td>
-                                    </tr>
-                                @endforelse
-                            @else
                             @forelse ($materials as $index => $material)
-                            <tr>
-                                <td>{{ $index + 1 }}</td>
-                                <td>{{ $material->type_materials ? $material->type_materials->type_name : 'N/A' }}</td>
-                                <td>{{ $material['jenis'] }}</td>
-                                <td>{{ $material['thickness'] }}</td>
-                                <td>{{ $material['weight'] }}</td>
-                                <td>{{ $material['inner_diameter'] }}</td>
-                                <td>{{ $material['outer_diameter'] }}</td>
-                                <td>{{ $material['length'] }}</td>
-                                <td>{{ $material['qty'] }}</td>
-                                <td>{{ $material['m1'] }}</td>
-                                <td>{{ $material['m2'] }}</td>
-                                <td>{{ $material['m3'] }}</td>
-                                <td>{{ $material['ship'] }}</td>
-                                <td>{{ $material['so'] }}</td>
-                                <td>{{ $material['note'] }}</td>
-                                <td>{{ $material['customer'] }}</td>
-                                <td>
-                                    @php
-                                        $partnerName = '';
-                                        foreach ($users as $user) {
-                                            if ($user->id == $material->create_by) {
-                                                $partnerName = $user->name;
-                                                break;
+                                <tr data-id="{{ $material->id }}">
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ $material->type_materials ? $material->type_materials->type_name : 'N/A' }}</td>
+                                    <td>{{ $material['jenis'] }}</td>
+                                    <td>{{ $material['thickness'] }}</td>
+                                    <td>{{ $material['weight'] }}</td>
+                                    <td>{{ $material['inner_diameter'] }}</td>
+                                    <td>{{ $material['outer_diameter'] }}</td>
+                                    <td>{{ $material['length'] }}</td>
+                                    <td>{{ $material['qty'] }}</td>
+                                    <td>{{ $material['m1'] }}</td>
+                                    <td>{{ $material['m2'] }}</td>
+                                    <td>{{ $material['m3'] }}</td>
+                                    <td>{{ $material['ship'] }}</td>
+                                    <td>{{ $material['so'] }}</td>
+                                    <td>{{ $material['note'] }}</td>
+                                    <td>
+                                        @php
+                                            $customerName = '';
+                                            foreach ($customers as $customer) {
+                                                if ($customer->id == $material->customer) {
+                                                    $customerName = $customer->name_customer;
+                                                    break;
+                                                }
                                             }
-                                        }
-                                    @endphp
-                                    <label>{{ $partnerName }}</label>
-                                </td>
-                                <td></td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="15" style="text-align: center;">Data tidak ditemukan</td>
-                            </tr>
-                        @endforelse
-                            @endif
+                                        @endphp
+                                        <span>{{ $customerName }}</span>
+                                    </td>
+                                    <td>
+                                        @php
+                                            $partnerName = '';
+                                            foreach ($users as $user) {
+                                                if ($user->id == $material->create_by) {
+                                                    $partnerName = $user->name;
+                                                    break;
+                                                }
+                                            }
+                                        @endphp
+                                        <span>{{ $partnerName }}</span>
+                                    </td>
+                                    <td>
+                                        @if ($inquiry->status == 1 && $material->create_by == Auth::id())
+                                        <a href="{{ route('editimport', ['id' => $material->id]) }}" class="btn btn-warning btn-sm">Edit</a>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteRow({{ $material->id }})">Delete</button>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="18" style="text-align: center;">Data tidak ditemukan</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     
                     </table>

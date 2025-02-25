@@ -295,7 +295,8 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/inquiry/previewSSImport', [InquirySalesController::class, 'previewSSImport'])->name('inquiry.previewSSImport');
     Route::delete('/deleteInquiryDetailImport/{id}', [InquirySalesController::class, 'deleteInquiryDetailImport'])->name('deleteInquiryDetailImport');
     Route::put('updateInquiryDetailsImport/{id}', [InquirySalesController::class, 'updateInquiryDetailsImport'])->name('updateInquiryDetailsImport');
-
+    Route::get('/editimport/{id}', [InquirySalesController::class, 'editimport'])->name('editimport');
+    Route::put('/updateimport/{id}', [InquirySalesController::class, 'updateImport'])->name('inquiry.update');
 
     Route::post('/inquiry/update-details/{id}', [InquirySalesController::class, 'updateInquiryDetails'])->name('updateInquiryDetails');
     Route::get('konfirmInquiry', [InquirySalesController::class, 'konfirmInquiry'])->name('konfirmInquiry');

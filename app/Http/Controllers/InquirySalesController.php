@@ -809,7 +809,88 @@ class InquirySalesController extends Controller
 }
 
 
+public function editimport($id)
+{
+    // Mengambil data DetailInquiryImport berdasarkan ID yang diberikan
+    $materials = DetailInquiryImport::where('id', $id)->get();
 
+    // Pastikan ada data materials sebelum mengambil inquiry
+    if ($materials->isEmpty()) {
+        abort(404, 'Data tidak ditemukan');
+    }
+
+    // Mengambil ID Inquiry dari DetailInquiryImport
+    $id_inquiry = $materials->first()->id_inquiry;
+
+    // Mengambil data InquirySales berdasarkan id_inquiry
+    $inquiry = InquirySales::findOrFail($id_inquiry);
+
+    // Ambil semua data TypeMaterial dan Customer
+    $typeMaterials = TypeMaterial::all();
+    $customers = Customer::all();
+
+    return view('inquiry.updateinquiryimport', compact('inquiry', 'typeMaterials', 'customers', 'materials'));
+}
+
+    public function updateImport(Request $request, $id){
+        // Validasi input
+        $request->validate([
+            'materials.*.id_type' => 'required|integer',
+            'materials.*.jenis' => 'required|string',
+            'materials.*.thickness' => 'nullable|numeric',
+            'materials.*.weight' => 'nullable|numeric',
+            'materials.*.inner_diameter' => 'nullable|numeric',
+            'materials.*.outer_diameter' => 'nullable|numeric',
+            'materials.*.length' => 'nullable|numeric',
+            'materials.*.qty' => 'required|integer',
+            'materials.*.m1' => 'nullable|numeric',
+            'materials.*.m2' => 'nullable|numeric',
+            'materials.*.m3' => 'nullable|numeric',
+            'materials.*.ship' => 'required|string',
+            'materials.*.so' => 'nullable|string',
+            'materials.*.note' => 'nullable|string',
+            'materials.*.customer' => 'required|string', // Nama customer untuk mencari ID
+        ]);
+
+        // Temukan inquiry berdasarkan ID
+        $inquiry = InquirySales::findOrFail($id);
+
+        $updatedMaterials = [];
+
+        // Update data materials
+        foreach ($request->materials as $materialData) {
+            $material = DetailInquiryImport::where('id_inquiry', $id)
+                ->where('id_type', $materialData['id_type'])
+                ->first();
+
+            if ($material) {
+                $jenis = $materialData['jenis'];
+
+                // Perbarui hanya nilai yang sesuai dengan jenisnya
+                $material->jenis = $jenis;
+                $material->thickness = ($jenis === 'Flat') ? $materialData['thickness'] : null;
+                $material->weight = ($jenis === 'Flat') ? $materialData['weight'] : null;
+                $material->inner_diameter = ($jenis === 'Honed Tube') ? $materialData['inner_diameter'] : null;
+                $material->outer_diameter = ($jenis === 'Round' || $jenis === 'Honed Tube') ? $materialData['outer_diameter'] : null;
+                $material->length = $materialData['length'];
+                $material->qty = $materialData['qty'];
+                $material->m1 = $materialData['m1'];
+                $material->m2 = $materialData['m2'];
+                $material->m3 = $materialData['m3'];
+                $material->ship = $materialData['ship'];
+                $material->so = $materialData['so'];
+                $material->note = $materialData['note'];
+                $material->customer = $materialData['customer'];
+                $material->save();
+
+                // Tambahkan data yang sudah diperbarui ke dalam array
+                $updatedMaterials[] = $material;
+            }
+        }
+
+        return redirect()->route('showFormSSimport', ['id' => $id])
+        ->with('success', 'Data berhasil diperbarui!');
+    }
 
 
 
