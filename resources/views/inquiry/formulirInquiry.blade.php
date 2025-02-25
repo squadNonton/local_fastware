@@ -371,7 +371,7 @@
                                         <option value="Deltamas">Deltamas</option>
                                         <option value="DS8">DS8</option>
                                     </select>`;
-                cell15.innerHTML = '<input type="text" name="so" size="10" required>';
+                cell15.innerHTML = '<input type="text" name="so" size="20" pattern="SO/[0-9]{4}/[0-9]{4}" title="Format harus SO/Tahun/4DigitAngka (contoh: SO/2024/1234)" required>';
                 // cell16.innerHTML = '<input type="text" name="nopo" size="10" required>';
                 cell16.innerHTML = '<input type="text" name="note" size="10" required>';
 
@@ -508,6 +508,7 @@
             function saveTable() {
                 var tableBody = document.getElementById('table-body');
                 var rows = tableBody.querySelectorAll('tr');
+
                 var data = {
                     id_inquiry: '{{ $inquiry->id }}',
                     kode_inquiry: '{{ $inquiry->kode_inquiry }}',
@@ -516,6 +517,7 @@
                     materials: [] // Inisialisasi array materials
                 };
 
+                var currentYear = new Date().getFullYear(); // Ambil tahun saat ini
 
                 rows.forEach(function(row) {
                     var idTypeElement = row.querySelector('select[name="id_type"]');
@@ -529,12 +531,22 @@
                     var m1Element = row.querySelector('input[name="m1"]');
                     var m2Element = row.querySelector('input[name="m2"]');
                     var m3Element = row.querySelector('input[name="m3"]');
-                    var shipElement = row.querySelector('select[name="ship"]'); // Pastikan ini adalah select
+                    var shipElement = row.querySelector('select[name="ship"]');
                     var soElement = row.querySelector('input[name="so"]');
-                    // var nopoElement = row.querySelector('input[name="nopo"]');
                     var noteElement = row.querySelector('input[name="note"]');
 
-                    // Pastikan semua elemen memiliki nilai
+                    // Ambil input SO (hanya 4 digit angka)
+                    var soNumber = soElement ? soElement.value.trim() : '';
+
+                    // Pastikan input SO hanya berupa 4 digit angka
+                    if (!/^\d{4}$/.test(soNumber)) {
+                        alert('SO harus berisi 4 digit angka saja!');
+                        return;
+                    }
+
+                    // Format SO otomatis: "SO/Tahun/4DigitAngka"
+                    var formattedSO = `SO/${currentYear}/${soNumber}`;
+
                     if (idTypeElement && jenisElement.value !== "" && idTypeElement.value !== "") {
                         var rowData = {
                             id_type: idTypeElement.value,
@@ -549,22 +561,20 @@
                             m2: m2Element ? m2Element.value : null,
                             m3: m3Element ? m3Element.value : null,
                             ship: shipElement ? shipElement.value : null,
-                            so: soElement ? soElement.value : null,
-                            // nopo: nopoElement ? nopoElement.value : null,
+                            so: formattedSO, // Simpan SO dalam format otomatis
                             note: noteElement ? noteElement.value : null
                         };
-                        data.materials.push(rowData); // Push ke materials
-
+                        data.materials.push(rowData);
                     }
                 });
 
                 // Cek apakah materials tidak kosong
                 if (data.materials.length === 0) {
-                    alert('Silakan tambahkan material terlebih dahulu.'); // Alert pengguna
-                    return; // Hentikan eksekusi jika tidak ada materials
+                    alert('Silakan tambahkan material terlebih dahulu.');
+                    return;
                 }
 
-                // Send the data via AJAX
+                // Kirim data via AJAX
                 $.ajax({
                     url: '{{ route('inquiry.previewSS') }}',
                     method: 'POST',
@@ -573,25 +583,13 @@
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    // success: function(response) {
-                    //     alert('Inquiry updated successfully');
-                    //     window.location.href = '{{ route('showFormSS', $inquiry->id) }}';
-                    // },
-                    // error: function(error) {
-                    //     console.error('Error occurred:', error);
-                    //     if (error.responseJSON) {
-                    //         console.error('Error response:', error.responseJSON);
-                    //     }
-                    //     alert('An error occurred');
-                    // }
-
                     success: function(response) {
                         Swal.fire({
                             title: 'Sukses!',
                             text: 'Inquiry updated successfully',
                             icon: 'success',
-                            timer: 2000, // Menentukan waktu dalam milisekon sebelum otomatis ditutup
-                            timerProgressBar: true, // Menampilkan progress bar
+                            timer: 2000,
+                            timerProgressBar: true,
                             willClose: () => {
                                 window.location.href = '{{ route('showFormSS', $inquiry->id) }}';
                             }
@@ -606,8 +604,8 @@
                             title: 'Error!',
                             text: 'An error occurred',
                             icon: 'error',
-                            timer: 2000, // Menentukan waktu dalam milisekon sebelum otomatis ditutup
-                            timerProgressBar: true // Menampilkan progress bar
+                            timer: 2000,
+                            timerProgressBar: true
                         });
                     }
                 });
