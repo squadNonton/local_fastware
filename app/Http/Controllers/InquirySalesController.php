@@ -26,6 +26,7 @@ class InquirySalesController extends Controller
         $inquiries = InquirySales::with('customer')
             ->whereIn('status', $statuses)
             ->where('is_active', 1)
+            ->where('loc_imp', 'Local')
             ->orderByRaw('FIELD(status, 0, 1, 2, 3, 4, 5, 6, 7,8,9)')
             ->orderBy('created_at', 'desc')
             ->get()
