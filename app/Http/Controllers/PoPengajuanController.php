@@ -12,6 +12,7 @@ use App\Models\TrsPoPengajuan;
 use App\Models\InquirySales;
 use Illuminate\Support\Carbon;
 use ZipArchive;
+use Illuminate\Support\Facades\Auth;
 
 class PoPengajuanController extends Controller
 {
@@ -430,11 +431,36 @@ class PoPengajuanController extends Controller
 
 public function overviewfpb()
 {
-    // Mengambil semua data tanpa melihat role_id
+    // Ambil role_id dari sesi pengguna yang login
+    $role_id = Auth::user()->role_id;
+
+    // Tentukan kategori berdasarkan role_id (gunakan array)
+    $kategori = [];
+
+    if (in_array($role_id, [1, 2, 3])) { // Role untuk IT
+        $kategori[] = 'it';
+    }
+    if (in_array($role_id, [1, 4, 5, 6])) { // Role untuk Subcont
+        $kategori[] = 'subcont';
+    }
+    if (in_array($role_id, [1, 7, 8, 9])) { // Role untuk Consumable
+        $kategori[] = 'consumable';
+    }
+    if (in_array($role_id, [1, 11, 12])) { // Role untuk GA
+        $kategori[] = 'GA';
+    }
+
+    // Jika tidak ada kategori yang cocok, kosongkan hasil
+    if (empty($kategori)) {
+        $data = collect();
+        return view('po_pengajuan.overviewfpb', compact('data'));
+    }
+
+    // Query data berdasarkan kategori yang sesuai dengan role_id
     $data = MstPoPengajuan::leftJoin('trs_po_pengajuans as trs', function ($join) {
             $join->on('trs.id_fpb', '=', 'mst_po_pengajuans.id')
                 ->whereRaw('trs.updated_at = (SELECT MAX(updated_at) FROM trs_po_pengajuans WHERE trs_po_pengajuans.id_fpb = mst_po_pengajuans.id)');
-        }) // LEFT JOIN dengan filter subquery untuk mengambil baris terbaru
+        })
         ->select(
             'mst_po_pengajuans.no_fpb',
             'mst_po_pengajuans.id',
@@ -446,14 +472,17 @@ public function overviewfpb()
             'mst_po_pengajuans.status_2',
             DB::raw('COALESCE(trs.updated_at, "-") as trs_updated_at')
         )
+        ->whereIn('mst_po_pengajuans.kategori_po', $kategori) // Pakai whereIn() untuk banyak kategori
         ->orderBy('mst_po_pengajuans.status_1', 'asc')
-        ->orderBy('mst_po_pengajuans.no_fpb', 'desc') // Urutan berdasarkan no_fpb
-        ->orderBy('trs.updated_at', 'asc') // Urutan berdasarkan trs.updated_at
+        ->orderBy('mst_po_pengajuans.no_fpb', 'desc')
+        ->orderBy('trs.updated_at', 'asc')
         ->get();
 
-    // Mengirim data ke view
+    // Kirim data ke tampilan
     return view('po_pengajuan.overviewfpb', compact('data'));
 }
+
+
 
 public function viewformfpb($id) {
     // Mengambil data FPB berdasarkan ID yang diklik
