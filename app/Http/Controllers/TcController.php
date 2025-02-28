@@ -302,7 +302,8 @@ class TcController extends Controller
                     'Admin Cutting Sheet (ACS)',
                     'Delivery Staff',
                     'Feeder',
-                    'Warehouse Admin', //tidak ada di db
+                    'Logistic Foreman',
+                    'Logistic Admin', //tidak ada di db
                     'PPIC Staff'
                 ])->unique('job_position')
                     ->sortBy('job_position');
@@ -316,7 +317,6 @@ class TcController extends Controller
                     'Admin HT & PPC',
                     'Production HT Operator', //tidak ada di db
                     'Maintenance Operator', //tidak ada di db
-
                     'MC Custom & Bubut Leader', //tidak ada di db
                     'MC Custom Staff',
                     'Operator Mc. Custom',
