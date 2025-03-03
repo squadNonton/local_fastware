@@ -522,7 +522,7 @@
                             var customers = {!! json_encode($customers) !!};
                             console.log(typeMaterials); // Untuk memastikan data benar
                         </script>
-                        <div class="datatable table table-hover table-responsive">
+                        <div class="table-responsive">
                             <table>
                                 <thead>
                                     <tr>
@@ -558,18 +558,23 @@
                 </div>
             </section>
             <!-- jQuery -->
-            <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-            <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
-            <script>
-                $(document).ready(function() {
-                    // Hover function for dropdowns
-                    $('.nav-item.dropdown').hover(function() {
-                        $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
-                    }, function() {
-                        $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
-                    });
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        {{-- excel --}}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+
+        <!-- SimpleDataTables JS -->
+        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
+
+        <script>
+            $(document).ready(function() {
+                // Hover function for dropdowns
+                $('.nav-item.dropdown').hover(function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+                }, function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
                 });
-            </script>
+            });
+        </script>
 
             <!-- Modal for Uploading File -->
             <div class="modal fade" id="uploadFileModal" tabindex="-1" aria-labelledby="uploadFileModalLabel"
@@ -607,6 +612,24 @@
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
             <script>
+                function toggle(source) {
+                checkboxes = document.getElementsByName('record');
+                for (var i = 0, n = checkboxes.length; i < n; i++) {
+                    checkboxes[i].checked = source.checked;
+                }
+            }
+
+            function deleteRow() {
+                var tableBody = document.getElementById('table-body');
+                var rows = tableBody.querySelectorAll('tr');
+                rows.forEach(function(row) {
+                    var checkbox = row.querySelector('input[name="record"]');
+                    if (checkbox && checkbox.checked) {
+                        tableBody.removeChild(row);
+                    }
+                });
+            }
+
                 function openUploadFileModal(id) {
                     document.getElementById('inquiryIdForFile').value = id; // Set inquiry ID
 

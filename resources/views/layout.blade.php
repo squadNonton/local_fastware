@@ -1042,7 +1042,7 @@
                                         <li><a class="dropdown-item" href="">Persetujuan Ka.Sie</a></li>
                                         <li><a class="dropdown-item" href="">Persetujuan Ka.Dept</a></li>
                                         <li><a class="dropdown-item" href="">Persetujuan Inventory</a></li>
-                                        <li><a class="dropdown-item" href="">Overview Import</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('overviewPurchaseImport') }}">Overview Import</a></li>
                                         <li><a class="dropdown-item" href="">Overview Inquiry Import</a></li>
                                     </ul>
                                 </li>

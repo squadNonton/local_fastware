@@ -15,8 +15,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use PDF;
 use App\Exports\InquirySalesExport;
+use App\Exports\DraftInquiryExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Response;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class InquirySalesController extends Controller
 {
@@ -677,6 +679,25 @@ class InquirySalesController extends Controller
 
         return view('inquiry.overviewPurchase', compact('inquiries', 'draftInquiries'));
     }
+    
+    public function overviewPurchaseImport()
+{
+    // Ambil semua inquiry dengan status relevan dan loc_imp harus 'Import'
+    $inquiries = InquirySales::whereIn('status', [5, 6, 8, 9]) // Mengambil status On Progress, Finished, etc.
+        ->where('loc_imp', 'Import') // Pastikan loc_imp benar-benar 'Import'
+        ->where('is_active', 1)
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    $draftInquiries = InquirySales::whereIn('status', [1, 2, 3, 4]) // Draft dan Open
+        ->where('loc_imp', 'Import') // Pastikan loc_imp benar-benar 'Import'
+        ->where('is_active', 1)
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    return view('inquiry.overviewPurchaseImport', compact('inquiries', 'draftInquiries'));
+}
+
 
     public function confirmPurchase($id)
     {
@@ -699,6 +720,75 @@ class InquirySalesController extends Controller
         // Mengembalikan response sukses
         return response()->json(['success' => 'Inquiry confirmed for purchasing successfully.']);
     }
+
+    public function exportexceloverviewimportpurchase()
+    {
+        return Excel::download(new DraftInquiryExport, 'inquiry-sales.xlsx');
+    }
+
+    public function importexceloverviewimportpurchase(Request $request)
+    {
+        // 1️⃣ Validasi apakah file dikirim
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls', // Hapus batasan ukuran file
+        ]);
+    
+        try {
+            $file = $request->file('file');
+            $spreadsheet = IOFactory::load($file->getPathname());
+            $worksheet = $spreadsheet->getActiveSheet();
+            $rows = $worksheet->toArray();
+
+            foreach ($rows as $index => $row) {
+                if ($index < 2) {
+                    // Skip the first two rows
+                    continue;
+                }
+
+                // Normalize numeric values to remove unnecessary decimals
+                foreach ($row as $key => $value) {
+                    if (is_numeric($value)) {
+                        $row[$key] = (string) intval($value);
+                    }
+                }
+
+                // Check if record exists
+                $existingRecord = InquirySales::where('id', $row[0])->where('kode_inquiry', $row[2])->first();
+
+                $data = [
+                    'id' => $row[0],
+                    'id_customer' => $row[1],
+                    'kode_inquiry' => $row[2],
+                    'type_order' => $row[3],
+                    'jenis_inquiry' => $row[4],
+                    'loc_imp' => $row[5],
+                    'est_date' => $row[6],
+                    'supplier' => $row[7],
+                    'create_by' => $row[8],
+                    'progress' => $row[9],
+                    'refnopo' => $row[10],
+                    'status' => $row[11],
+                    'updated_at' => now(),  
+                    'modified_by' => now(),
+                    'region' => $row[14],
+                ];
+
+                if ($existingRecord) {
+                    // Update the existing record
+                    $existingRecord->update($data);
+                } else {
+                    // Create a new record
+                    InquirySales::create($data);
+                }
+            }
+
+            return response()->json(['success' => true, 'message' => 'Inquiry Import berhasil']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan: '.$e->getMessage()], 500);
+        }
+    }
+    
+
 
     public function updateInquiry(Request $request)
     {

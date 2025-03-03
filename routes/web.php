@@ -23,6 +23,7 @@ use App\Http\Controllers\PoPengajuanController;
 use App\Http\Controllers\PengajuanSubcontController;
 use App\Http\Controllers\JsonToCsvController;
 use App\Http\Controllers\CrpController;
+use App\Models\InquirySales;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -301,6 +302,10 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::put('updateInquiryDetailsImport/{id}', [InquirySalesController::class, 'updateInquiryDetailsImport'])->name('updateInquiryDetailsImport');
     Route::get('/editimport/{id}', [InquirySalesController::class, 'editimport'])->name('editimport');
     Route::put('/updateimport/{id}', [InquirySalesController::class, 'updateImport'])->name('inquiry.update');
+    Route::get('/inquiry/overview-purchase-import', [InquirySalesController::class, 'overviewPurchaseImport'])->name('overviewPurchaseImport');
+    Route::get('/export-excel', [InquirySalesController::class, 'exportexceloverviewimportpurchase'])->name('exportExcelimportpurchase');
+    Route::post('/import-excel-purchase', [InquirySalesController::class, 'importexceloverviewimportpurchase'])->name('importExcelimportpurchase');
+
 
     Route::post('/inquiry/update-details/{id}', [InquirySalesController::class, 'updateInquiryDetails'])->name('updateInquiryDetails');
     Route::get('konfirmInquiry', [InquirySalesController::class, 'konfirmInquiry'])->name('konfirmInquiry');
