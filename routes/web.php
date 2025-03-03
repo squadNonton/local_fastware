@@ -22,6 +22,7 @@ use App\Http\Controllers\MadingController;
 use App\Http\Controllers\PoPengajuanController;
 use App\Http\Controllers\PengajuanSubcontController;
 use App\Http\Controllers\JsonToCsvController;
+use App\Http\Controllers\CrpController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -137,9 +138,12 @@ Route::middleware(['web', 'auth'])->group(function () {
         ->name('sales.lihat');
 
     // CRP
-    Route::get('/crp', function () {
-        return view('inquiry.crp'); // Sesuaikan dengan path yang benar
-    })->name('crp');
+    Route::get('/crp', [CrpController::class, 'index'])->name('crp');
+    Route::get('/crp/create', [CrpController::class, 'create'])->name('crp.create');
+    Route::post('/crp/store', [CrpController::class, 'store'])->name('crp.store');
+    Route::get('/crp/edit/{id}', [CrpController::class, 'edit'])->name('crp.edit');
+    Route::put('/crp/update/{id}', [CrpController::class, 'update'])->name('crp.update');
+    Route::delete('/crp/delete/{id}', [CrpController::class, 'destroy'])->name('crp.destroy');
 
     // Download File
     Route::get('download-excel/{tindaklanjut}', [FormFPPController::class, 'downloadAttachment'])->name('download.attachment');

@@ -119,7 +119,7 @@ class PoPengajuanController extends Controller
     }
 
     public function dashboardFPB(Request $request)
-        {
+    {
 
         // Filter Lead Time
         $startDate2 = $request->input('start_date_leadtime');
@@ -147,7 +147,7 @@ class PoPengajuanController extends Controller
             $queryTrs->whereBetween('created_at', [$startDate1, $endDate1]);
         }
 
-        
+
         // Query untuk chart kedua (Lead Time) - Semua kategori tanpa filter berdasarkan kategori
         $query2 = MstPoPengajuan::query();
         if ($startDate2 && $endDate2) {
@@ -160,7 +160,7 @@ class PoPengajuanController extends Controller
 
         $trsPoPengajuan = $queryTrs->get()->groupBy('id_fpb'); // Kelompokkan berdasarkan id_fpb
 
-            
+
         // Menghitung data unik berdasarkan no_fpb
         $fpbOpenUnique = 0;
         $fpbFinishUnique = 0;
@@ -210,7 +210,6 @@ class PoPengajuanController extends Controller
 
                     $monthlyData['finish'][$finishMonth]++;
                     $fpbFinishUnique++;
-
                 } else {
                     // Jika belum selesai, tetap dihitung sampai bulan berjalan
                     for ($year = $createdYear; $year <= $currentYear; $year++) {
@@ -241,61 +240,61 @@ class PoPengajuanController extends Controller
         $totalConfirmFinish = 0;
 
         foreach ($categories as $category) {
-        $filteredMst = $uniqueFPB2->where('kategori_po', $category);
-        $categoryTotal = $filteredMst->count();
+            $filteredMst = $uniqueFPB2->where('kategori_po', $category);
+            $categoryTotal = $filteredMst->count();
 
-        $categoryLeadDaysFirstJob = [];
-        $categoryLeadDaysSecondJob = [];
-        $categorySubmitConfirm = 0;
-        $categoryConfirmFinish = 0;
+            $categoryLeadDaysFirstJob = [];
+            $categoryLeadDaysSecondJob = [];
+            $categorySubmitConfirm = 0;
+            $categoryConfirmFinish = 0;
 
-        foreach ($filteredMst as $fpb) {
-            $fpbStartDate = $fpb->created_at;
+            foreach ($filteredMst as $fpb) {
+                $fpbStartDate = $fpb->created_at;
 
-            $trsPoFirstJob = TrsPoPengajuan::where('id_fpb', $fpb->id)
-                ->whereBetween('status', [2, 6])
-                ->orderBy('updated_at', 'desc')
-                ->first();
+                $trsPoFirstJob = TrsPoPengajuan::where('id_fpb', $fpb->id)
+                    ->whereBetween('status', [2, 6])
+                    ->orderBy('updated_at', 'desc')
+                    ->first();
 
-            $trsPoSecondJob = TrsPoPengajuan::where('id_fpb', $fpb->id)
-                ->whereBetween('status', [7, 9])
-                ->orderBy('updated_at', 'desc')
-                ->first();
+                $trsPoSecondJob = TrsPoPengajuan::where('id_fpb', $fpb->id)
+                    ->whereBetween('status', [7, 9])
+                    ->orderBy('updated_at', 'desc')
+                    ->first();
 
-            if ($trsPoFirstJob && $trsPoFirstJob->status >= 6) {
-                $leadDaysFirstJob = $trsPoFirstJob->updated_at->diffInDays($fpbStartDate);
-                $categoryLeadDaysFirstJob[] = $leadDaysFirstJob;
+                if ($trsPoFirstJob && $trsPoFirstJob->status >= 6) {
+                    $leadDaysFirstJob = $trsPoFirstJob->updated_at->diffInDays($fpbStartDate);
+                    $categoryLeadDaysFirstJob[] = $leadDaysFirstJob;
+                }
+
+                if ($trsPoSecondJob && $trsPoSecondJob->status >= 6) {
+                    $leadDaysSecondJob = $trsPoSecondJob->updated_at->diffInDays($trsPoFirstJob ? $trsPoFirstJob->updated_at : $fpbStartDate);
+                    $categoryLeadDaysSecondJob[] = $leadDaysSecondJob;
+                }
+
+                if ($trsPoSecondJob && in_array($trsPoSecondJob->status, [10, 9])) {
+                    $categoryConfirmFinish++;
+                } elseif ($trsPoFirstJob && in_array($trsPoFirstJob->status, [6, 7, 8])) {
+                    $categorySubmitConfirm++;
+                }
             }
 
-            if ($trsPoSecondJob && $trsPoSecondJob->status >= 6) {
-                $leadDaysSecondJob = $trsPoSecondJob->updated_at->diffInDays($trsPoFirstJob ? $trsPoFirstJob->updated_at : $fpbStartDate);
-                $categoryLeadDaysSecondJob[] = $leadDaysSecondJob;
-            }
+            $averageLeadDaysFirstJob = count($categoryLeadDaysFirstJob) > 0 ? round(array_sum($categoryLeadDaysFirstJob) / count($categoryLeadDaysFirstJob)) : 0;
+            $averageLeadDaysSecondJob = count($categoryLeadDaysSecondJob) > 0 ? round(array_sum($categoryLeadDaysSecondJob) / count($categoryLeadDaysSecondJob)) : 0;
 
-            if ($trsPoSecondJob && in_array($trsPoSecondJob->status, [10, 9])) {
-                $categoryConfirmFinish++;
-            } elseif ($trsPoFirstJob && in_array($trsPoFirstJob->status, [6, 7, 8])) {
-                $categorySubmitConfirm++;
-            }
-        }
+            $categoryPercentage = $totalFPB > 0 ? round(($categoryTotal / $totalFPB) * 100) : 0;
+            $totalPercentage += $categoryPercentage;
 
-        $averageLeadDaysFirstJob = count($categoryLeadDaysFirstJob) > 0 ? round(array_sum($categoryLeadDaysFirstJob) / count($categoryLeadDaysFirstJob)) : 0;
-        $averageLeadDaysSecondJob = count($categoryLeadDaysSecondJob) > 0 ? round(array_sum($categoryLeadDaysSecondJob) / count($categoryLeadDaysSecondJob)) : 0;
+            // Tambahkan ke total global
+            $totalSubmitConfirm += $categorySubmitConfirm;
+            $totalConfirmFinish += $categoryConfirmFinish;
 
-        $categoryPercentage = $totalFPB > 0 ? round(($categoryTotal / $totalFPB) * 100) : 0;
-        $totalPercentage += $categoryPercentage;
-
-        // Tambahkan ke total global
-        $totalSubmitConfirm += $categorySubmitConfirm;
-        $totalConfirmFinish += $categoryConfirmFinish;
-
-        $leadTimeData[$category] = [
-            'average_lead_days_first' => $averageLeadDaysFirstJob,
-            'average_lead_days_second' => $averageLeadDaysSecondJob,
-            'total' => $categoryTotal,
-            'percentage' => $categoryPercentage,
-            'submit_confirm' => $categorySubmitConfirm,
-            'confirm_finish' => $categoryConfirmFinish
+            $leadTimeData[$category] = [
+                'average_lead_days_first' => $averageLeadDaysFirstJob,
+                'average_lead_days_second' => $averageLeadDaysSecondJob,
+                'total' => $categoryTotal,
+                'percentage' => $categoryPercentage,
+                'submit_confirm' => $categorySubmitConfirm,
+                'confirm_finish' => $categoryConfirmFinish
             ];
         }
 
@@ -339,7 +338,7 @@ class PoPengajuanController extends Controller
                 $processedinquiry[$inquiry->id] = true;
 
                 if ($lastRecord1) {
-                    if ($lastRecord1->status == 6    ) {
+                    if ($lastRecord1->status == 6) {
                         $finishMonth1 = Carbon::parse($lastRecord1->updated_at)->month - 1;
                         for ($m = $createdMonth1; $m <= $finishMonth1; $m++) {
                             $monthlyData1['open'][$m]++;
@@ -398,141 +397,140 @@ class PoPengajuanController extends Controller
         $inquiryFinishPercentage = $totalinquiry > 0 ? round(($inquiryFinishUnique / $totalinquiry) * 100) : 0;
 
 
-    return view('dashboard.dashboardFPB', [
-        'fpbOpen' => $fpbOpenUnique,
-        'fpbFinish' => $fpbFinishUnique,
-        'fpbOpenPercentage' => $fpbOpenPercentage,
-        'fpbFinishPercentage' => $fpbFinishPercentage,
-        'leadTimeData' => $leadTimeData,
-        'monthlyData' => $monthlyData,
-        'totalFPB' => $totalFPB,
-        'fpbOpenUnique' => $fpbOpenUnique,
-        'fpbFinishUnique' => $fpbFinishUnique,
-        'kategoriList' => $kategoriList,
-        'startDate1'   => $startDate1,
-        'endDate1'     => $endDate1,
-        'startDate2' => $startDate2,
-        'endDate2'   => $endDate2,
-        'startDate' => $startDate,
-        'endDate' => $endDate,
-        'inquiryOpenCount' => $inquiryOpenCount,
-        'inquiryOnprogressCount' => $inquiryOnprogressCount,
-        'inquiryFinishCount' => $inquiryFinishCount,
-        'inquiryOpenUnique' => $inquiryOpenUnique,
-        'inquiryOnprogressUnique' => $inquiryOnprogressUnique,
-        'inquiryFinishUnique' => $inquiryFinishUnique,
-        'inquiryOpenPercentage' => $inquiryOpenPercentage,
-        'inquiryOnprogressPercentage' => $inquiryOnprogressPercentage,
-        'inquiryFinishPercentage' => $inquiryFinishPercentage,
-        'monthlyData1' => $monthlyData1,
-        'totalinquiry' => $totalinquiry,
-    ]);
-}
-
-public function overviewfpb()
-{
-    // Ambil role_id dari sesi pengguna yang login
-    $role_id = Auth::user()->role_id;
-
-    // Tentukan kategori berdasarkan role_id (gunakan array)
-    $kategori = [];
-
-    if (in_array($role_id, [1, 2, 3])) { // Role untuk IT
-        $kategori[] = 'it';
-    }
-    if (in_array($role_id, [1, 4, 5, 6])) { // Role untuk Subcont
-        $kategori[] = 'subcont';
-    }
-    if (in_array($role_id, [1, 7, 8, 9])) { // Role untuk Consumable
-        $kategori[] = 'consumable';
-    }
-    if (in_array($role_id, [1, 11, 12])) { // Role untuk GA
-        $kategori[] = 'GA';
+        return view('dashboard.dashboardFPB', [
+            'fpbOpen' => $fpbOpenUnique,
+            'fpbFinish' => $fpbFinishUnique,
+            'fpbOpenPercentage' => $fpbOpenPercentage,
+            'fpbFinishPercentage' => $fpbFinishPercentage,
+            'leadTimeData' => $leadTimeData,
+            'monthlyData' => $monthlyData,
+            'totalFPB' => $totalFPB,
+            'fpbOpenUnique' => $fpbOpenUnique,
+            'fpbFinishUnique' => $fpbFinishUnique,
+            'kategoriList' => $kategoriList,
+            'startDate1'   => $startDate1,
+            'endDate1'     => $endDate1,
+            'startDate2' => $startDate2,
+            'endDate2'   => $endDate2,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'inquiryOpenCount' => $inquiryOpenCount,
+            'inquiryOnprogressCount' => $inquiryOnprogressCount,
+            'inquiryFinishCount' => $inquiryFinishCount,
+            'inquiryOpenUnique' => $inquiryOpenUnique,
+            'inquiryOnprogressUnique' => $inquiryOnprogressUnique,
+            'inquiryFinishUnique' => $inquiryFinishUnique,
+            'inquiryOpenPercentage' => $inquiryOpenPercentage,
+            'inquiryOnprogressPercentage' => $inquiryOnprogressPercentage,
+            'inquiryFinishPercentage' => $inquiryFinishPercentage,
+            'monthlyData1' => $monthlyData1,
+            'totalinquiry' => $totalinquiry,
+        ]);
     }
 
-    // Jika tidak ada kategori yang cocok, kosongkan hasil
-    if (empty($kategori)) {
-        $data = collect();
-        return view('po_pengajuan.overviewfpb', compact('data'));
-    }
+    public function overviewfpb()
+    {
+        $name = Auth::user()->name;
+        $kategori_po = [];
+        $modified_at = [];
 
-    // Query data berdasarkan kategori yang sesuai dengan role_id
-    $data = MstPoPengajuan::leftJoin('trs_po_pengajuans as trs', function ($join) {
+        if (in_array($name, ['ADMINSTRATOR', 'MEDI KRISNANTO'])) {
+            $kategori_po = ['Spareparts', 'GA', 'Subcont', 'Consumable', 'IT'];
+            $modified_at = ['MUGI PRAMONO', 'RAGIL ISHA RAHMANTO', 'MUHAMMAD DINAR FARISI', 'MEDI KRISNANTO'];
+        } elseif (in_array($name, ['GUNAWAN', 'BANGUN SUTOPO', 'ZAENAL ARIFIN'])) {
+            $kategori_po = ['Spareparts', 'GA', 'Consumable', 'IT'];
+            $modified_at = ['MUGI PRAMONO'];
+        } elseif (in_array($name, ['JEFRY WASTON E', 'YUSUF SYAFAAT'])) {
+            $kategori_po = ['Spareparts', 'GA', 'Consumable', 'IT'];
+            $modified_at = ['RAGIL ISHA RAHMANTO'];
+        } elseif (in_array($name, ['MAMIK ABIDIN', 'FATUL MUKMIN', 'ELI HANDOYO', 'NURSALIM'])) {
+            $kategori_po = ['Spareparts', 'GA', 'Consumable', 'IT'];
+            $modified_at = ['ABDUR RAHMAN AL FAAIZ'];
+        }
+
+        if (empty($kategori_po) || empty($modified_at)) {
+            $data = collect();
+            return view('po_pengajuan.overviewfpb', compact('data'));
+        }
+
+        // Query data
+        $data = MstPoPengajuan::leftJoin('trs_po_pengajuans as trs', function ($join) {
             $join->on('trs.id_fpb', '=', 'mst_po_pengajuans.id')
                 ->whereRaw('trs.updated_at = (SELECT MAX(updated_at) FROM trs_po_pengajuans WHERE trs_po_pengajuans.id_fpb = mst_po_pengajuans.id)');
         })
-        ->select(
-            'mst_po_pengajuans.no_fpb',
-            'mst_po_pengajuans.id',
-            'mst_po_pengajuans.modified_at',
-            'mst_po_pengajuans.kategori_po',
-            'mst_po_pengajuans.nama_barang',
-            'mst_po_pengajuans.catatan',
-            'mst_po_pengajuans.status_1',
-            'mst_po_pengajuans.status_2',
-            DB::raw('COALESCE(trs.updated_at, "-") as trs_updated_at')
-        )
-        ->whereIn('mst_po_pengajuans.kategori_po', $kategori) // Pakai whereIn() untuk banyak kategori
-        ->orderBy('mst_po_pengajuans.status_1', 'asc')
-        ->orderBy('mst_po_pengajuans.no_fpb', 'desc')
-        ->orderBy('trs.updated_at', 'asc')
-        ->get();
+            ->select(
+                'mst_po_pengajuans.no_fpb',
+                'mst_po_pengajuans.id',
+                'mst_po_pengajuans.modified_at',
+                'mst_po_pengajuans.kategori_po',
+                'mst_po_pengajuans.nama_barang',
+                'mst_po_pengajuans.catatan',
+                'mst_po_pengajuans.status_1',
+                'mst_po_pengajuans.status_2',
+                DB::raw('COALESCE(trs.updated_at, "-") as trs_updated_at')
+            )
+            ->whereIn('mst_po_pengajuans.kategori_po', $kategori_po)
+            ->whereIn('mst_po_pengajuans.modified_at', $modified_at)
+            ->orderBy('mst_po_pengajuans.no_fpb', 'desc')
+            ->orderBy('trs.updated_at', 'asc')
+            ->get();
 
-    // Kirim data ke tampilan
-    return view('po_pengajuan.overviewfpb', compact('data'));
-}
-
-
-
-public function viewformfpb($id) {
-    // Mengambil data FPB berdasarkan ID yang diklik
-    $latestPoPengajuan = MstPoPengajuan::find($id);
-
-    if (!$latestPoPengajuan) {
-        return abort(404); // Jika tidak ada data FPB
+        // Kirim data ke tampilan
+        return view('po_pengajuan.overviewfpb', compact('data'));
     }
 
-    // Mengambil semua data berdasarkan no_fpb yang sama
-    $mstPoPengajuans = MstPoPengajuan::where('no_fpb', $latestPoPengajuan->no_fpb)->get();
 
-    // Mengambil modified_at dari TrsPoPengajuan berdasarkan status tertentu
-    $trsPoPengajuanStatus3 = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
-        ->where('status', 3)
-        ->select('modified_at')
-        ->first();
 
-    $trsPoPengajuanStatus4 = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
-        ->where('status', 5)
-        ->select('modified_at')
-        ->first();
+    public function viewformfpb($id)
+    {
+        // Mengambil data FPB berdasarkan ID yang diklik
+        $latestPoPengajuan = MstPoPengajuan::find($id);
 
-    // Tentukan User Acc berdasarkan kategori_po
-    $userAccHeader = '';
-    $userAccbody = '';
+        if (!$latestPoPengajuan) {
+            return abort(404); // Jika tidak ada data FPB
+        }
 
-    if ($latestPoPengajuan->kategori_po == 'IT') {
-        $userAccHeader = 'IT';
-    } elseif ($latestPoPengajuan->kategori_po == 'GA') {
-        $userAccHeader = 'GA';
-    } elseif (in_array($latestPoPengajuan->kategori_po, ['Consumable', 'Spareparts', 'Indirect Material'])) {
-        $userAccHeader = 'Warehouse';
+        // Mengambil semua data berdasarkan no_fpb yang sama
+        $mstPoPengajuans = MstPoPengajuan::where('no_fpb', $latestPoPengajuan->no_fpb)->get();
+
+        // Mengambil modified_at dari TrsPoPengajuan berdasarkan status tertentu
+        $trsPoPengajuanStatus3 = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
+            ->where('status', 3)
+            ->select('modified_at')
+            ->first();
+
+        $trsPoPengajuanStatus4 = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
+            ->where('status', 5)
+            ->select('modified_at')
+            ->first();
+
+        // Tentukan User Acc berdasarkan kategori_po
+        $userAccHeader = '';
+        $userAccbody = '';
+
+        if ($latestPoPengajuan->kategori_po == 'IT') {
+            $userAccHeader = 'IT';
+        } elseif ($latestPoPengajuan->kategori_po == 'GA') {
+            $userAccHeader = 'GA';
+        } elseif (in_array($latestPoPengajuan->kategori_po, ['Consumable', 'Spareparts', 'Indirect Material'])) {
+            $userAccHeader = 'Warehouse';
+        }
+
+        $trsPoPengajuan = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
+            ->where('status', 4)
+            ->select('modified_at')
+            ->first();
+
+        $userAccbody = $trsPoPengajuan ? $trsPoPengajuan->modified_at : '';
+
+        // Mengambil semua transaksi berdasarkan ID FPB
+        $matchingTrsPoPengajuans = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
+            ->select('created_at', 'status')
+            ->get();
+
+        // Mengirim data ke view
+        return view('po_pengajuan.view_form_overview', compact('mstPoPengajuans', 'userAccHeader', 'userAccbody', 'matchingTrsPoPengajuans', 'trsPoPengajuanStatus4'));
     }
-    
-    $trsPoPengajuan = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
-        ->where('status', 4)
-        ->select('modified_at')
-        ->first();
-
-    $userAccbody = $trsPoPengajuan ? $trsPoPengajuan->modified_at : '';
-
-    // Mengambil semua transaksi berdasarkan ID FPB
-    $matchingTrsPoPengajuans = TrsPoPengajuan::where('id_fpb', $latestPoPengajuan->id)
-        ->select('created_at', 'status')
-        ->get();
-
-    // Mengirim data ke view
-    return view('po_pengajuan.view_form_overview', compact('mstPoPengajuans', 'userAccHeader', 'userAccbody', 'matchingTrsPoPengajuans', 'trsPoPengajuanStatus4'));
-}
 
     public function indexPoDeptHead()
     {
@@ -1545,7 +1543,7 @@ public function viewformfpb($id) {
     {
         try {
             Log::info('Received request data for purchase order:', $request->all());
-    
+
             $validatedData = $request->validate([
                 'kategori_po' => 'required|string',
                 'nama_barang.*' => 'required|string',
@@ -1561,31 +1559,31 @@ public function viewformfpb($id) {
                 'nama_project.*' => 'nullable|string',
                 'no_so.*' => 'nullable|string',
             ]);
-    
+
             Log::info('Validated data:', $validatedData);
-    
+
             // Generate no_fpb
             $currentYear = date('Y');
             $latestPo = MstPoPengajuan::whereYear('created_at', $currentYear)
                 ->orderBy('id', 'desc')
                 ->first();
-    
+
             $newPoNumber = 1;
             if ($latestPo) {
                 $lastPoNumber = (int)substr($latestPo->no_fpb, strrpos($latestPo->no_fpb, '/') + 1);
                 $newPoNumber = $lastPoNumber + 1;
             }
-    
+
             $no_fpb = 'FPB/' . $currentYear . '/' . str_pad($newPoNumber, 5, '0', STR_PAD_LEFT);
             Log::info('Generated PO number: ' . $no_fpb);
-    
+
             while (MstPoPengajuan::where('no_fpb', $no_fpb)->exists()) {
                 Log::warning('Duplicate PO number found, generating a new one.');
                 $newPoNumber++;
                 $no_fpb = 'FPB/' . $currentYear . '/' . str_pad($newPoNumber, 5, '0', STR_PAD_LEFT);
                 Log::info('Newly generated PO number: ' . $no_fpb);
             }
-    
+
             foreach ($validatedData['nama_barang'] as $index => $nama_barang) {
                 $purchaseOrder = new MstPoPengajuan();
                 $purchaseOrder->no_fpb = $no_fpb;
@@ -1595,54 +1593,54 @@ public function viewformfpb($id) {
                 $purchaseOrder->pcs = $validatedData['pcs'][$index];
                 $purchaseOrder->price_list = isset($validatedData['price_list'][$index]) ?
                     str_replace(',', '', $validatedData['price_list'][$index]) : null;
-    
+
                 if (isset($validatedData['pcs'][$index]) && isset($validatedData['price_list'][$index])) {
                     $purchaseOrder->total_harga = $validatedData['pcs'][$index] * str_replace(',', '', $validatedData['price_list'][$index]);
                 } else {
                     $purchaseOrder->total_harga = null;
                 }
-    
+
                 Log::info('Creating purchase order for item:', [
                     'no_fpb' => $no_fpb,
                     'kategori_po' => $validatedData['kategori_po'],
                     'nama_barang' => $nama_barang,
                     'spesifikasi' => $validatedData['spesifikasi'][$index],
                 ]);
-    
+
                 // Menyimpan file ke dalam kolom `file_name`
                 if ($request->hasFile('file')) {
                     $fileNames = [];
                     $existingFiles = json_decode($purchaseOrder->file_name ?? '[]', true); // Mendapatkan file yang sudah ada
                     $nextNumber = count($existingFiles) + 1; // Menentukan nomor urut berikutnya
-                
+
                     foreach ($request->file('file') as $file) {
                         if ($file->isValid()) {
                             $originalName = $file->getClientOriginalName();
                             $fileName = pathinfo($originalName, PATHINFO_FILENAME);
                             $extension = $file->getClientOriginalExtension();
-                
+
                             // Tambahkan nomor acak untuk menghindari duplikasi
                             $randomNumber = rand(1000, 9999);
                             $newFileName = 'adsi_' . $fileName . '(' . $randomNumber . ')_' . $nextNumber . '.' . $extension;
-                
+
                             // Pastikan file tidak ada sebelum menyimpan
                             while (file_exists(public_path('assets/pre_order/' . $newFileName))) {
                                 $randomNumber = rand(1000, 9999); // Buat nomor acak baru
                                 $newFileName = 'adsi_' . $fileName . '(' . $randomNumber . ')_' . $nextNumber . '.' . $extension;
                             }
-                
+
                             $file->move(public_path('assets/pre_order'), $newFileName);
-                
+
                             $fileNames[] = $newFileName;
                             $nextNumber++; // Menambah nomor urut untuk file berikutnya
                         }
                     }
-                
+
                     $allFileNames = array_merge($existingFiles, $fileNames); // Menggabungkan file yang sudah ada dengan file baru
                     $purchaseOrder->file_name = json_encode($allFileNames); // Menyimpan nama file ke dalam kolom `file_name`
                 }
 
-    
+
                 if ($validatedData['kategori_po'] === 'Subcont') {
                     $purchaseOrder->target_cost = isset($validatedData['target_cost'][$index]) ?
                         str_replace(',', '', $validatedData['target_cost'][$index]) : null;
@@ -1650,10 +1648,10 @@ public function viewformfpb($id) {
                     $purchaseOrder->rekomendasi = $validatedData['rekomendasi'][$index] ?? null;
                     $purchaseOrder->nama_customer = $validatedData['nama_customer'][$index] ?? null;
                     $purchaseOrder->nama_project = $validatedData['nama_project'][$index] ?? null;
-    
+
                     $so_number = 'SO/' . $currentYear . '/' . ($validatedData['no_so'][$index] ?? '');
                     $purchaseOrder->no_so = $so_number;
-    
+
                     Log::info('Subcont fields for item:', [
                         'target_cost' => $purchaseOrder->target_cost,
                         'lead_time' => $purchaseOrder->lead_time,
@@ -1663,10 +1661,10 @@ public function viewformfpb($id) {
                         'no_so' => $so_number,
                     ]);
                 }
-    
+
                 $purchaseOrder->status_1 = 1;
                 $purchaseOrder->modified_at = $request->user()->name;
-    
+
                 try {
                     $purchaseOrder->save();
                     Log::info('Purchase order saved successfully:', ['no_fpb' => $no_fpb]);
@@ -1678,7 +1676,7 @@ public function viewformfpb($id) {
                     return redirect()->route('index.PO')->with('error', 'Data failed to save: ' . $e->getMessage());
                 }
             }
-    
+
             return redirect()->route('index.PO')->with('success', 'Data successfully saved!');
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Validation failed: ' . json_encode($e->errors()));
@@ -1761,7 +1759,7 @@ public function viewformfpb($id) {
                             $pengajuanPoItem->file_name = json_encode($uploadedFiles);
                         }
 
-                        
+
 
                         // Special handling for Subcont category
                         if ($pengajuanPo->kategori_po === 'Subcont') {
@@ -1803,18 +1801,18 @@ public function viewformfpb($id) {
 
                     // Handle file upload for new item
                     // Handle new file upload
-                        if ($request->hasFile('file.' . $index)) {
-                            $uploadedFiles = $request->file('file.' . $index);
-                            $fileNames = [];
+                    if ($request->hasFile('file.' . $index)) {
+                        $uploadedFiles = $request->file('file.' . $index);
+                        $fileNames = [];
 
-                            foreach ($uploadedFiles as $fileIndex => $file) {
-                                $hashedName = uniqid('adsi_') . '_' . ($fileIndex + 1) . '.' . $file->getClientOriginalExtension();
-                                $file->move(public_path('assets/pre_order'), $hashedName);
-                                $fileNames[] = $hashedName;
-                            }
-
-                            $pengajuanPoItem->file_name = json_encode($uploadedFiles);
+                        foreach ($uploadedFiles as $fileIndex => $file) {
+                            $hashedName = uniqid('adsi_') . '_' . ($fileIndex + 1) . '.' . $file->getClientOriginalExtension();
+                            $file->move(public_path('assets/pre_order'), $hashedName);
+                            $fileNames[] = $hashedName;
                         }
+
+                        $pengajuanPoItem->file_name = json_encode($uploadedFiles);
+                    }
 
                     // Special handling for Subcont category
                     if ($pengajuanPo->kategori_po === 'Subcont') {

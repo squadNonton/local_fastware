@@ -3,19 +3,12 @@
 @section('content')
     <main id="main" class="main">
         <style>
-            /* Gaya dasar untuk tabel */
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                font-family: Arial, sans-serif;
-                margin-bottom: 20px;
-                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            .fo {
+                font-family: Cambria, serif;
             }
 
             /* Gaya untuk header tabel */
             thead th {
-                background-color: #00d9ff;
-                color: black;
                 text-transform: uppercase;
                 font-weight: bold;
                 padding: 12px;
@@ -228,11 +221,15 @@
                     display: table-cell;
                 }
 
-
                 /* Mengatur lebar khusus untuk kolom No PO */
                 th:nth-child(1),
                 td:nth-child(1) {
-                    width: 3%;
+                    width: 5px;
+                }
+
+                th:nth-child(2),
+                td:nth-child(2) {
+                    width: 15px;
                 }
 
                 th:nth-child(3),
@@ -308,14 +305,14 @@
                 color: initial;
             }
         </style>
-        <div class="pagetitle">
+        {{-- <div class="pagetitle">
             <h1>Halaman View Form </h1>
             <nav>
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item active">Halaman View Form FPB</li>
                 </ol>
             </nav>
-        </div><!-- End Page Title -->
+        </div> --}}
 
         <section class="section">
             <div class="row">
@@ -324,7 +321,7 @@
                         <div id="print-area">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <!-- Text FORM PERMINTAAN BARANG (FPB) -->
-                                <h4 style="margin-top: 3%;"><b>FORM PERMINTAAN BARANG (FPB)</b></h4>
+                                <h4 class="fo mt-4"><b>FORM PERMINTAAN BARANG (FPB)</b></h4>
                                 <!-- Gambar logo -->
                                 <img id="signature-section" src="{{ asset('assets/pre_order/logo-adasi.png') }}"
                                     alt="Logo Adasi" style="width: 330px; height: auto;">
@@ -332,31 +329,44 @@
 
                             <!-- Ambil no_fpb dari item pertama dalam koleksi -->
                             @if ($mstPoPengajuans->isNotEmpty())
-                                <p>PIC : {{ $mstPoPengajuans->first()->modified_at }}</p>
-                                <p>NO FPB : {{ $mstPoPengajuans->first()->no_fpb }}</p>
+                                <button type="button" class="btn btn-primary position-relative fo">
+                                    PIC : {{ $mstPoPengajuans->first()->modified_at }}
+                                    <span
+                                        class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                                        <span class="visually-hidden"></span>
+                                    </span>
+                                </button>
+                                <button type="button" class="btn btn-primary position-relative fo">
+                                    NO FPB : {{ $mstPoPengajuans->first()->no_fpb }}
+                                    <span
+                                        class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                                        <span class="visually-hidden"></span>
+                                    </span>
+                                </button>
+                                <hr>
                             @else
                                 <p>NO FPB : Data not found</p>
                             @endif
 
                             <div style="overflow-x: auto;">
-                                <table>
+                                <table class="datatable table table-hover">
                                     <thead>
                                         <tr>
-                                            <th style="width: 2%">No</th>
-                                            <th class="no-print" style="width: 20%">No PO</th>
-                                            <th style="width: 10%">Nama Barang</th>
-                                            <th style="width: 10%">Spesifikasi</th>
-                                            <th style="width: 2%">PCS</th>
-                                            <th style="width: 10%">Harga Satuan</th>
-                                            <th style="width: 10%">Total Harga</th>
+                                            <th style="width: 4px">No</th>
+                                            <th class="no-print">No PO</th>
+                                            <th>Nama Barang</th>
+                                            <th>Spesifikasi</th>
+                                            <th>PCS</th>
+                                            <th>Harga Satuan</th>
+                                            <th>Total Harga</th>
                                             @if ($mstPoPengajuans->first()->kategori_po == 'Subcont')
                                                 <!-- Tambahkan kolom baru jika kategori_po adalah Subcont -->
                                                 <th style="width: 10%; text-align: center;">Target Cost / Unit</th>
-                                                <th style="width: 10%">Lead Time</th>
+                                                <th>Lead Time</th>
                                                 <th style="width: 10%; text-align: center;">Rekomendasi (Jika Ada)</th>
-                                                <th style="width: 10%">Nama Customer</th>
-                                                <th style="width: 10%">Nama Project</th>
-                                                <th style="width: 10%">NO SO</th>
+                                                <th>Nama Customer</th>
+                                                <th>Nama Project</th>
+                                                <th>NO SO</th>
                                             @endif
                                             <th class="no-print">File</th>
                                             <th>Tgl Dibuat</th>
@@ -409,10 +419,11 @@
                                                         {{ $item->no_so }}</td>
                                                 @endif
 
-                                                <td class="{{ $item->status_2 == 8 ? 'disabled-cell' : '' }} no-print" style="text-align: center;">
-                                                    @if (!empty(json_decode($item->file_name, true)))  
-                                                        <a href="{{ route('download.file', $item->id) }}" 
-                                                           class="btn btn-sm btn-primary" title="Download All Files">
+                                                <td class="{{ $item->status_2 == 8 ? 'disabled-cell' : '' }} no-print"
+                                                    style="text-align: center;">
+                                                    @if (!empty(json_decode($item->file_name, true)))
+                                                        <a href="{{ route('download.file', $item->id) }}"
+                                                            class="btn btn-sm btn-primary" title="Download All Files">
                                                             <i class="fas fa-download"></i> Download All
                                                         </a>
                                                     @else
@@ -456,7 +467,8 @@
                                                 </td>
                                                 <td class="no-print">
                                                     @if ($item->quotation_file)
-                                                        <button class="btn btn-primary btn-action" data-id="{{ $item->id }}">
+                                                        <button class="btn btn-primary btn-action"
+                                                            data-id="{{ $item->id }}">
                                                             <i class="fas fa-check-circle"></i> Konfirmasi
                                                         </button>
                                                     @else
@@ -603,22 +615,23 @@
                                 </table>
                             </div>
                         </div>
-                        <div class="d-flex justify-content-end gap-3" style="margin-top: 2%;">
-                            <a href="{{ route('index.PO') }}" class="btn btn-secondary btn-sm" style="margin-top: 3%;"
-                                title="Back">
-                                <i class="fas fa-arrow-left"></i> Back
+                        <div class="d-flex justify-content-end gap-3 mt-2">
+                            <a href="{{ route('index.PO') }}" title="Back">
+                                <button type="button" class="btn btn-secondary position-relative">
+                                    <i class="fas fa-arrow-left"></i>
+                                    Back
+                                </button>
                             </a>
-                            <a href="javascript:void(0);" class="btn btn-success btn-sm" style="margin-top: 3%;"
-                                onclick="printTable()">
-                                <i class="fas fa-print"></i>Print PDF
+                            <a href="javascript:void(0);"onclick="printTable()">
+                                <button type="button" class="btn btn-danger position-relative">
+                                    <i class="fas fa-print"></i>
+                                    Print PDF
+                                </button>
                             </a>
                         </div>
 
-                        <h4 style="margin-top: 3%">
-                            <i class="fas fa-eye" style="margin-left: 10px;"></i>
-                            <b>HISTORI PERMINTAAN BARANG (FPB)</b>
-                        </h4>
-                        <table id="historyTable" class="table table-bordered table-hover"
+                        <h4 class="fo fw-bold">HISTORI PERMINTAAN BARANG (FPB)</h4>
+                        <table id="historyTable" class="datatable table table-hover"
                             style="width: 100%; overflow: hidden;">
                             <thead>
                                 <tr>
@@ -644,19 +657,19 @@
             </div>
         </section>
 
-                        <!-- jQuery -->
-                        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-                        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
-                        <script>
-                            $(document).ready(function() {
-                                // Hover function for dropdowns
-                                $('.nav-item.dropdown').hover(function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
-                                }, function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
-                                });
-                            });
-                            </script>
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
+        <script>
+            $(document).ready(function() {
+                // Hover function for dropdowns
+                $('.nav-item.dropdown').hover(function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+                }, function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
+                });
+            });
+        </script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
         <script>
