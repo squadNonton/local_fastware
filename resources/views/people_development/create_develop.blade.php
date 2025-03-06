@@ -103,6 +103,9 @@
                                             case 2:
                                                 echo 'Sales';
                                                 break;
+                                            case 14:
+                                                echo 'PDCA, Procurement, Inventory, IT';
+                                                break;
                                             default:
                                                 echo 'Unknown Department'; // Fallback for any undefined roles
                                                 break;
@@ -153,19 +156,19 @@
             </div>
         </section>
 
-                        <!-- jQuery -->
-                        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-                        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
-                        <script>
-                            $(document).ready(function() {
-                                // Hover function for dropdowns
-                                $('.nav-item.dropdown').hover(function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
-                                }, function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
-                                });
-                            });
-                            </script>
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
+        <script>
+            $(document).ready(function() {
+                // Hover function for dropdowns
+                $('.nav-item.dropdown').hover(function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+                }, function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
+                });
+            });
+        </script>
         <!-- jQuery -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
@@ -255,7 +258,7 @@
                     userDropdown.innerHTML = '<option value="">---- Pilih Karyawan ----</option>';
 
                     var jobPositions =
-                    @json($jobPositions); // Get job positions with users from the controller
+                        @json($jobPositions); // Get job positions with users from the controller
                     var uniqueUsers = [];
 
                     // Filter and populate job positions and users based on selected section

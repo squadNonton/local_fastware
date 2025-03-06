@@ -32,17 +32,19 @@ class PenilaianTCController extends Controller
         // Cek apakah role_id adalah 1, 14, atau 15
         if (!in_array($roleId, [1, 14, 15])) {
             // Tentukan data yang ditampilkan berdasarkan nama user
-            if ($userName == 'RANGGA FADILLAH') {
+            if ($userName == 'ABDUR RAHMAN AL FAAIZ') {
                 $penilaianData = $penilaianData->filter(function ($item) {
                     return in_array($item->id_job_position, [
-                        'Logistic Foreman',
-                        'Feeder',
-                        'Delivery Staff',
+                        'Warehouse Foreman', //tidak ada di db
                         'Admin Cutting Sheet (ACS)',
-                        'Logistic Admin'
+                        'Delivery Staff',
+                        'Feeder',
+                        'Logistic Foreman',
+                        'Logistic Admin', //tidak ada di db
+                        'PPIC Staff'
                     ]);
                 });
-            } elseif ($userName == 'ABDUR RAHMAN AL FAAIZ') {
+            } elseif ($userName == 'MUGI PRAMONO') {
                 $penilaianData = $penilaianData->filter(function ($item) {
                     return in_array($item->id_job_position, [
                         'Foreman CT & MC',
@@ -55,35 +57,73 @@ class PenilaianTCController extends Controller
             } elseif ($userName == 'RAGIL ISHA RAHMANTO') {
                 $penilaianData = $penilaianData->filter(function ($item) {
                     return in_array($item->id_job_position, [
-                        'Foreman Machining Custom',
                         'Leader MC',
-                        'Operator Bubut',
                         'Operator Mc. Custom',
                         'MC Custom Staff',
                         'Operator Machining',
+                        'Operator Bubut',
+                        'Foreman Machining Custom',
                     ]);
                 });
             } elseif ($userName == 'MUGI PRAMONO') {
                 $penilaianData = $penilaianData->filter(function ($item) {
                     return in_array($item->id_job_position, [
-                        'Produksi HT Sec. Head',
                         'Leader HT',
-                        'Operator HT',
                         'Admin HT & PPC',
+                        'Operator HT',
                         'Operator MTN',
+                        'Foreman CT',
+                        'Foreman QC',
                     ]);
                 });
             } elseif ($userName == 'JESSICA PAUNE' || $userName == 'SITI MARIA ULFA') {
                 $penilaianData = $penilaianData->filter(function ($item) {
                     return in_array($item->id_job_position, [
-                        'HRGA & CSR Staff',
+                        'Feeder',
+                        'Admin Cutting Sheet (ACS)',
+                        'Logistic Admin',
+                        'Delivery Staff',
+                        'Logistic Foreman',
+                        'Finance & Accounting Sec. Head',
                         'HR & Legal Staff',
-                        'IT Staff',
-                        'Procurement Staff',
+                        'Finance & Treasury Sec. Head',
+                        'HRGA & CSR Staff',
                         'Accounting Staff & Kasir',
-                        'AR Staff',
                         'Invoicing Staff',
-                        'Kurir'
+                        'SOH Region 1',
+                        'Sales Admin',
+                        'Machining Custom Sec. Head',
+                        'Produksi HT Sec. Head',
+                        'Foreman CT & MC',
+                        'Foreman QC',
+                        'PPIC Staff',
+                        'Leader MC',
+                        'Leader HT',
+                        'Operator CT',
+                        'Operator Bubut',
+                        'Operator Mc. Custom',
+                        'MC Custom Staff',
+                        'Operator Machining',
+                        'Admin HT & PPC',
+                        'Operator MTN',
+                        'Operator HT',
+                        'Procurement Material Staff',
+                        'Sales Engineer Reg 3',
+                        'Sales Engineer Reg 4',
+                        'Foreman Machining Custom',
+                        'Sales Engineer Reg 1',
+                        'SOH Region 2',
+                        'AR Staff',
+                        'IT Staff',
+                        'Sales Engineer Reg 2',
+                        'SOH Region 3',
+                        'SOH Region 4',
+                        'HR, GA, Legal, PDCA, Procurement & IT Se. Head',
+                        'HR & GA Section Head',
+                        'Leader Cutting',
+                        'PDCA & Procurement Non Material Staff',
+                        'Procurement Administration',
+                        'Inventory Section Head',
                     ]);
                 });
             } elseif ($userName == 'ADHI PRASETIYO' ||  $userName == 'RICHARDUS') {
@@ -112,53 +152,54 @@ class PenilaianTCController extends Controller
                         'Sales Engineer Reg 4'
                     ]);
                 });
-            } elseif ($userName == 'VITRI HANDAYANI') {
+            } elseif ($userName == 'HARDI SAPUTRA') {
                 $penilaianData = $penilaianData->filter(function ($item) {
                     return in_array($item->id_job_position, [
-                        'Purchasing & Logistics Sec. Head',
-                        'Logistic Foreman',
-                        'Feeder',
-                        'Delivery Staff',
+                        'Warehouse Foreman', //tidak ada di db
                         'Admin Cutting Sheet (ACS)',
-                        'Logistic Admin'
+                        'Delivery Staff',
+                        'Feeder',
+                        'Logistic Foreman',
+                        'Logistic Admin', //tidak ada di db
+                        'PPIC Staff'
                     ]);
                 });
             } elseif ($userName == 'ARY RODJO PRASETYO') {
                 $penilaianData = $penilaianData->filter(function ($item) {
                     return in_array($item->id_job_position, [
-                        'Produksi CT & MC Sec. Head',
-                        'Foreman CT & MC',
+                        'Cutting Leader',
+                        'Cutting Operator',
                         'Foreman QC',
-                        'Leader CT',
-                        'PPIC Staff',
-                        'Operator CT',
-                        'Produksi HT Sec. Head',
-                        'Leader HT',
-                        'Operator HT',
+                        'Production HT Leader', //tidak ada di db
+                        'production HT Admin', //tidak ada di db
                         'Admin HT & PPC',
-                        'Operator MTN',
-                        'Foreman Machining Custom',
-                        'Leader MC',
-                        'Operator Bubut',
-                        'Operator Mc. Custom',
+                        'Production HT Operator', //tidak ada di db
+                        'Maintenance Operator', //tidak ada di db
+
+                        'MC Custom & Bubut Leader', //tidak ada di db
                         'MC Custom Staff',
+                        'Operator Mc. Custom',
                         'Operator Machining',
+                        'Leader MC',
+                        'MC Operator', //tidak ada di db
+                        'Bubut Operator', //tidak ada di db
                     ]);
                 });
             } elseif ($userName == 'MARTINUS CAHYO RAHASTO') {
                 $penilaianData = $penilaianData->filter(function ($item) {
                     return in_array($item->id_job_position, [
-                        'Finance & Accounting Sec. Head',
-                        'Finance & Treasury Sec. Head',
-                        'HRGA & CSR Staff',
-                        'HR & Legal Staff',
-                        'HR, GA, Legal, PDCA, Procurement & IT Se. Head',
-                        'IT Staff',
-                        'Procurement Staff',
                         'Accounting Staff & Kasir',
                         'AR Staff',
                         'Invoicing Staff',
-                        'Kurir'
+                        'HR & Legal Staff',
+                        'HRGA & CSR Staff',
+                        'Procurement Material Staff',
+                        'IT Staff',
+                        'PDCA, Inventory, Procurement & IT Sec. Head',
+                        'HR & GA Section Head',
+                        'PDCA & Procurement Non Material Staff',
+                        'Procurement Administration',
+                        'Inventory Staff',
                     ]);
                 });
             } elseif ($userName == 'YULMAI RIDO WINANDA') {
@@ -241,17 +282,18 @@ class PenilaianTCController extends Controller
             } elseif ($roleId == 11) {
                 $penilaianData = $penilaianData->filter(function ($item) {
                     return in_array($item->id_job_position, [
-                        'Finance & Accounting Sec. Head',
-                        'Finance & Treasury Sec. Head',
-                        'HRGA & CSR Staff',
-                        'HR & Legal Staff',
-                        'HR, GA, Legal, PDCA, Procurement & IT Se. Head',
-                        'IT Staff',
-                        'Procurement Staff',
                         'Accounting Staff & Kasir',
                         'AR Staff',
                         'Invoicing Staff',
-                        'Kurir'
+                        'HR & Legal Staff',
+                        'HRGA & CSR Staff',
+                        'Procurement Material Staff',
+                        'IT Staff',
+                        'PDCA, Inventory, Procurement & IT Sec. Head',
+                        'HR & GA Section Head',
+                        'PDCA & Procurement Non Material Staff',
+                        'Procurement Administration',
+                        'Inventory Staff',
                     ]);
                 });
             } elseif ($roleId == 2) {

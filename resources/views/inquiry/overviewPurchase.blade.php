@@ -529,6 +529,8 @@
                                                     PT GAYA STEEL</option>
                                                 <option value="CV. GLOBAL METAL INDONESIA">
                                                     CV. GLOBAL METAL INDONESIA</option>
+                                                <option value="PT. KREASI INTI SUKSES">
+                                                    PT. KREASI INTI SUKSES</option>
                                                 <!-- Tambahkan opsi lain jika diperlukan -->
                                             </select>
                                         </div>

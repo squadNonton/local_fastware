@@ -467,17 +467,46 @@
                                                 </td>
                                                 <td class="no-print">
                                                     @if ($item->quotation_file)
-                                                        <button class="btn btn-primary btn-action"
-                                                            data-id="{{ $item->id }}">
-                                                            <i class="fas fa-check-circle"></i> Konfirmasi
-                                                        </button>
+                                                        @php
+                                                            $excludedUsers = [
+                                                                'GUNAWAN',
+                                                                'JEFRY WASTON E',
+                                                                'YUSUF SYAFAAT',
+                                                                'BANGUN SUTOPO',
+                                                                'ZAENAL ARIFIN',
+                                                                'MAMIK ABIDIN',
+                                                                'FATUL MUKMIN',
+                                                                'ELI HANDOYO',
+                                                                'NURSALIM',
+                                                                'MEDI KRISNANTO',
+                                                            ];
+                                                        @endphp
+                                                        @if (!in_array(auth()->user()->name, $excludedUsers))
+                                                            {{-- @if (auth()->user()->name !== 'GUNAWAN') --}}
+                                                            <button class="btn btn-primary btn-action"
+                                                                data-id="{{ $item->id }}">
+                                                                <i class="fas fa-check-circle"></i> Konfirmasi
+                                                            </button>
+                                                        @endif
                                                     @else
                                                         <span class="text-muted">-</span>
                                                     @endif
                                                 </td>
 
                                                 <td class="no-print"
-                                                    @if ($item->konfirmasi_quotation == 'Ditolak') style="background-color: #e74c3c; color: white;"
+                                                    @php $excludedUsers = [
+                                                        'GUNAWAN',
+                                                        'JEFRY WASTON E',
+                                                        'YUSUF SYAFAAT',
+                                                        'BANGUN SUTOPO',
+                                                        'ZAENAL ARIFIN',
+                                                        'MAMIK ABIDIN',
+                                                        'FATUL MUKMIN',
+                                                        'ELI HANDOYO',
+                                                        'NURSALIM',
+                                                        'MEDI KRISNANTO',
+                                                    ]; @endphp
+                                                    @if (!in_array(auth()->user()->name, $excludedUsers)) @if ($item->konfirmasi_quotation == 'Ditolak') style="background-color: #e74c3c; color: white;"
                                                         @elseif ($item->konfirmasi_quotation == 'Dikonfirmasi')
                                                             style="background-color: #2ecc71; color: white;" @endif>
                                                     @if ($item->quotation_file)
@@ -509,267 +538,268 @@
                                                     @else
                                                         <span class="text-muted">-</span>
                                                     @endif
-                                                </td>
-                                            </tr>
+                                        @endif
+                                        </td>
+                                        </tr>
                                         @empty
                                             <tr>
                                                 <td colspan="5">No data available</td>
                                             </tr>
-                                        @endforelse
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <td colspan="4" style="text-align: right; font-weight: bold;">Jumlah Total:
-                                            </td>
-                                            <td id="total-pcs"></td>
-                                            <td></td>
-                                            <td id="total-price_list"></td>
-                                            <td colspan="12"></td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
+                                            @endforelse
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="4" style="text-align: right; font-weight: bold;">Jumlah Total:
+                                                </td>
+                                                <td id="total-pcs"></td>
+                                                <td></td>
+                                                <td id="total-price_list"></td>
+                                                <td colspan="12"></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                                <div id="signature-section">
+                                    <br>
+                                    <table border="1" cellspacing="0" cellpadding="5"
+                                        style="width: 100%; border-collapse: collapse; text-align: center;">
+                                        <thead>
+                                            <tr>
+                                                <th colspan="1">PEMBUAT</th>
+                                                <th colspan="3" style="text-align: center">PERSETUJUAN PEMBELIAN</th>
+                                                <th>MENGETAHUI</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td style="width: 15%">Pemohon</td>
+                                                <td style="width: 15%">Dept. Head</td>
+                                                <td style="width: 15%">{{ $userAccHeader }}</td>
+                                                <td style="width: 15%">Finance</td>
+                                                <td style="width: 15%">Purchasing</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="vertical-align: top; height: 60px;">
+                                                    @if ($mstPoPengajuans->first()->status_1 >= 2 && $mstPoPengajuans->first()->status_1 <= 13)
+                                                        <p><b>SUBMITTED by {{ $mstPoPengajuans->first()->modified_at }}</b></p>
+                                                    @else
+                                                        <p>&nbsp;</p>
+                                                    @endif
+                                                </td>
+                                                <td style="vertical-align: top; height: 60px;">
+                                                    @if ($mstPoPengajuans->first()->status_1 >= 3 && $mstPoPengajuans->first()->status_1 <= 13)
+                                                        <p><b>APPROVED by {{ $deptHead }}</b></p>
+                                                    @else
+                                                        <p>&nbsp;</p>
+                                                    @endif
+                                                </td>
+                                                <td style="vertical-align: top; height: 60px;">
+                                                    @if ($mstPoPengajuans->first()->status_1 >= 4 && $mstPoPengajuans->first()->status_1 <= 13)
+                                                        <p><b>APPROVED by {{ $userAccbody }}</b></p>
+                                                    @else
+                                                        <p>&nbsp;</p>
+                                                    @endif
+                                                </td>
+                                                <td style="vertical-align: top; height: 60px;">
+                                                    @if ($mstPoPengajuans->first()->status_1 >= 5 && $mstPoPengajuans->first()->status_1 <= 13)
+                                                        <p>
+                                                            <b>APPROVED by&nbsp;
+                                                                @if ($trsPoPengajuanStatus4)
+                                                                    {{ $trsPoPengajuanStatus4->modified_at }}
+                                                                @else
+                                                                    &nbsp;
+                                                                @endif
+                                                            </b>
+                                                        </p>
+                                                    @else
+                                                        <p>&nbsp;</p>
+                                                    @endif
+                                                </td>
+                                                <td style="vertical-align: top; height: 60px;">
+                                                    @if ($mstPoPengajuans->first()->status_1 >= 6 && $mstPoPengajuans->first()->status_1 <= 13)
+                                                        <p><b>APPROVED by VIVIAN ANGELIKA</b></p>
+                                                    @else
+                                                        <p>&nbsp;</p>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Tgl:
+                                                    {{ optional($matchingTrsPoPengajuans->firstWhere('status', 2))->created_at ? optional($matchingTrsPoPengajuans->firstWhere('status', 2))->created_at->format('d/m/y') : '' }}
+                                                </td>
+                                                <td>Tgl:
+                                                    {{ optional($matchingTrsPoPengajuans->firstWhere('status', 3))->created_at ? optional($matchingTrsPoPengajuans->firstWhere('status', 3))->created_at->format('d/m/y') : '' }}
+                                                </td>
+                                                <td>Tgl:
+                                                    {{ optional($matchingTrsPoPengajuans->firstWhere('status', 4))->created_at ? optional($matchingTrsPoPengajuans->firstWhere('status', 4))->created_at->format('d/m/y') : '' }}
+                                                </td>
+                                                <td>Tgl:
+                                                    {{ optional($matchingTrsPoPengajuans->firstWhere('status', 5))->created_at ? optional($matchingTrsPoPengajuans->firstWhere('status', 5))->created_at->format('d/m/y') : '' }}
+                                                </td>
+                                                <td>Tgl:
+                                                    {{ optional($matchingTrsPoPengajuans->firstWhere('status', 6))->created_at ? optional($matchingTrsPoPengajuans->firstWhere('status', 6))->created_at->format('d/m/y') : '' }}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end gap-3 mt-2">
+                                <a href="{{ route('index.PO') }}" title="Back">
+                                    <button type="button" class="btn btn-secondary position-relative">
+                                        <i class="fas fa-arrow-left"></i>
+                                        Back
+                                    </button>
+                                </a>
+                                <a href="javascript:void(0);"onclick="printTable()">
+                                    <button type="button" class="btn btn-danger position-relative">
+                                        <i class="fas fa-print"></i>
+                                        Print PDF
+                                    </button>
+                                </a>
                             </div>
 
-                            <div id="signature-section">
-                                <br>
-                                <table border="1" cellspacing="0" cellpadding="5"
-                                    style="width: 100%; border-collapse: collapse; text-align: center;">
-                                    <thead>
-                                        <tr>
-                                            <th colspan="1">PEMBUAT</th>
-                                            <th colspan="3" style="text-align: center">PERSETUJUAN PEMBELIAN</th>
-                                            <th>MENGETAHUI</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td style="width: 15%">Pemohon</td>
-                                            <td style="width: 15%">Dept. Head</td>
-                                            <td style="width: 15%">{{ $userAccHeader }}</td>
-                                            <td style="width: 15%">Finance</td>
-                                            <td style="width: 15%">Purchasing</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="vertical-align: top; height: 60px;">
-                                                @if ($mstPoPengajuans->first()->status_1 >= 2 && $mstPoPengajuans->first()->status_1 <= 13)
-                                                    <p><b>SUBMITTED by {{ $mstPoPengajuans->first()->modified_at }}</b></p>
-                                                @else
-                                                    <p>&nbsp;</p>
-                                                @endif
-                                            </td>
-                                            <td style="vertical-align: top; height: 60px;">
-                                                @if ($mstPoPengajuans->first()->status_1 >= 3 && $mstPoPengajuans->first()->status_1 <= 13)
-                                                    <p><b>APPROVED by {{ $deptHead }}</b></p>
-                                                @else
-                                                    <p>&nbsp;</p>
-                                                @endif
-                                            </td>
-                                            <td style="vertical-align: top; height: 60px;">
-                                                @if ($mstPoPengajuans->first()->status_1 >= 4 && $mstPoPengajuans->first()->status_1 <= 13)
-                                                    <p><b>APPROVED by {{ $userAccbody }}</b></p>
-                                                @else
-                                                    <p>&nbsp;</p>
-                                                @endif
-                                            </td>
-                                            <td style="vertical-align: top; height: 60px;">
-                                                @if ($mstPoPengajuans->first()->status_1 >= 5 && $mstPoPengajuans->first()->status_1 <= 13)
-                                                    <p>
-                                                        <b>APPROVED by&nbsp;
-                                                            @if ($trsPoPengajuanStatus4)
-                                                                {{ $trsPoPengajuanStatus4->modified_at }}
-                                                            @else
-                                                                &nbsp;
-                                                            @endif
-                                                        </b>
-                                                    </p>
-                                                @else
-                                                    <p>&nbsp;</p>
-                                                @endif
-                                            </td>
-                                            <td style="vertical-align: top; height: 60px;">
-                                                @if ($mstPoPengajuans->first()->status_1 >= 6 && $mstPoPengajuans->first()->status_1 <= 13)
-                                                    <p><b>APPROVED by VIVIAN ANGELIKA</b></p>
-                                                @else
-                                                    <p>&nbsp;</p>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Tgl:
-                                                {{ optional($matchingTrsPoPengajuans->firstWhere('status', 2))->created_at ? optional($matchingTrsPoPengajuans->firstWhere('status', 2))->created_at->format('d/m/y') : '' }}
-                                            </td>
-                                            <td>Tgl:
-                                                {{ optional($matchingTrsPoPengajuans->firstWhere('status', 3))->created_at ? optional($matchingTrsPoPengajuans->firstWhere('status', 3))->created_at->format('d/m/y') : '' }}
-                                            </td>
-                                            <td>Tgl:
-                                                {{ optional($matchingTrsPoPengajuans->firstWhere('status', 4))->created_at ? optional($matchingTrsPoPengajuans->firstWhere('status', 4))->created_at->format('d/m/y') : '' }}
-                                            </td>
-                                            <td>Tgl:
-                                                {{ optional($matchingTrsPoPengajuans->firstWhere('status', 5))->created_at ? optional($matchingTrsPoPengajuans->firstWhere('status', 5))->created_at->format('d/m/y') : '' }}
-                                            </td>
-                                            <td>Tgl:
-                                                {{ optional($matchingTrsPoPengajuans->firstWhere('status', 6))->created_at ? optional($matchingTrsPoPengajuans->firstWhere('status', 6))->created_at->format('d/m/y') : '' }}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                            <h4 class="fo fw-bold">HISTORI PERMINTAAN BARANG (FPB)</h4>
+                            <table id="historyTable" class="datatable table table-hover"
+                                style="width: 100%; overflow: hidden;">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>No FPB</th>
+                                        <th>No PO</th>
+                                        <th>Nama Barang</th>
+                                        <th>Keterangan</th>
+                                        <th>Status</th>
+                                        <th>Tanggal Diajukan</th>
+                                        <th>PIC</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Tabel akan terisi oleh JavaScript -->
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="d-flex justify-content-end gap-3 mt-2">
-                            <a href="{{ route('index.PO') }}" title="Back">
-                                <button type="button" class="btn btn-secondary position-relative">
-                                    <i class="fas fa-arrow-left"></i>
-                                    Back
-                                </button>
-                            </a>
-                            <a href="javascript:void(0);"onclick="printTable()">
-                                <button type="button" class="btn btn-danger position-relative">
-                                    <i class="fas fa-print"></i>
-                                    Print PDF
-                                </button>
-                            </a>
-                        </div>
-
-                        <h4 class="fo fw-bold">HISTORI PERMINTAAN BARANG (FPB)</h4>
-                        <table id="historyTable" class="datatable table table-hover"
-                            style="width: 100%; overflow: hidden;">
-                            <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th>No FPB</th>
-                                    <th>No PO</th>
-                                    <th>Nama Barang</th>
-                                    <th>Keterangan</th>
-                                    <th>Status</th>
-                                    <th>Tanggal Diajukan</th>
-                                    <th>PIC</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Tabel akan terisi oleh JavaScript -->
-                            </tbody>
-                        </table>
                     </div>
+                    <!-- Wadah untuk tabel yang akan dibuat -->
+                    <div id="tableContainer" hidden></div>
+
                 </div>
-                <!-- Wadah untuk tabel yang akan dibuat -->
-                <div id="tableContainer" hidden></div>
+            </section>
 
-            </div>
-        </section>
-
-        <!-- jQuery -->
-        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
-        <script>
-            $(document).ready(function() {
-                // Hover function for dropdowns
-                $('.nav-item.dropdown').hover(function() {
-                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
-                }, function() {
-                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
+            <!-- jQuery -->
+            <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+            <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
+            <script>
+                $(document).ready(function() {
+                    // Hover function for dropdowns
+                    $('.nav-item.dropdown').hover(function() {
+                        $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+                    }, function() {
+                        $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
+                    });
                 });
-            });
-        </script>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            </script>
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
 
-                document.querySelectorAll('.btn-view').forEach(button => {
-                    button.addEventListener('click', function() {
-                        var id = this.getAttribute('data-id');
-                        console.log("Viewing details for ID:", id);
+                    document.querySelectorAll('.btn-view').forEach(button => {
+                        button.addEventListener('click', function() {
+                            var id = this.getAttribute('data-id');
+                            console.log("Viewing details for ID:", id);
 
-                        // Lakukan AJAX request
-                        $.ajax({
-                            url: '{{ route('po.history', ':id') }}'.replace(':id', id),
-                            type: 'GET',
-                            success: function(response) {
-                                let tbody = document.querySelector('#historyTable tbody');
-                                tbody.innerHTML =
-                                    ''; // Kosongkan tbody sebelum menambahkan data baru
+                            // Lakukan AJAX request
+                            $.ajax({
+                                url: '{{ route('po.history', ':id') }}'.replace(':id', id),
+                                type: 'GET',
+                                success: function(response) {
+                                    let tbody = document.querySelector('#historyTable tbody');
+                                    tbody.innerHTML =
+                                        ''; // Kosongkan tbody sebelum menambahkan data baru
 
-                                response.data.forEach((item, index) => {
-                                    console.log(item
-                                        .status); // Log status untuk pengecekan
+                                    response.data.forEach((item, index) => {
+                                        console.log(item
+                                            .status); // Log status untuk pengecekan
 
-                                    let statusBadge = '';
-                                    switch (item.status) {
-                                        case 1:
-                                            statusBadge =
-                                                '<span class="badge bg-secondary">Draf</span>';
-                                            break;
-                                        case 2:
-                                            statusBadge =
-                                                '<span class="badge bg-warning">Di ajukan Oleh Pemohon</span>';
-                                            break;
-                                        case 3:
-                                            statusBadge =
-                                                '<span class="badge bg-warning">Telah di Approved Dept. Head</span>';
-                                            break;
-                                        case 4:
-                                            let modifiedLabel =
-                                                ''; // Label yang akan digunakan
+                                        let statusBadge = '';
+                                        switch (item.status) {
+                                            case 1:
+                                                statusBadge =
+                                                    '<span class="badge bg-secondary">Draf</span>';
+                                                break;
+                                            case 2:
+                                                statusBadge =
+                                                    '<span class="badge bg-warning">Di ajukan Oleh Pemohon</span>';
+                                                break;
+                                            case 3:
+                                                statusBadge =
+                                                    '<span class="badge bg-warning">Telah di Approved Dept. Head</span>';
+                                                break;
+                                            case 4:
+                                                let modifiedLabel =
+                                                    ''; // Label yang akan digunakan
 
-                                            // Cek modified_at dan kategori_po, kemudian tampilkan label sesuai
-                                            if (['NURSALIM', 'RANGGA FADILLAH']
-                                                .includes(item.modified_at) && [
-                                                    'Consumable', 'Spareparts',
-                                                    'Indirect Material'
-                                                ].includes(item.kategori_po)) {
-                                                modifiedLabel = 'Warehouse';
-                                            } else if (['MEDI KRISNANTO',
-                                                    'JESSICA PAUNE'
-                                                ].includes(item.modified_at) && [
-                                                    'IT'
-                                                ].includes(item.kategori_po)) {
-                                                modifiedLabel = 'IT';
-                                            } else if (['MUHAMMAD DINAR FARISI',
-                                                    'MARTINUS CAHYO RAHASTO',
-                                                    'JESSICA PAUNE'
-                                                ].includes(item.modified_at) && [
-                                                    'GA'
-                                                ].includes(item.kategori_po)) {
-                                                modifiedLabel = 'GA';
-                                            } else {
-                                                modifiedLabel = item
-                                                    .modified_at; // Tampilkan nama asli jika tidak cocok
-                                            }
+                                                // Cek modified_at dan kategori_po, kemudian tampilkan label sesuai
+                                                if (['NURSALIM', 'RANGGA FADILLAH']
+                                                    .includes(item.modified_at) && [
+                                                        'Consumable', 'Spareparts',
+                                                        'Indirect Material'
+                                                    ].includes(item.kategori_po)) {
+                                                    modifiedLabel = 'Warehouse';
+                                                } else if (['MEDI KRISNANTO',
+                                                        'JESSICA PAUNE'
+                                                    ].includes(item.modified_at) && [
+                                                        'IT'
+                                                    ].includes(item.kategori_po)) {
+                                                    modifiedLabel = 'IT';
+                                                } else if (['MUHAMMAD DINAR FARISI',
+                                                        'MARTINUS CAHYO RAHASTO',
+                                                        'JESSICA PAUNE'
+                                                    ].includes(item.modified_at) && [
+                                                        'GA'
+                                                    ].includes(item.kategori_po)) {
+                                                    modifiedLabel = 'GA';
+                                                } else {
+                                                    modifiedLabel = item
+                                                        .modified_at; // Tampilkan nama asli jika tidak cocok
+                                                }
 
-                                            statusBadge =
-                                                `<span class="badge bg-warning">Telah di Approved ${modifiedLabel}</span>`;
-                                            break;
-                                        case 5:
-                                            statusBadge =
-                                                '<span class="badge bg-warning">Telah di Approved Finance</span>';
-                                            break;
-                                        case 6:
-                                            statusBadge =
-                                                '<span class="badge bg-success">FPB Telah di Confirm Procurment</span>';
-                                            break;
-                                        case 7:
-                                            statusBadge =
-                                                '<span class="badge bg-success">PO Release</span>';
-                                            break;
-                                        case 8:
-                                            statusBadge =
-                                                '<span class="badge bg-danger">Item Reject</span>';
-                                            break;
-                                        case 9:
-                                            statusBadge =
-                                                '<span class="badge bg-info">Finish</span>';
-                                            break;
-                                        case 10:
-                                            statusBadge =
-                                                '<span class="badge bg-danger">Pengajuan Reject</span>';
-                                            break;
-                                        default:
-                                            statusBadge =
-                                                '<span class="badge bg-secondary">Tidak terdapat Informasi</span>'; // Default jika tidak cocok
-                                            break;
-                                    }
+                                                statusBadge =
+                                                    `<span class="badge bg-warning">Telah di Approved ${modifiedLabel}</span>`;
+                                                break;
+                                            case 5:
+                                                statusBadge =
+                                                    '<span class="badge bg-warning">Telah di Approved Finance</span>';
+                                                break;
+                                            case 6:
+                                                statusBadge =
+                                                    '<span class="badge bg-success">FPB Telah di Confirm Procurment</span>';
+                                                break;
+                                            case 7:
+                                                statusBadge =
+                                                    '<span class="badge bg-success">PO Release</span>';
+                                                break;
+                                            case 8:
+                                                statusBadge =
+                                                    '<span class="badge bg-danger">Item Reject</span>';
+                                                break;
+                                            case 9:
+                                                statusBadge =
+                                                    '<span class="badge bg-info">Finish</span>';
+                                                break;
+                                            case 10:
+                                                statusBadge =
+                                                    '<span class="badge bg-danger">Pengajuan Reject</span>';
+                                                break;
+                                            default:
+                                                statusBadge =
+                                                    '<span class="badge bg-secondary">Tidak terdapat Informasi</span>'; // Default jika tidak cocok
+                                                break;
+                                        }
 
-                                    tbody.innerHTML += `
+                                        tbody.innerHTML += `
                                     <tr>
                                         <td>${index + 1}</td>
                                         <td>${item.no_fpb || '-'}</td>
@@ -781,234 +811,234 @@
                                         <td>${item.modified_at || '-'}</td>
                                     </tr>
                                 `;
-                                });
-                            },
-                            error: function(xhr) {
-                                console.error(xhr.responseText);
-                            }
+                                    });
+                                },
+                                error: function(xhr) {
+                                    console.error(xhr.responseText);
+                                }
+                            });
                         });
                     });
-                });
 
-                document.querySelectorAll('.btn-cancel').forEach(button => {
-                    button.addEventListener('click', function() {
-                        var id = this.getAttribute('data-id'); // Mengambil id dari tombol
-                        console.log("ID to cancel:", id); // Log id yang diambil
+                    document.querySelectorAll('.btn-cancel').forEach(button => {
+                        button.addEventListener('click', function() {
+                            var id = this.getAttribute('data-id'); // Mengambil id dari tombol
+                            console.log("ID to cancel:", id); // Log id yang diambil
 
-                        // SweetAlert untuk memasukkan keterangan pembatalan
-                        Swal.fire({
-                            title: 'Masukkan Keterangan Pengajuan Reject',
-                            html: `
+                            // SweetAlert untuk memasukkan keterangan pembatalan
+                            Swal.fire({
+                                title: 'Masukkan Keterangan Pengajuan Reject',
+                                html: `
                                 <textarea id="textarea-keterangan" class="swal2-input" placeholder="Masukkan keterangan Pengajuan" style="width: 300px; font-size: 16px;"></textarea>
                             `,
-                            focusConfirm: false,
-                            preConfirm: () => {
-                                const textareaValue = document.getElementById(
-                                    'textarea-keterangan').value;
+                                focusConfirm: false,
+                                preConfirm: () => {
+                                    const textareaValue = document.getElementById(
+                                        'textarea-keterangan').value;
 
-                                if (!textareaValue) {
-                                    Swal.showValidationMessage(
-                                        'Keterangan tidak boleh kosong'
-                                    );
+                                    if (!textareaValue) {
+                                        Swal.showValidationMessage(
+                                            'Keterangan tidak boleh kosong'
+                                        );
+                                    }
+
+                                    return textareaValue;
                                 }
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    var keterangan = result.value;
+                                    console.log("Keterangan pembatalan:",
+                                        keterangan); // Log keterangan pembatalan yang dipilih
 
-                                return textareaValue;
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                var keterangan = result.value;
-                                console.log("Keterangan pembatalan:",
-                                    keterangan); // Log keterangan pembatalan yang dipilih
+                                    // Jika konfirmasi, lakukan AJAX POST request untuk membatalkan item
+                                    $.ajax({
+                                        url: "{{ route('kirim.fpb.cancel2', ':id') }}"
+                                            .replace(':id',
+                                                id), // Menggunakan id yang diambil
+                                        type: 'POST',
+                                        data: {
+                                            _token: '{{ csrf_token() }}', // CSRF Token Laravel
+                                            keterangan: keterangan // Data keterangan yang dimasukkan
+                                        },
+                                        success: function(response) {
+                                            console.log("Response from server:",
+                                                response); // Log response dari server
 
-                                // Jika konfirmasi, lakukan AJAX POST request untuk membatalkan item
-                                $.ajax({
-                                    url: "{{ route('kirim.fpb.cancel2', ':id') }}"
-                                        .replace(':id',
-                                            id), // Menggunakan id yang diambil
-                                    type: 'POST',
-                                    data: {
-                                        _token: '{{ csrf_token() }}', // CSRF Token Laravel
-                                        keterangan: keterangan // Data keterangan yang dimasukkan
-                                    },
-                                    success: function(response) {
-                                        console.log("Response from server:",
-                                            response); // Log response dari server
+                                            Swal.fire(
+                                                'Diajukan!',
+                                                'Item berhasil Diajukan.',
+                                                'success'
+                                            ).then(() => {
+                                                location
+                                                    .reload(); // Refresh halaman setelah sukses
+                                            });
+                                        },
+                                        error: function(xhr) {
+                                            console.log("Error occurred:", xhr
+                                                .responseText
+                                            ); // Log error jika terjadi kesalahan
 
-                                        Swal.fire(
-                                            'Diajukan!',
-                                            'Item berhasil Diajukan.',
-                                            'success'
-                                        ).then(() => {
-                                            location
-                                                .reload(); // Refresh halaman setelah sukses
-                                        });
-                                    },
-                                    error: function(xhr) {
-                                        console.log("Error occurred:", xhr
-                                            .responseText
-                                        ); // Log error jika terjadi kesalahan
-
-                                        Swal.fire(
-                                            'Gagal!',
-                                            'Terjadi kesalahan saat Diajukan item.',
-                                            'error'
-                                        );
-                                    }
-                                });
-                            }
+                                            Swal.fire(
+                                                'Gagal!',
+                                                'Terjadi kesalahan saat Diajukan item.',
+                                                'error'
+                                            );
+                                        }
+                                    });
+                                }
+                            });
                         });
                     });
-                });
 
-                //Konfirmasi Quotation
-                document.querySelectorAll('.btn-action').forEach(button => {
-                    button.addEventListener('click', function() {
-                        var id = this.getAttribute('data-id'); // Ambil ID dari tombol
+                    //Konfirmasi Quotation
+                    document.querySelectorAll('.btn-action').forEach(button => {
+                        button.addEventListener('click', function() {
+                            var id = this.getAttribute('data-id'); // Ambil ID dari tombol
 
-                        Swal.fire({
-                            title: 'Konfirmasi Item',
-                            text: 'Pilih tindakan untuk item ini:',
-                            icon: 'question',
-                            showCancelButton: true,
-                            showDenyButton: true,
-                            confirmButtonText: 'Dikonfirmasi',
-                            denyButtonText: 'Ditolak',
-                            cancelButtonText: 'Batal'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                // Jika "Dikonfirmasi"
-                                $.ajax({
-                                    url: "{{ route('poPengajuan.updateStatusQuotation', ':id') }}"
-                                        .replace(':id', id),
-                                    type: 'POST',
-                                    data: {
-                                        _token: '{{ csrf_token() }}', // CSRF Token Laravel
-                                        status: 'Dikonfirmasi' // Status untuk update
-                                    },
-                                    success: function(response) {
-                                        Swal.fire(
-                                            'Berhasil!',
-                                            'Item berhasil dikonfirmasi.',
-                                            'success'
-                                        ).then(() => {
-                                            location
-                                                .reload(); // Refresh halaman
-                                        });
-                                    },
-                                    error: function(xhr) {
-                                        Swal.fire(
-                                            'Gagal!',
-                                            'Terjadi kesalahan saat mengkonfirmasi item.',
-                                            'error'
-                                        );
-                                    }
-                                });
-                            } else if (result.isDenied) {
-                                // Jika "Ditolak"
-                                $.ajax({
-                                    url: "{{ route('poPengajuan.updateStatusQuotation', ':id') }}"
-                                        .replace(':id', id),
-                                    type: 'POST',
-                                    data: {
-                                        _token: '{{ csrf_token() }}', // CSRF Token Laravel
-                                        status: 'Ditolak' // Status untuk update
-                                    },
-                                    success: function(response) {
-                                        Swal.fire(
-                                            'Berhasil!',
-                                            'Item berhasil ditolak.',
-                                            'success'
-                                        ).then(() => {
-                                            location
-                                                .reload(); // Refresh halaman
-                                        });
-                                    },
-                                    error: function(xhr) {
-                                        Swal.fire(
-                                            'Gagal!',
-                                            'Terjadi kesalahan saat menolak item.',
-                                            'error'
-                                        );
-                                    }
-                                });
-                            }
+                            Swal.fire({
+                                title: 'Konfirmasi Item',
+                                text: 'Pilih tindakan untuk item ini:',
+                                icon: 'question',
+                                showCancelButton: true,
+                                showDenyButton: true,
+                                confirmButtonText: 'Dikonfirmasi',
+                                denyButtonText: 'Ditolak',
+                                cancelButtonText: 'Batal'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // Jika "Dikonfirmasi"
+                                    $.ajax({
+                                        url: "{{ route('poPengajuan.updateStatusQuotation', ':id') }}"
+                                            .replace(':id', id),
+                                        type: 'POST',
+                                        data: {
+                                            _token: '{{ csrf_token() }}', // CSRF Token Laravel
+                                            status: 'Dikonfirmasi' // Status untuk update
+                                        },
+                                        success: function(response) {
+                                            Swal.fire(
+                                                'Berhasil!',
+                                                'Item berhasil dikonfirmasi.',
+                                                'success'
+                                            ).then(() => {
+                                                location
+                                                    .reload(); // Refresh halaman
+                                            });
+                                        },
+                                        error: function(xhr) {
+                                            Swal.fire(
+                                                'Gagal!',
+                                                'Terjadi kesalahan saat mengkonfirmasi item.',
+                                                'error'
+                                            );
+                                        }
+                                    });
+                                } else if (result.isDenied) {
+                                    // Jika "Ditolak"
+                                    $.ajax({
+                                        url: "{{ route('poPengajuan.updateStatusQuotation', ':id') }}"
+                                            .replace(':id', id),
+                                        type: 'POST',
+                                        data: {
+                                            _token: '{{ csrf_token() }}', // CSRF Token Laravel
+                                            status: 'Ditolak' // Status untuk update
+                                        },
+                                        success: function(response) {
+                                            Swal.fire(
+                                                'Berhasil!',
+                                                'Item berhasil ditolak.',
+                                                'success'
+                                            ).then(() => {
+                                                location
+                                                    .reload(); // Refresh halaman
+                                            });
+                                        },
+                                        error: function(xhr) {
+                                            Swal.fire(
+                                                'Gagal!',
+                                                'Terjadi kesalahan saat menolak item.',
+                                                'error'
+                                            );
+                                        }
+                                    });
+                                }
+                            });
                         });
                     });
+
+
                 });
 
-
-            });
-
-            function renumberVisibleRows() {
-                // Ambil semua baris yang terlihat dalam tabel, kecuali yang memiliki class 'hide-on-print'
-                const tableRows = document.querySelectorAll("tbody tr:not(.hide-on-print)");
-                let index = 1;
-                // Loop setiap baris yang terlihat
-                tableRows.forEach(row => {
-                    // Periksa apakah baris ini bukan bagian dari #signature-section
-                    if (!row.closest('#signature-section')) {
-                        const noCell = row.querySelector('td:first-child');
-                        if (noCell) {
-                            noCell.textContent = index; // Setel nomor urut baru
-                            index++;
+                function renumberVisibleRows() {
+                    // Ambil semua baris yang terlihat dalam tabel, kecuali yang memiliki class 'hide-on-print'
+                    const tableRows = document.querySelectorAll("tbody tr:not(.hide-on-print)");
+                    let index = 1;
+                    // Loop setiap baris yang terlihat
+                    tableRows.forEach(row => {
+                        // Periksa apakah baris ini bukan bagian dari #signature-section
+                        if (!row.closest('#signature-section')) {
+                            const noCell = row.querySelector('td:first-child');
+                            if (noCell) {
+                                noCell.textContent = index; // Setel nomor urut baru
+                                index++;
+                            }
                         }
-                    }
-                });
-            }
+                    });
+                }
 
 
-            // Tambahkan event listener sebelum halaman dicetak
-            window.addEventListener('beforeprint', () => {
-                renumberVisibleRows(); // Panggil fungsi penomoran ulang sebelum mencetak
-            });
-
-
-            function printTable() {
-                window.print(); // Memanggil dialog cetak browser
-            }
-
-            document.addEventListener('DOMContentLoaded', function() {
-                var totalPcs = 0;
-                var totalPrice = 0;
-
-                document.querySelectorAll('tbody tr').forEach(function(row) {
-                    // Check if the row has status 'Cancel'
-                    var statusCell = row.querySelector('td.no-print span.badge');
-                    var isCancelled = statusCell && statusCell.textContent.trim() === 'Reject';
-
-                    if (!isCancelled) {
-                        // Get PCS (kolom ke-5, index 4)
-                        var pcsCell = row.cells[4];
-                        var pcs = parseInt(pcsCell ? pcsCell.innerText.replace(/,/g, '') : 0, 10);
-                        totalPcs += isNaN(pcs) ? 0 : pcs;
-
-                        // Get Total Harga (kolom ke-7, index 6)
-                        var totalHargaCell = row.cells[6];
-                        var totalHarga = parseFloat(totalHargaCell ? totalHargaCell.innerText.replace(
-                            /Rp|\.|,/g, '').trim() : 0);
-                        totalPrice += isNaN(totalHarga) ? 0 : totalHarga;
-                    }
+                // Tambahkan event listener sebelum halaman dicetak
+                window.addEventListener('beforeprint', () => {
+                    renumberVisibleRows(); // Panggil fungsi penomoran ulang sebelum mencetak
                 });
 
-                // Update total PCS
-                document.getElementById('total-pcs').innerText = totalPcs.toLocaleString();
 
-                // Update total Total Harga
-                document.getElementById('total-price_list').innerText = `Rp ${totalPrice.toLocaleString()}`;
-            });
+                function printTable() {
+                    window.print(); // Memanggil dialog cetak browser
+                }
 
-            window.addEventListener('beforeprint', function() {
-                document.querySelectorAll('tfoot td[colspan="4"]').forEach(function(td) {
-                    td.setAttribute('colspan', '3');
+                document.addEventListener('DOMContentLoaded', function() {
+                    var totalPcs = 0;
+                    var totalPrice = 0;
+
+                    document.querySelectorAll('tbody tr').forEach(function(row) {
+                        // Check if the row has status 'Cancel'
+                        var statusCell = row.querySelector('td.no-print span.badge');
+                        var isCancelled = statusCell && statusCell.textContent.trim() === 'Reject';
+
+                        if (!isCancelled) {
+                            // Get PCS (kolom ke-5, index 4)
+                            var pcsCell = row.cells[4];
+                            var pcs = parseInt(pcsCell ? pcsCell.innerText.replace(/,/g, '') : 0, 10);
+                            totalPcs += isNaN(pcs) ? 0 : pcs;
+
+                            // Get Total Harga (kolom ke-7, index 6)
+                            var totalHargaCell = row.cells[6];
+                            var totalHarga = parseFloat(totalHargaCell ? totalHargaCell.innerText.replace(
+                                /Rp|\.|,/g, '').trim() : 0);
+                            totalPrice += isNaN(totalHarga) ? 0 : totalHarga;
+                        }
+                    });
+
+                    // Update total PCS
+                    document.getElementById('total-pcs').innerText = totalPcs.toLocaleString();
+
+                    // Update total Total Harga
+                    document.getElementById('total-price_list').innerText = `Rp ${totalPrice.toLocaleString()}`;
                 });
-            });
 
-            window.addEventListener('afterprint', function() {
-                document.querySelectorAll('tfoot td[colspan="3"]').forEach(function(td) {
-                    td.setAttribute('colspan', '4');
+                window.addEventListener('beforeprint', function() {
+                    document.querySelectorAll('tfoot td[colspan="4"]').forEach(function(td) {
+                        td.setAttribute('colspan', '3');
+                    });
                 });
-            });
-        </script>
 
-    </main><!-- End #main -->
-@endsection
+                window.addEventListener('afterprint', function() {
+                    document.querySelectorAll('tfoot td[colspan="3"]').forEach(function(td) {
+                        td.setAttribute('colspan', '4');
+                    });
+                });
+            </script>
+
+        </main><!-- End #main -->
+    @endsection

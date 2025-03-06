@@ -54,6 +54,14 @@ class TcController extends Controller
                     'Warehouse Admin', //tidak ada di db
                     'PPIC Staff'
                 ];
+            } elseif ($userName == 'YULMAI RIDO WINANDA') {
+                $jobPositions = [
+                    'Sales Engineer Reg 1',
+                    'Sales Engineer Reg 2',
+                    'Sales Admin',
+                    'SOH Region 1',
+                    'SOH Region 2'
+                ];
             } elseif ($userName == 'ARYA RODJO PRASETYO') {
                 $jobPositions = [
                     'Cutting Leader',
@@ -111,16 +119,15 @@ class TcController extends Controller
                     'Accounting Staff & Kasir',
                     'AR Staff',
                     'Invoicing Staff',
-                    'Accounting Staff', //Tidak ada di db
-
-                    'Inventory Staff', //tidak ada di db
-                    'HR, GA, Legal, PDCA, Procurement & IT Se. Head',
+                    'HR & Legal Staff',
+                    'HRGA & CSR Staff',
+                    'Procurement Material Staff',
                     'IT Staff',
-                    'PDCA, Procurement Staff', //tidak ada di db
-                    'Purchasing Import Staff',
-
-                    'GA & CSR Staff',
-                    'HRGA & Legal Staff'
+                    'PDCA, Inventory, Procurement & IT Sec. Head',
+                    'HR & GA Section Head',
+                    'PDCA & Procurement Non Material Staff',
+                    'Procurement Administration',
+                    'Inventory Staff',
                 ];
             } elseif ($userName == 'ADHI PRASETYO') {
                 $jobPositions = [
@@ -364,16 +371,15 @@ class TcController extends Controller
                     'Accounting Staff & Kasir',
                     'AR Staff',
                     'Invoicing Staff',
-                    'Accounting Staff', //Tidak ada di db
-
-                    'Inventory Staff', //tidak ada di db
-                    'HR, GA, Legal, PDCA, Procurement & IT Se. Head',
+                    'HR & Legal Staff',
+                    'HRGA & CSR Staff',
+                    'Procurement Material Staff',
                     'IT Staff',
-                    'PDCA, Procurement Staff', //tidak ada di db
-                    'Purchasing Import Staff',
-
-                    'GA & CSR Staff',
-                    'HRGA & Legal Staff'
+                    'PDCA, Inventory, Procurement & IT Sec. Head',
+                    'HR & GA Section Head',
+                    'PDCA & Procurement Non Material Staff',
+                    'Procurement Administration',
+                    'Inventory Staff',
                 ])->unique('job_position');
             } elseif ($userName == 'ADHI PRASETYO') {
                 $jobPositions = $uniquejobPositions->whereIn('job_position', [

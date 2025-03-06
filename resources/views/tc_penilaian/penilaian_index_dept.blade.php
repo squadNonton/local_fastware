@@ -47,12 +47,11 @@
                                             <i class="fas fa-edit"></i> Konfirmasi Nilai
                                         </a>
 
-                                        @if ($item->status != 3)
-                                            <button type="button" class="btn btn-success"
-                                                onclick="kirimData('{{ $item->id_job_position }}')">
-                                                <i class="fas fa-paper-plane"></i> Kirim
-                                            </button>
-                                        @endif
+
+                                        <button type="button" class="btn btn-success"
+                                            onclick="kirimData('{{ $item->id_job_position }}')">
+                                            <i class="fas fa-paper-plane"></i> Kirim
+                                        </button>
 
 
                                         <a href="{{ route('penilaian.view', $item->id_job_position) }}"
@@ -67,19 +66,17 @@
                 </table>
             </div>
         </section>
-                        <!-- jQuery -->
-                        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-                        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
-                        <script>
-                            $(document).ready(function() {
-                                // Hover function for dropdowns
-                                $('.nav-item.dropdown').hover(function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
-                                }, function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
-                                });
-                            });
-                            </script>
+        <!-- jQuery -->
+        <script>
+            $(document).ready(function() {
+                // Hover function for dropdowns
+                $('.nav-item.dropdown').hover(function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+                }, function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
+                });
+            });
+        </script>
 
 
         <!-- jQuery -->
