@@ -204,6 +204,7 @@
                                         'YUNASIS PALGUNADI',
                                         'ABDUR RAHMAN AL FAAIZ',
                                         'SONY STIAWAN',
+                                        'HERLIANA',
                                     ];
                                 @endphp
 
@@ -1153,6 +1154,28 @@
                                             <li><a class="dropdown-item"
                                                     href="{{ route('penilaian.index') }}">Penilaian Technical
                                                     Competency Ka. Dept</a></li>
+                                        @endif
+
+                                        @if (in_array(auth()->user()->name, [
+                                                'ADMINSTRATOR',
+                                                'MUGI PRAMONO',
+                                                'YULMAI RIDO WINANDA',
+                                                'ADHI PRASETIYO',
+                                                'ANDIK TOTOK SISWOYO',
+                                                'ARY RODJO PRASETYO',
+                                                'HARDI SAPUTRA',
+                                                'ILHAM CHOLID',
+                                                'JESSICA PAUNE',
+                                                'JUN JOHAMIN PD',
+                                                'MARTINUS CAHYO RAHASTO',
+                                                'RAGIL ISHA RAHMANTO',
+                                                'RICHARDUS',
+                                                'SITI MARIA ULFA',
+                                                'ABDUR RAHMAN AL FAAIZ',
+                                            ]))
+                                            <li><a class="dropdown-item"
+                                                    href="{{ route('penilaian.index') }}">Penilaian Technical
+                                                    Competency HR</a></li>
                                         @endif
 
                                         @if (in_array(auth()->user()->name, [

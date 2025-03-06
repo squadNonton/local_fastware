@@ -27,23 +27,27 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @php
+                            $user = Auth::user(); // Ambil pengguna yang sedang login
+                            $userName = $user->name;
+                        @endphp
+
                         @foreach ($penilaianData as $item)
+                            @if ($userName == 'SITI MARIA ULFA' && $item->status != 3)
+                                @continue
+                            @endif
+
                             <tr>
                                 <th scope="row">{{ $loop->iteration }}</th>
                                 <td>{{ $item->id_job_position }}</td>
                                 <td>
-                                    @php
-                                    $user = Auth::user(); // Ambil pengguna yang sedang login
-                                @endphp
-                                
-                                @if ($item->status == 1 && !in_array($user->username, ['CAHYO', 'RODJO']))
-                                    <span class="badge rounded-pill bg-secondary">Draf</span>
-                                @elseif ($item->status == 2)
-                                    <span class="badge rounded-pill bg-warning">Menunggu Konfirmasi Dept. Head</span>
-                                @elseif ($item->status == 3)
-                                    <span class="badge rounded-pill bg-success">Telah Disetujui</span>
-                                @endif
-                                
+                                    @if ($item->status == 1 && !in_array($userName, ['CAHYO', 'RODJO']))
+                                        <span class="badge rounded-pill bg-secondary">Draf</span>
+                                    @elseif ($item->status == 2)
+                                        <span class="badge rounded-pill bg-warning">Menunggu Konfirmasi Dept. Head</span>
+                                    @elseif ($item->status == 3)
+                                        <span class="badge rounded-pill bg-success">Telah Disetujui</span>
+                                    @endif
                                 </td>
                                 <td>
                                     @if ($item->status == 1)
@@ -56,11 +60,8 @@
                                             <i class="fas fa-paper-plane"></i> Kirim
                                         </button>
                                     @endif
-                                    @php
-                                        $user = Auth::user(); // Ambil pengguna yang sedang login
-                                    @endphp
 
-                                    @if ($item->status == 2 && $user->username == 'CAHYO')
+                                    @if ($item->status == 2 && $userName == 'CAHYO')
                                         <button type="button" class="btn btn-success"
                                             onclick="kirimData2('{{ $item->id_job_position }}')">
                                             <i class="fas fa-paper-plane"></i> Kirim
@@ -79,7 +80,6 @@
                                 </td>
                             </tr>
                         @endforeach
-
                     </tbody>
                 </table>
             </div>
@@ -98,7 +98,6 @@
                 });
             });
         </script>
-
 
         <!-- jQuery -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
