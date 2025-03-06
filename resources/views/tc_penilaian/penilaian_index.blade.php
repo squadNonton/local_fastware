@@ -32,15 +32,18 @@
                                 <th scope="row">{{ $loop->iteration }}</th>
                                 <td>{{ $item->id_job_position }}</td>
                                 <td>
-                                    @if ($item->status == 1)
-                                        <span class="badge rounded-pill bg-secondary">Draf</span>
-                                    @elseif ($item->status == 2)
-                                        <span class="badge rounded-pill bg-warning">Menunggu Konfirmasi Dept. Head</span>
-                                    @elseif ($item->status == 3)
-                                        <span class="badge rounded-pill bg-success">Telah Disetujui</span>
-                                    @else
-                                        <!-- Tambahkan opsi lain jika diperlukan -->
-                                    @endif
+                                    @php
+                                    $user = Auth::user(); // Ambil pengguna yang sedang login
+                                @endphp
+                                
+                                @if ($item->status == 1 && !in_array($user->username, ['CAHYO', 'RODJO']))
+                                    <span class="badge rounded-pill bg-secondary">Draf</span>
+                                @elseif ($item->status == 2)
+                                    <span class="badge rounded-pill bg-warning">Menunggu Konfirmasi Dept. Head</span>
+                                @elseif ($item->status == 3)
+                                    <span class="badge rounded-pill bg-success">Telah Disetujui</span>
+                                @endif
+                                
                                 </td>
                                 <td>
                                     @if ($item->status == 1)
