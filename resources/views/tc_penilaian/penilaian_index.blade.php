@@ -53,6 +53,17 @@
                                             <i class="fas fa-paper-plane"></i> Kirim
                                         </button>
                                     @endif
+                                    @php
+                                        $user = Auth::user(); // Ambil pengguna yang sedang login
+                                    @endphp
+
+                                    @if ($item->status == 2 && $user->username == 'CAHYO')
+                                        <button type="button" class="btn btn-success"
+                                            onclick="kirimData2('{{ $item->id_job_position }}')">
+                                            <i class="fas fa-paper-plane"></i> Kirim
+                                        </button>
+                                    @endif
+
                                     @if ($item->status == 3 || $item->status == 2)
                                         <a href="{{ route('penilaian.edit', $item->id_job_position) }}"
                                             class="btn btn-warning">
@@ -114,6 +125,66 @@
                         // Jika pengguna memilih Yes, lakukan AJAX request
                         $.ajax({
                             url: '{{ route('update.status', ':id_job_position') }}'.replace(':id_job_position',
+                                id_job_position),
+                            type: 'POST',
+                            data: {
+                                _token: '{{ csrf_token() }}' // Sertakan token CSRF
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        title: 'Berhasil!',
+                                        text: response.message,
+                                        icon: 'success',
+                                        confirmButtonText: 'OK'
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            location.reload(); // contoh aksi: merefresh halaman
+                                        }
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Error!',
+                                        text: 'Error: ' + response.message,
+                                        icon: 'error',
+                                        confirmButtonText: 'OK'
+                                    });
+                                }
+                            },
+                            error: function(xhr) {
+                                Swal.fire({
+                                    title: 'Request failed!',
+                                    text: 'Request failed: ' + xhr.statusText,
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        });
+                    } else {
+                        Swal.fire(
+                            'Dibatalkan',
+                            'Data Tidak DiKirim',
+                            'info'
+                        );
+                    }
+                });
+            }
+
+            function kirimData2(id_job_position) {
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Anda Ingin Mengirim Competency?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'No'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Jika pengguna memilih Yes, lakukan AJAX request
+                        $.ajax({
+                            url: '{{ route('update.status2', ':id_job_position') }}'.replace(':id_job_position',
                                 id_job_position),
                             type: 'POST',
                             data: {
