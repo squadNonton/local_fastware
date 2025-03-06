@@ -406,7 +406,7 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     Route::put('/updated-pd-hrga2', [PdController::class, 'updatePdPlan2'])->name('updatePdPlan2');
     Route::post('/update-status/{id_job_position}', [PenilaianTCController::class, 'kirimSC'])->name('update.status');
-    Route::post('/update-status-dept/{id}', [PenilaianTCController::class, 'kirimDept'])->name('update.status2');
+    Route::post('/update-status-dept/{id_job_position}', [PenilaianTCController::class, 'kirimDept'])->name('update.status2');
 
     Route::get('/editPdPengajuan/{modified_at}/{tahun_aktual}', [PdController::class, 'editPdPengajuan'])->name('editPdPengajuan');
     Route::get('/editPdPengajuan-HRGA/{tahun_aktual}', [PdController::class, 'editPdPengajuanHRGA'])->name('editPdPengajuanHRGA');
