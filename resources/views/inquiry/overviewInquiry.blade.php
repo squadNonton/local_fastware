@@ -453,8 +453,8 @@
                                                 </td>
                                                 <td>{{ $inquiry->est_date }}</td>
                                                 <td>
-                                                    <a href="#" class="btn btn-warning btn-sm"
-                                                        onclick="showInquiry({{ $inquiry->id }}); return false;">
+                                                    <a href="{{ route('showFormSS', ['id' => $inquiry->id]) }}" class="btn btn-warning btn-sm"
+                                                        title="View Form">
                                                         <i class="bi bi-eye-fill"></i>
                                                     </a>
                                                 </td>
