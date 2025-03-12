@@ -214,6 +214,23 @@
                 font-family: 'Cambria', serif;
             }
 
+            table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table th,
+        table td {
+            border: 1px solid #015974;
+            padding: 8px;
+            text-align: center;
+        }
+
+        table th {
+            background-color: #f2f2f2;
+        }
+
             .datatable-table>tbody>tr>td {
                 text-align: center;
             }
