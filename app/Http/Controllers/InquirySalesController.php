@@ -1033,6 +1033,21 @@ public function editimport($id)
         }
     }
 
+    public function deleteInquiryDetail($id)
+    {
+        try {
+            $material = DetailInquiry::find($id); // Ganti dengan model yang sesuai
+            if (!$material) {
+                return Response::json(['success' => false, 'message' => 'Material not found'], 404);
+            }
+
+            $material->delete();
+            return Response::json(['success' => true, 'message' => 'Material deleted successfully']);
+        } catch (\Exception $e) {
+            return Response::json(['success' => false, 'message' => 'Failed to delete material'], 500);
+        }
+    }
+
     // public function confirmPurchase($id)
     // {
     //     // Temukan inquiry berdasarkan ID

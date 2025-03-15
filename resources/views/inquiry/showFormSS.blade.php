@@ -156,6 +156,7 @@
                                     <th style="width: 50px; text-align:center;">Sales Order</th>
                                     {{-- <th style="width: 50px; text-align:center;">PO Number</th> --}}
                                     <th style="width: 50px; text-align:center;">Remark</th>
+                                    <th style="width: 50px; text-align:center;">Aksi</th>
                                 </tr>
                             </thead>
 
@@ -232,6 +233,11 @@
                                             <td contenteditable="false" class="editable"><input type="text"
                                                     name="note" value="{{ $material['note'] }}" size="10"
                                                     disabled></td>
+                                            <td>
+                                                @if ($inquiry->status == 1)
+                                                <button class="btn btn-danger btn-sm" onclick="deleteRow({{ $material->id }})">Delete</button>
+                                                @endif
+                                            </td>
                                         </tr>
                                     @empty
                                         <tr>
@@ -257,6 +263,7 @@
                                             <td>{{ $material['ship'] }}</td>
                                             <td>{{ $material['so'] }}</td>
                                             <td>{{ $material['note'] }}</td>
+                                            <td></td>
                                         </tr>
                                     @empty
                                         <tr>
@@ -277,6 +284,11 @@
                             <input type="hidden" name="id" value="{{ $inquiry->id }}">
                             <button type="submit" class="btn btn-primary btn-sm m-1">Submit</button>
                         </form>
+                            <a class="btn btn-custom-form m-1 btn-sm"
+                                href="{{ route('formulirInquiry', ['id' => $inquiry->id]) }}"
+                                title="Formulir Inquiry">
+                                <i class="bi bi-file-earmark-arrow-up-fill btn btn-primary btn-sm m-1"></i>
+                            </a>
                         <button id="edit-button" onclick="enableEdit()" class="btn btn-primary btn-sm m-1">Edit</button>
                         <button id="save-button" onclick="saveChanges()" style="display: none;" class="btn btn-primary btn-sm m-1">Save</button>
                     @endif
@@ -460,6 +472,30 @@
         </script>
 
         <script>
+            function deleteRow(id) {
+            if (confirm('Are you sure you want to delete this row?')) {
+                fetch(`{{ url('deleteInquiryDetail') }}/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Row deleted successfully');
+                        location.reload(); // Reload the page to see the changes
+                    } else {
+                        alert('Failed to delete row');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the row');
+                });
+            }
+        }
+
             function enableEdit() {
                 document.querySelectorAll('.editable').forEach(element => {
                     element.querySelectorAll('input, select').forEach(input => {
