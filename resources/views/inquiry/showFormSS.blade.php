@@ -277,6 +277,8 @@
                             <input type="hidden" name="id" value="{{ $inquiry->id }}">
                             <button type="submit" class="btn btn-primary btn-sm m-1">Submit</button>
                         </form>
+                        <button id="edit-button" onclick="enableEdit()" class="btn btn-primary btn-sm m-1">Edit</button>
+                        <button id="save-button" onclick="saveChanges()" style="display: none;" class="btn btn-primary btn-sm m-1">Save</button>
                     @endif
                 @endif
 
