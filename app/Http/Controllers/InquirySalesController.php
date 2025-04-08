@@ -632,7 +632,7 @@ class InquirySalesController extends Controller
             'description' => 'Approved by Ka. Dept. ' . Auth::user()->name
         ]);
 
-        return redirect()->route('showApprovalKaDeptImport')->with('success', 'Inquiry approved successfully by Ka.Dept.');
+        return redirect()->route('showApprovalInventoryImport')->with('success', 'Inquiry approved successfully by Ka.Dept.');
     }
 
     public function rejectKaDept($id)
@@ -658,6 +658,19 @@ class InquirySalesController extends Controller
         return view('inquiry.approvalInventory', compact('inquiries'));
     }
 
+    public function showApprovalInventoryImport()
+    {
+        // Ambil semua inquiry dengan status Open (2) dan yang belum disetujui
+        $inquiries = InquirySales::with(['customer', 'details'])
+            ->where('status', 3) // Hanya ambil yang berstatus Approve Ka.Dept
+            ->where('is_active', 1) // Hanya yang aktif
+            ->where('loc_imp', 'Import') // Pastikan loc_imp benar-benar 'Import'
+            ->latest()
+            ->get();
+
+        return view('inquiry.approvalInventoryImport', compact('inquiries'));
+    }
+
     public function approveInventory($id)
     {
         // Temukan inquiry berdasarkan ID
@@ -678,6 +691,40 @@ class InquirySalesController extends Controller
         ]);
 
         return redirect()->route('showApprovalInventory')->with('success', 'Inquiry approved successfully by Inventory.');
+    }
+
+    public function approveInventoryImport($id)
+    {
+        // Temukan inquiry berdasarkan ID
+        $inquiry = InquirySales::whereIn('loc_imp', ['Import'])->findOrFail($id);
+
+        // Ubah status inquiry menjadi 8 (Approve Inventory)
+        $inquiry->status = 8; // Menandakan status "Approve Inventory"
+        // Simpan ID pengguna yang melakukan approve
+        $inquiry->inventory_id = Auth::user()->id; // Ambil ID pengguna yang login
+        $inquiry->approved_inventory_at = now();
+        $inquiry->save();
+
+        // Ketika menyetujui oleh Inventory
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $inquiry->id,
+            'user_id' => auth()->id(),
+            'description' => 'Approved by Inventory. ' . Auth::user()->name
+        ]);
+
+        return redirect()->route('showApprovalInventoryImport')->with('success', 'Inquiry approved successfully by Inventory.');
+    }
+
+    public function rejectInventoryImport($id)
+    {
+        // Temukan inquiry berdasarkan ID
+        $inquiry = InquirySales::whereIn('loc_imp', ['Import'])->findOrFail($id);
+
+        // Ubah status inquiry menjadi 7 (Rejected)
+        $inquiry->status = 7; // Menandakan status "Rejected"
+        $inquiry->save();
+
+        return redirect()->route('showApprovalInventoryImport')->with('success', 'Inquiry rejected successfully by Inventory');
     }
 
     public function rejectInventory($id)
