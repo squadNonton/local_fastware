@@ -123,22 +123,22 @@
         <div class="card">
             <div class="card-body">
                 <div class="form-section mt-3">
-                    <div class="form-group">
+                    {{-- <div class="form-group">
                         <label>Create By :</label>
                         <div class="form-value">{{ $inquiry->create_by }}</div>
-                    </div>
+                    </div> --}}
                     <div class="form-group">
                         <label>Category :</label>
                         <div class="form-value">{{ $inquiry->loc_imp }}</div>
                     </div>
-                    <div class="form-group">
+                    {{-- <div class="form-group">
                         <label>Reference :</label>
                         <div class="form-value">{{ $inquiry->kode_inquiry }}</div>
-                    </div>
-                    <div class="form-group">
+                    </div> --}}
+                    {{-- <div class="form-group">
                         <label>Supplier :</label>
                         <div class="form-value">{{ $inquiry->supplier }}</div>
-                    </div>
+                    </div> --}}
                     <div class="form-group">
                         <label>Date Create :</label>
                         <div class="form-value">{{ $inquiry->created_at }}</div>
@@ -270,17 +270,18 @@
                 @endif
                 
 
-                @if (($inquiry->status == 9 && in_array(Auth::id(), [1, 2, 3, 4]) || ($inquiry->status == 6 && in_array(Auth::id(), [1, 2, 3, 4]))))
-                    
+                
                 <div class="text-start mb-3">
-                    <a href="{{ route('exportInquiryimportpurchase', ['id' => $inquiry->id, 'klasifikasi' => request()->query('klasifikasi')]) }}" class="btn btn-success">
-                        <i class="bi bi-file-earmark-excel-fill"></i> Export
+                    <a href="{{ route('exportInquiryimportpurchase', ['klasifikasi' => request('klasifikasi'), 'ids' => implode(',', $inquiries->pluck('id')->toArray())]) }}" class="btn btn-success">
+                        <i class="bi bi-file-earmark-excel-fill"></i> Export Data
                     </a>
+
+                
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importModal">
                         <i class="bi bi-file-earmark-excel"></i> Import Data
                     </button>
                 </div>
-                @endif
+                
                 <!-- Import Modal -->
                 <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
                     <div class="modal-dialog">

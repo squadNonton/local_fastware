@@ -303,9 +303,29 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::put('updateInquiryDetailsImport/{id}', [InquirySalesController::class, 'updateInquiryDetailsImport'])->name('updateInquiryDetailsImport');
     Route::get('/editimport/{id}', [InquirySalesController::class, 'editimport'])->name('editimport');
     Route::put('/updateimport/{id}', [InquirySalesController::class, 'updateImport'])->name('inquiry.update');
-    Route::get('/inquiry/overview-purchase-import', [InquirySalesController::class, 'overviewPurchaseImport'])->name('overviewPurchaseImport');
+    Route::get('/inquiry/overview-purchase-import', [InquirySalesController::class, 'showApprovalPurchaseImport'])->name('overviewPurchaseImport');
     Route::get('/export-excel', [InquirySalesController::class, 'exportexceloverviewimportpurchase'])->name('exportExcelimportpurchase');
     Route::post('/import-excel-purchase', [InquirySalesController::class, 'importexceloverviewimportpurchase'])->name('importExcelimportpurchase');
+    Route::get('/inquiry/overview-inquiry-import', [InquirySalesController::class, 'overviewInquiryImport'])->name('overviewInquiryImport');
+    Route::get('/export-inquiries', [InquirySalesController::class, 'exportInquiries'])->name('exportInquiries');
+    Route::post('/import/inquiry', [InquirySalesController::class, 'importinquiryinventory'])->name('import.inquiry');
+    Route::post('/import/inquirypurchase', [InquirySalesController::class, 'importinquirypurchase'])->name('import.purchaseimport');
+    Route::get('inquiry/export', [InquirySalesController::class, 'exportinquirypurchaseimport'])->name('exportInquiryimportpurchase');
+    Route::post('/confirm-purchase-import', [InquirySalesController::class, 'confirmpurchaseimport'])->name('confirmPurchaseimport');
+    Route::post('/inquiry/approveimport/{id}', [InquirySalesController::class, 'approveKaSieImport'])->name('approveKaSieImport');
+    Route::get('/inquiry/approvalimport', [InquirySalesController::class, 'showApprovalKaSieImport'])->name('showApprovalKaSieImport');
+    Route::post('/inquiry/rejectimport/{id}', [InquirySalesController::class, 'rejectKaSieImport'])->name('rejectKaSieImport');
+    Route::get('/inquiry/approval-ka-deptimport', [InquirySalesController::class, 'showApprovalKaDeptImport'])->name('showApprovalKaDeptImport');
+    Route::post('/inquiry/approve-ka-deptimport/{id}', [InquirySalesController::class, 'approveKaDeptImport'])->name('approveKaDeptImport');
+    Route::post('/inquiry/reject-ka-deptimport/{id}', [InquirySalesController::class, 'rejectKaDeptImport'])->name('rejectKaDeptImport');
+    Route::get('/inquiry/approval-inventoryimport', [InquirySalesController::class, 'showApprovalInventoryImport'])->name('showApprovalInventoryImport');
+    Route::post('/inquiry/approve-inventoryimport/{id}', [InquirySalesController::class, 'approveInventoryImport'])->name('approveInventoryImport');
+    Route::post('/inquiry/reject-inventoryimport/{id}', [InquirySalesController::class, 'rejectInventoryImport'])->name('rejectInventoryImport');
+
+
+    Route::post('/inquiry/finish/{id}', [InquirySalesController::class, 'finishInquiryimport'])->name('finishInquiryimport');
+    Route::get('/showFormSSimport/pdf/{id}', [InquirySalesController::class, 'generatePDFimport'])->name('showFormSSimport.pdf');
+    Route::get('/inquiry/form-import/{month}/{klasifikasi}', [InquirySalesController::class, 'showFormSSimportpurchase'])->name('showFormSSimportpurchase');
 
 
     Route::post('/inquiry/update-details/{id}', [InquirySalesController::class, 'updateInquiryDetails'])->name('updateInquiryDetails');

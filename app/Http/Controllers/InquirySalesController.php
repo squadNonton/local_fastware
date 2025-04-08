@@ -196,18 +196,13 @@ class InquirySalesController extends Controller
         $inquiry->is_active = 1;
         $inquiry->create_by = Auth::user()->name;
         $inquiry->save();
-
-        // Simpan progres awal sebagai "No updates yet"
-        $progress = new TrxDboProgPurchase();
-        $progress->inquiry_id = $inquiry->id;
-        $progress->description = '---- No updates yet ----'; // Set default
-        $progress->save();
+        
 
         // Ketika membuat Inquiry
         TrxDboProgPurchase::create([
             'inquiry_id' => $inquiry->id,
-            'user_id' => auth()->id(),
-            'description' => 'Inquiry created.'
+            'user_id' => Auth::id(),
+            'description' => 'Inquiry created by ' . Auth::user()->name,
         ]);
 
         return redirect()->route('createinquiryImport')->with('success', 'Inquiry successfully saved.');
@@ -412,6 +407,7 @@ class InquirySalesController extends Controller
         'materials.*.so' => 'required|string',
         'materials.*.note' => 'required|string',
         'materials.*.name_customer' => 'required|string', // Nama customer untuk mencari ID
+        'materials.*.klasifikasi' => 'required|string',
     ]);
 
     // Ambil ID pengguna yang login dari tabel users
@@ -448,6 +444,7 @@ class InquirySalesController extends Controller
         $newDetail->note = $material['note'];
         $newDetail->create_by = $user_id; // ID user dari tabel users
         $newDetail->customer = $customer->id; // ID customer dari tabel customers
+        $newDetail->klasifikasi = $material['klasifikasi'];
         $newDetail->save();
     }
 
@@ -457,7 +454,7 @@ class InquirySalesController extends Controller
     TrxDboProgPurchase::create([
         'inquiry_id' => $id_inquiry,
         'user_id' => $user_id,
-        'description' => 'Inquiry Submitted'
+        'description' => 'Inquiry Submitted by ' . Auth::user()->name
     ]);
 
     return response()->json(['message' => 'Detail Inquiry saved successfully']);
@@ -493,39 +490,49 @@ class InquirySalesController extends Controller
     }
 
     public function showFormSSimport(Request $request, $id)
-        {
-            $inquiry = InquirySales::with('detailInquiryImport.type_materials')->findOrFail($id);
+{
+    $inquiry = InquirySales::with('detailInquiryImport.type_materials')->findOrFail($id);
+    
+    // Ambil klasifikasi dari tombol
+    $klasifikasi = request()->query('klasifikasi');
+    
+    // Fetch all detail inquiries based on id_inquiry from the main inquiry
+    if (in_array($inquiry->status, [8, 9, 6]) && $klasifikasi) {
+        $materials = DetailInquiryImport::where('id_inquiry', $inquiry->id)
+            ->where('klasifikasi', $klasifikasi)
+            ->with('type_materials')
+            ->get();
+    } else {
+        $materials = DetailInquiryImport::where('id_inquiry', $inquiry->id)
+            ->with('type_materials')
+            ->get();
+    }
 
-            // Fetch all detail inquiries based on id_inquiry from the main inquiry
-            $materials = DetailInquiryImport::where('id_inquiry', $inquiry->id)->with('type_materials')->get();
+    $typeMaterials = TypeMaterial::all();
 
-            $typeMaterials = TypeMaterial::all(); // Ambil semua data TypeMaterial, sesuaikan dengan kebutuhan
+    // Ambil semua nama file yang ter-upload
+    $uploadedFiles = DetailInquiryImport::where('id_inquiry', $inquiry->id)
+        ->pluck('file')
+        ->flatMap(function ($file) {
+            return json_decode($file) ?? [];
+        })
+        ->toArray();
 
+    // Progress updates
+    $progressUpdates = TrxDboProgPurchase::where('inquiry_id', $id)
+        ->with('user')
+        ->orderBy('created_at', 'desc')
+        ->get();
 
-            // Ambil semua nama file yang ter-upload
-            $uploadedFiles = DetailInquiryImport::where('id_inquiry', $inquiry->id)
-                ->pluck('file')
-                ->flatMap(function ($file) {
-                    return json_decode($file) ?? []; // Kembalikan array kosong jika null
-                })
-                ->toArray();
+    // Customer & Users
+    $customers = Customer::all();
+    $users = User::all();
 
-            // $progressUpdates = TrxDboProgPurchase::where('inquiry_id', $id)->with('user')->get();
-            $progressUpdates = TrxDboProgPurchase::where('inquiry_id', $id)
-                ->with('user')
-                ->orderBy('created_at', 'desc') // Urutkan berdasarkan created_at menurun
-                ->get();
-
-            //customer
-            $customers = Customer::all();
-
-                // Fetch all users (partners)
-            $users = User::all();
-
-            // Cek apakah berasal dari halaman approval
-            $isFromApproval = request()->query('source') === 'approval';
-            return view('inquiry.showFormSSimport', compact('inquiry', 'materials', 'typeMaterials', 'progressUpdates', 'uploadedFiles', 'isFromApproval', 'customers', 'users'));
-        }
+    // Cek apakah berasal dari halaman approval
+    $isFromApproval = request()->query('source') === 'approval';
+    
+    return view('inquiry.showFormSSimport', compact('inquiry', 'materials', 'typeMaterials', 'progressUpdates', 'uploadedFiles', 'isFromApproval', 'customers', 'users'));
+}
 
     public function approveKaSie($id)
     {
@@ -584,16 +591,31 @@ class InquirySalesController extends Controller
         return view('inquiry.approvalKaDept', compact('inquiries'));
     }
 
-    public function approveKaDept($id)
+    public function showApprovalKaDeptImport()
+    {
+        // Ambil semua inquiry dengan status Open (2) dan yang belum disetujui
+        $inquiries = InquirySales::with('customer')
+            ->where('status', 4) // Hanya ambil yang berstatus Open
+            ->where('is_active', 1) // Hanya yang aktif
+            ->where('loc_imp', 'Import') // Pastikan loc_imp benar-benar 'Import'
+            ->latest()
+            ->get();
+
+        return view('inquiry.approvalKaDeptImport', compact('inquiries'));
+    }
+
+    public function approveKaDeptImport($id)
     {
         // Temukan inquiry berdasarkan ID
-        $inquiry = InquirySales::findOrFail($id);
+        $inquiry = InquirySales::whereIn('loc_imp', ['Import'])->findOrFail($id);
 
         // Ubah status inquiry menjadi 3 (Approve Ka.Dept)
         $inquiry->status = 3; // Menandakan status "Approve Ka.Dept"
         // Simpan ID pengguna yang melakukan approve
         $inquiry->kadept_id = Auth::user()->id; // Ambil ID pengguna yang login
+        $inquiry->kasie_id = Auth::user()->id;
         $inquiry->approved_kadept_at = now();
+        $inquiry->approved_kasie_at = now();
         $inquiry->save();
 
         // Ketika menyetujui oleh Ka.Dept
@@ -602,8 +624,15 @@ class InquirySalesController extends Controller
             'user_id' => auth()->id(),
             'description' => 'Approved by Ka. Dept.'
         ]);
+        
+        // Ketika menyetujui oleh Ka.Dept
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $inquiry->id,
+            'user_id' => auth()->id(),
+            'description' => 'Approved by Ka. Dept. ' . Auth::user()->name
+        ]);
 
-        return redirect()->route('showApprovalKaDept')->with('success', 'Inquiry approved successfully by Ka.Dept.');
+        return redirect()->route('showApprovalKaDeptImport')->with('success', 'Inquiry approved successfully by Ka.Dept.');
     }
 
     public function rejectKaDept($id)
@@ -645,7 +674,7 @@ class InquirySalesController extends Controller
         TrxDboProgPurchase::create([
             'inquiry_id' => $inquiry->id,
             'user_id' => auth()->id(),
-            'description' => 'Approved by Inventory.'
+            'description' => 'Approved by Inventory. ' . Auth::user()->name
         ]);
 
         return redirect()->route('showApprovalInventory')->with('success', 'Inquiry approved successfully by Inventory.');
@@ -720,6 +749,39 @@ class InquirySalesController extends Controller
         // Mengembalikan response sukses
         return response()->json(['success' => 'Inquiry confirmed for purchasing successfully.']);
     }
+
+    public function confirmPurchaseimport(Request $request)
+{
+    $ids = $request->input('ids');
+
+    if (!is_array($ids) || empty($ids)) {
+        return response()->json(['error' => 'No inquiry IDs provided.'], 400);
+    }
+
+    $user = Auth::user();
+
+    foreach ($ids as $id) {
+        $inquiry = InquirySales::find($id);
+
+        if (!$inquiry || $inquiry->status != 8) {
+            continue; // Lewati jika inquiry tidak valid atau bukan status 8
+        }
+
+        // Update inquiry
+        $inquiry->status = 9;
+        $inquiry->purchasing_id = $user->id;
+        $inquiry->confirmed_purchasing_at = now();
+        $inquiry->save();
+
+        // Insert progress ke trx
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $inquiry->id,
+            'user_id' => $user->id,
+            'description' => 'Confirm Inquiry by Procurement ' . $user->name
+        ]);
+    }
+    return response()->json(['success' => 'Selected inquiries have been successfully confirmed for purchasing.']);
+}
 
     public function exportexceloverviewimportpurchase()
     {
@@ -1016,17 +1078,275 @@ public function editimport($id)
         ->with('success', 'Data berhasil diperbarui!');
     }
 
+    
+
+    public function importInquiryInventory(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:xlsx,xls',
+    ]);
+
+    try {
+        $file = $request->file('file');
+        $spreadsheet = IOFactory::load($file->getPathname());
+        $worksheet = $spreadsheet->getActiveSheet();
+        $rows = $worksheet->toArray();
+
+        $now = Carbon::now();
+        $userId = Auth::id();
+
+        // Ambil type_materials untuk reference
+        $typeMaterials = DB::table('type_materials')->pluck('id', 'type_name');
+        $partner = DB::table('users')->pluck('id', 'name');
+
+        // Array untuk batch insert/update
+        $inquiryUpdates = [];
+        $detailUpdates = [];
+        $logs = [];
+
+        foreach ($rows as $index => $row) {
+            // **Lewati 2 baris pertama (judul) & baris kosong**
+            if ($index < 1 || empty(array_filter($row))) {
+                continue;
+            }
+
+            // **Pastikan jumlah kolom cukup sebelum akses indeks**
+            if (count($row) < 32) {
+                continue;
+            }
+
+            $partnerId = isset($row[29]) ? ($partner[$row[29]] ?? null) : null;
+            // **Ambil Type ID dengan cek validitas data**
+            $typeId = isset($row[14]) ? ($typeMaterials[$row[14]] ?? null) : null;
+
+            // **Pastikan ID inquiry tidak kosong**
+            if (empty($row[0])) {
+                continue;
+            }
+
+            $inquiryUpdates[] = [
+                'id' => $row[30] ?? null,
+                'region' => $row[2] ?? null,
+                'kode_inquiry' => $row[4] ?? null,
+                'type_order' => $row[5] ?? null,
+                'jenis_inquiry' => $row[6] ?? null,
+                'loc_imp' => $row[7] ?? null,
+                'est_date' => $row[8] ?? null,
+                'supplier' => $row[9] ?? null,
+                'create_by' => $row[10] ?? null,
+                'refnopo' => $row[11] ?? null,
+                'progress' => $row[32] ?? null,
+                'attach_file' => $row[12] ?? null,
+                'updated_at' => $now,
+            ];
+
+            $detailUpdates[] = [
+                'id' => $row[31] ?? null,
+                'id_inquiry' => $row[30] ?? null,
+                'id_type' => $typeId,
+                'jenis' => $row[15] ?? null,
+                'thickness' => $row[16] ?? null,
+                'inner_diameter' => $row[17] ?? null,
+                'outer_diameter' => $row[18] ?? null,
+                'weight' => $row[19] ?? null,
+                'length' => $row[20] ?? null,
+                'qty' => $row[21] ?? null,
+                'm1' => $row[22] ?? null,
+                'm2' => $row[23] ?? null,
+                'm3' => $row[24] ?? null,
+                'so' => $row[25] ?? null,
+                'ship' => $row[26] ?? null,
+                'note' => $row[27] ?? null,
+                'customer' => $row[3] ?? null,
+                'create_by' => $partnerId,
+                'updated_at' => $now,
+            ];
+
+            $logs[] = [
+                'inquiry_id' => $row[30] ?? null,
+                'description' => 'Updated via Excel Import by ' . Auth::user()->name,
+                'user_id' => $userId,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        // **Batch insert/update hanya jika ada data**
+        if (!empty($inquiryUpdates)) {
+            DB::table('inquiry_sales')->upsert($inquiryUpdates, ['id'], array_keys($inquiryUpdates[0]));
+        }
+
+        if (!empty($detailUpdates)) {
+            DB::table('detail_inquiry_import')->upsert($detailUpdates, ['id_inquiry'], array_keys($detailUpdates[0]));
+        }
+
+        if (!empty($logs)) {
+            DB::table('trx_dbo_progpurchase')->insert($logs);
+        }
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Import berhasil', 
+            'redirect' => route('showApprovalInventoryImport')
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+    }
+}
+
+    public function importInquirypurchase(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls',
+        ]);
+
+        try {
+            $file = $request->file('file');
+            $reader = IOFactory::createReader('Xlsx');
+            $reader->setReadDataOnly(false); // Pastikan format tetap dipertahankan
+            $spreadsheet = IOFactory::load($file->getPathname());
+            $worksheet = $spreadsheet->getActiveSheet();
+            $rows = $worksheet->toArray();
+
+            $now = Carbon::now();
+            $userId = Auth::id();
+            $userName = Auth::user()->name;
+
+            // Ambil type_materials untuk reference
+            $typeMaterials = DB::table('type_materials')->pluck('id', 'type_name');
+            $partner = DB::table('users')->pluck('id', 'name');
+
+            // Array untuk batch insert/update
+            $inquiryUpdates = [];
+            $detailUpdates = [];
+            $logs = [];
+
+            foreach ($rows as $index => $row) {
+                // **Lewati 2 baris pertama (judul) & baris kosong**
+                if ($index < 1 || empty(array_filter($row))) {
+                    continue;
+                }
+
+                // **Pastikan jumlah kolom cukup sebelum akses indeks**
+                if (count($row) < 33) {
+                    continue;
+                }
+
+                $partnerId = isset($row[29]) ? ($partner[$row[29]] ?? null) : null;
+                // **Ambil Type ID dengan cek validitas data**
+                $typeId = isset($row[15]) ? ($typeMaterials[$row[15]] ?? null) : null;
+
+                // **Pastikan ID inquiry tidak kosong**
+                if (empty($row[30])) {
+                    continue;
+                }
+
+                $inquiryUpdates[] = [
+                    'id' => $row[30] ?? null,
+                    'region' => $row[2] ?? null,
+                    'kode_inquiry' => $row[5] ?? null,
+                    'type_order' => $row[6] ?? null,
+                    'jenis_inquiry' => $row[7] ?? null,
+                    'loc_imp' => $row[8] ?? null,
+                    'est_date' => $row[9] ?? null,
+                    'supplier' => $row[10] ?? null,
+                    'create_by' => $row[11] ?? null,
+                    'refnopo' => $row[12] ?? null,
+                    'progress' => $row[32] ?? null,
+                    'attach_file' => $row[13] ?? null,
+                    'updated_at' => $now,
+                ];
+
+                $detailUpdates[] = [
+                    'id' => $row[31] ?? null,
+                    'id_inquiry' => $row[30] ?? null,
+                    'id_type' => $typeId,
+                    'jenis' => $row[16] ?? null,
+                    'thickness' => $row[17] ?? null,
+                    'inner_diameter' => $row[18] ?? null,
+                    'outer_diameter' => $row[19] ?? null,
+                    'weight' => $row[20] ?? null,
+                    'length' => $row[21] ?? null,
+                    'qty' => $row[22] ?? null,
+                    'm1' => $row[23] ?? null,
+                    'm2' => $row[24] ?? null,
+                    'm3' => $row[25] ?? null,
+                    'so' => $row[26] ?? null,
+                    'ship' => $row[27] ?? null,
+                    'note' => $row[28] ?? null,
+                    'customer' => $row[4] ?? null,
+                    'create_by' => $partnerId,
+                    'updated_at' => $now,
+                    'nopo' => $row[33] ?? null,
+                ];
+
+                $logs[] = [
+                    'inquiry_id' => $row[30] ?? null,
+                    'description' => 'Updated purchase oleh ' . $userName . ' via Excel Import',
+                    'user_id' => $userId,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+
+            // **Batch insert/update hanya jika ada data**
+            if (!empty($inquiryUpdates)) {
+                DB::table('inquiry_sales')->upsert($inquiryUpdates, ['id'], array_keys($inquiryUpdates[0]));
+            }
+
+            if (!empty($detailUpdates)) {
+                DB::table('detail_inquiry_import')->upsert($detailUpdates, ['id_inquiry'], array_keys($detailUpdates[0]));
+            }
+
+            if (!empty($logs)) {
+                DB::table('trx_dbo_progpurchase')->insert($logs);
+            }
+
+            return response()->json([
+                'success' => true, 
+                'message' => 'Import berhasil', 
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function exportinquirypurchaseimport(Request $request)
+{
+
+    $ids = explode(',', $request->query('ids'));
+    $klasifikasi = $request->query('klasifikasi');
+
+    if (empty($ids)) {
+        abort(400, 'ID inquiry tidak ditemukan');
+    }
+
+    return Excel::download(
+        new InquiryImportPurchaseExport($ids, $klasifikasi),
+        "inquiry_export_{$klasifikasi}.xlsx"
+    );
+}
 
 
     public function deleteInquiryDetailImport($id)
     {
         try {
+
+            $userName = Auth::user()->name;
             $material = DetailInquiryImport::find($id); // Ganti dengan model yang sesuai
             if (!$material) {
                 return Response::json(['success' => false, 'message' => 'Material not found'], 404);
             }
 
             $material->delete();
+            $inquiry = InquirySales::findOrFail($material->id_inquiry);
+
+            TrxDboProgPurchase::create([
+                'inquiry_id' => $inquiry->id,
+                'user_id' => auth()->id(),
+                'description' => "Inquiry {$material->id} dihapus oleh " . $userName
+            ]);
+
             return Response::json(['success' => true, 'message' => 'Material deleted successfully']);
         } catch (\Exception $e) {
             return Response::json(['success' => false, 'message' => 'Failed to delete material'], 500);
@@ -1117,6 +1437,26 @@ public function editimport($id)
         return response()->json(['success' => 'Inquiry marked as finished.']);
     }
 
+    public function finishInquiryimport($id)
+    {
+        // Temukan inquiry berdasarkan ID
+        $inquiry = InquirySales::findOrFail($id);
+        $userName = Auth::user()->name;
+
+        // Ubah status inquiry menjadi "Finished" (status 6)
+        $inquiry->status = 6; // Finished
+        $inquiry->save();
+
+        // Ketika Finished by Procurement
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $inquiry->id,
+            'user_id' => auth()->id(),
+            'description' => 'Finished Inquiry by ' . $userName
+        ]);
+
+        return response()->json(['success' => 'Inquiry marked as finished.']);
+    }
+
     public function exportInquiry()
     {
         return Excel::download(new InquirySalesExport, 'inquiry_sales.xlsx');
@@ -1157,6 +1497,33 @@ public function editimport($id)
 
     // Konversi ke PDF dengan orientasi landscape
     $pdf = PDF::loadView('pdf.inquiry', compact('inquiry', 'materials', 'signatures'))
+        ->setPaper('a4', 'landscape');
+
+    return $pdf->download('ADSI_FormInquiry.pdf');
+}
+
+public function generatePDFimport($id)
+{
+    // Ambil data inquiry berdasarkan ID
+    $inquiry = InquirySales::with(['details.type_materials', 'kasie', 'kadept', 'inventory', 'purchasing'])->findOrFail($id);
+    $materials = DetailInquiryImport::where('id_inquiry', $inquiry->id)->with('type_materials')->get();
+    $customers = Customer::all();
+    $users = User::all();
+
+    // Ambil nama pengguna yang melakukan submit
+    $submittedBy = $inquiry->create_by;
+
+    // Ambil nama dari relasi
+    $signatures = [
+        'submitted' => $submittedBy,
+        'approved_kasie' => $inquiry->kasie ? $inquiry->kasie->name : 'Waiting Approval',
+        'approved_kadept' => $inquiry->kadept ? $inquiry->kadept->name : 'Waiting Approval',
+        'approved_inventory' => $inquiry->inventory ? $inquiry->inventory->name : 'Waiting Approval',
+        'confirmed_purchasing' => $inquiry->purchasing ? $inquiry->purchasing->name : 'Waiting Approval',
+    ];
+
+    // Konversi ke PDF dengan orientasi landscape
+    $pdf = PDF::loadView('pdf.inquiry', compact('inquiry', 'materials', 'signatures', 'customers', 'users'))
         ->setPaper('a4', 'landscape');
 
     return $pdf->download('ADSI_FormInquiry.pdf');
@@ -1236,6 +1603,110 @@ public function editimport($id)
 
         return view('inquiry.overviewInquiry', compact('draftInquiries'));
     }
+
+    public function showApprovalPurchaseImport()
+{
+    // Ambil semua inquiry dengan status Approve Ka.Dept (8, 9, 6) dan yang aktif serta import
+    $inquiries = InquirySales::with(['customer', 'detailinquiryimport'])
+        ->whereIn('status', [8, 9, 6])
+        ->where('is_active', 1)
+        ->where('loc_imp', 'Import')
+        ->latest()
+        ->get();
+
+    // Group berdasarkan bulan dari created_at
+    $groupedByMonth = $inquiries->groupBy(function ($inquiry) {
+        return $inquiry->created_at->format('Y-m'); // Format sebagai "2025-04"
+    });
+
+    // Ambil satu inquiry per bulan untuk Daido
+    $Daido = $groupedByMonth->map(function ($group) {
+        return $group->first(function ($inquiry) {
+            return $inquiry->detailinquiryimport->contains(function ($detail) {
+                return $detail->klasifikasi === 'Daido';
+            });
+        });
+    })->filter(); // Buang null values jika tidak ada inquiry Daido di bulan tersebut
+
+    // Ambil satu inquiry per bulan untuk NonDaido
+    $NonDaido = $groupedByMonth->map(function ($group) {
+        return $group->first(function ($inquiry) {
+            return $inquiry->detailinquiryimport->contains(function ($detail) {
+                return $detail->klasifikasi === 'NonDaido';
+            });
+        });
+    })->filter(); // Buang null values jika tidak ada inquiry NonDaido di bulan tersebut
+
+    return view('inquiry.overviewPurchaseImport', [
+        'inquiries' => $inquiries,
+        'Daido' => $Daido,
+        'NonDaido' => $NonDaido,
+    ]);
+}
+
+    public function showFormSSimportpurchase($month, $klasifikasi)
+{
+    // Parsing format bulan (pastikan formatnya valid: YYYY-MM atau sejenis)
+    try {
+        $carbonMonth = Carbon::parse($month);
+    } catch (\Exception $e) {
+        abort(400, 'Format bulan tidak valid');
+    }
+
+    $inquiries = InquirySales::with([
+        'customer',
+        'detailinquiryimport' => function ($query) use ($klasifikasi) {
+            $query->where('klasifikasi', $klasifikasi);
+        }
+    ])
+    ->whereYear('created_at', $carbonMonth->year)
+    ->whereMonth('created_at', $carbonMonth->month)
+    ->where('is_active', 1)
+    ->where('loc_imp', 'Import')
+    ->whereIn('status', ['8', '9', '6'])
+    ->whereHas('detailinquiryimport', function ($query) use ($klasifikasi) {
+        $query->where('klasifikasi', $klasifikasi);
+    })
+    ->get();
+    
+    // Fetch all detail inquiries based on id_inquiry from the main inquiry
+    if ($klasifikasi) {
+        $materials = DetailInquiryImport::whereIn('id_inquiry', $inquiries->pluck('id'))
+            ->where('klasifikasi', $klasifikasi)
+            ->with('type_materials')
+            ->get();
+    } else {
+        $materials = DetailInquiryImport::whereIn('id_inquiry', $inquiries->pluck('id'))
+            ->with('type_materials')
+            ->get();
+    }
+
+
+    $inquiry = $inquiries->first();
+
+    $customers = Customer::all();
+    $users = User::all();
+
+    // Ambil semua nama file yang ter-upload
+    $uploadedFiles = DetailInquiryImport::whereIn('id_inquiry', $inquiries->pluck('id'))
+        ->pluck('file')
+        ->flatMap(function ($file) {
+            return json_decode($file) ?? [];
+        })
+        ->toArray();
+
+    // Progress updates
+    $progressUpdates = TrxDboProgPurchase::whereIn('inquiry_id', $inquiries->pluck('id'))
+        ->with('user')
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    
+    $isFromApproval = request()->query('source') === 'approval';
+    
+    return view('inquiry.showformSSimportpurchase', compact('inquiries', 'isFromApproval', 'uploadedFiles', 'progressUpdates', 'customers', 'users', 'inquiry', 'materials', 'month', 'klasifikasi'));
+    
+}
 
 
     public function createInquirySalesImport()
