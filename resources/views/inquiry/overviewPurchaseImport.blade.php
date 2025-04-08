@@ -471,26 +471,38 @@
                                                                     @endif
                                                                     @php
                                                                         $monthKey = $inquiry->created_at->format('Y-m');
+
+                                                                        $inquiriesForMonth = $inquiries->filter(function ($item) use ($monthKey) {
+                                                                            return $item->created_at->format('Y-m') === $monthKey;
+                                                                        });
+
+                                                                        $idsToConfirm = $inquiriesForMonth->whereIn('status', 8)->pluck('id')->values();
+                                                                        $idsToFinish = $inquiriesForMonth->whereIn('status', 9)->pluck('id')->values();
                                                                     @endphp
 
+                                                                    <!-- Tombol View -->
                                                                     <a class="btn btn-custom-view m-1 btn-sm"
-                                                                        title="View Form"
-                                                                        href="{{ route('showFormSSimportpurchase', ['month' => $monthKey, 'klasifikasi' => 'Daido']) }}">
+                                                                    title="View Form"
+                                                                    href="{{ route('showFormSSimportpurchase', ['month' => $monthKey, 'klasifikasi' => 'Daido']) }}">
                                                                         <i class="bi bi-eye-fill"></i>
                                                                     </a>
 
-                                                                    @if ($inquiry->status == 8)
-                                                                                <a href="#" class="btn btn-primary btn-sm"
-                                                                                onclick="confirmPurchasing({{ $inquiry->id }}); return false;">
-                                                                                <i class="bi bi-check-square-fill"></i>
-                                                                                </a>
-                                                                            @endif
-                                                                    @if ($inquiry->status == 9)
-                                                                                <a href="#" class="btn btn-success btn-sm"
-                                                                                onclick="finishInquiry({{ $inquiry->id }}); return false;">
-                                                                                <i class="bi bi-check-square-fill"></i>
-                                                                                </a>
+                                                                    <!-- Tombol Confirm -->
+                                                                    @if ($idsToConfirm->isNotEmpty())
+                                                                        <a href="#" class="btn btn-primary btn-sm"
+                                                                        onclick='confirmPurchasing({!! json_encode($idsToConfirm) !!}); return false;'>
+                                                                            <i class="bi bi-check-square-fill"></i>
+                                                                        </a>
                                                                     @endif
+
+                                                                    <!-- Tombol Finish -->
+                                                                    @if ($idsToFinish->isNotEmpty())
+                                                                        <a href="#" class="btn btn-success btn-sm"
+                                                                        onclick='finishInquiry({!! json_encode($idsToFinish) !!}); return false;'>
+                                                                            <i class="bi bi-check-square-fill"></i>
+                                                                        </a>
+                                                                    @endif
+
                                                                 </td>
                                                             </tr>
                                                         @endforeach
@@ -619,34 +631,38 @@
                                                                                 </a>
                                                                             @endif
                                                                             @php
-                                                                            $monthKey = $inquiry->created_at->format('Y-m'); // atau bisa dari looping luar
-                                                                            $inquiriesForMonth = $inquiries->filter(function ($item) use ($monthKey) {
-                                                                                    return $item->created_at->format('Y-m') === $monthKey;
-                                                                                });
+                                                                        $monthKey = $inquiry->created_at->format('Y-m');
 
-                                                                                $idsToConfirm = $inquiriesForMonth->where('status', 8)->pluck('id')->values();
-                                                                                $idsToFinish = $inquiriesForMonth->where('status', 9)->pluck('id')->values();
-                                                                            @endphp
+                                                                        $inquiriesForMonth = $inquiries->filter(function ($item) use ($monthKey) {
+                                                                            return $item->created_at->format('Y-m') === $monthKey;
+                                                                        });
 
-                                                                            <a class="btn btn-custom-view m-1 btn-sm"
-                                                                            title="View Form"
-                                                                            href="{{ route('showFormSSimportpurchase', ['month' => $monthKey, 'klasifikasi' => 'NonDaido']) }}">
-                                                                                <i class="bi bi-eye-fill"></i>
-                                                                            </a>
+                                                                        $idsToConfirm = $inquiriesForMonth->whereIn('status', 8)->pluck('id')->values();
+                                                                        $idsToFinish = $inquiriesForMonth->whereIn('status', 9)->pluck('id')->values();
+                                                                    @endphp
 
-                                                                            @if ($idsToConfirm->count() > 0)
-                                                                                <a href="#" class="btn btn-primary btn-sm"
-                                                                                onclick='confirmPurchasing({!! json_encode($idsToConfirm) !!}); return false;'>
-                                                                                <i class="bi bi-check-square-fill"></i>
-                                                                                </a>
-                                                                            @endif
+                                                                    <!-- Tombol View -->
+                                                                    <a class="btn btn-custom-view m-1 btn-sm"
+                                                                    title="View Form"
+                                                                    href="{{ route('showFormSSimportpurchase', ['month' => $monthKey, 'klasifikasi' => 'NonDaido']) }}">
+                                                                        <i class="bi bi-eye-fill"></i>
+                                                                    </a>
 
-                                                                            @if ($idsToFinish->count() > 0)
-                                                                                <a href="#" class="btn btn-success btn-sm"
-                                                                                onclick='finishInquiry({!! json_encode($idsToFinish) !!}); return false;'>
-                                                                                <i class="bi bi-check-square-fill"></i>
-                                                                                </a>
-                                                                            @endif
+                                                                    <!-- Tombol Confirm -->
+                                                                    @if ($idsToConfirm->isNotEmpty())
+                                                                        <a href="#" class="btn btn-primary btn-sm"
+                                                                        onclick='confirmPurchasing({!! json_encode($idsToConfirm) !!}); return false;'>
+                                                                            <i class="bi bi-check-square-fill"></i>
+                                                                        </a>
+                                                                    @endif
+
+                                                                    <!-- Tombol Finish -->
+                                                                    @if ($idsToFinish->isNotEmpty())
+                                                                        <a href="#" class="btn btn-success btn-sm"
+                                                                        onclick='finishInquiry({!! json_encode($idsToFinish) !!}); return false;'>
+                                                                            <i class="bi bi-check-square-fill"></i>
+                                                                        </a>
+                                                                    @endif
 
                                                                         </td>
                                                                     </tr>
