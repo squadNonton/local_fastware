@@ -98,7 +98,7 @@ class JsonToCsvController extends Controller
                 $handle = fopen('php://output', 'w');
 
                 // Mendefinisikan kolom yang ingin diambil
-                $desiredColumns = ['BuyerTaxpayerName', 'TaxInvoiceNumber', 'VAT', 'Reference'];
+                $desiredColumns = ['BuyerTaxpayerName', 'TaxInvoiceNumber', 'VAT', 'Reference', 'TaxInvoiceStatus', 'TaxInvoiceDate'];
 
                 // Menulis header CSV berdasarkan kolom yang diinginkan
                 fputcsv($handle, $desiredColumns);

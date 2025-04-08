@@ -10,10 +10,6 @@
                 width: 100%;
             }
 
-            .fo {
-                font-family: Cambria, serif;
-            }
-
             .swal2-popup {
                 font-size: 0.6rem;
                 width: 300px;
@@ -128,6 +124,35 @@
             .font-sii {
                 font-family: 'Cambria', serif;
                 font-weight: bold;
+            }
+
+            .table-1 {
+                margin: 5px auto;
+                /* Pusatkan tabel */
+                padding: 1rem;
+                /* Padding di sekeliling tabel */
+                background-color: #f7f7f7;
+                /* Warna latar belakang */
+                border-radius: 8px;
+                /* Sudut membulat */
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+                /* Bayangan untuk efek kedalaman */
+            }
+
+            .table-1 th {
+                background-color: rgb(97, 97, 97);
+                /* Warna latar belakang */
+                color: #ffffff;
+                font-size: 10pt;
+                /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); */
+                /* Bayangan untuk efek kedalaman */
+                text-align: center;
+                font-family: 'Cambria', serif;
+            }
+
+            .table-1 td {
+                font-size: 8pt;
+                font-family: 'Cambria', serif;
             }
 
             .datatable-table>tbody>tr>td {
@@ -977,7 +1002,8 @@
                                             <label for="id_customer" class="form-label fw-bold">Order from</label>
                                             <div class="searchable-dropdown">
                                                 <input type="text" id="search_customer">
-                                                <div class="dropdown-items" id="customer_list" style="display: none;">
+                                                <div class="dropdown-items" id="customer_list"
+                                                    style="display: none; max-height: 200px; overflow-y: auto;">
                                                     @foreach ($customers as $customer)
                                                         <div data-value="{{ $customer->id }}">
                                                             {{ $customer->name_customer }}
@@ -1079,37 +1105,37 @@
                     <!-- End Edit Inquiry Modal -->
                 </div>
             </div>
-        </section>
-
-        <!-- Modal for Viewing Progress History -->
-        <div class="modal fade" id="progressHistoryModal1" tabindex="-1" aria-labelledby="progressHistoryModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="progressHistoryModalLabel">History Progress</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="table-responsive">
-                            <table class="table table-1" id="historyTable">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Date</th>
-                                        <th>User</th>
-                                        <th>Progress Description</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="historyBody">
-                                    <!-- Data akan ditambahkan melalui AJAX -->
-                                </tbody>
-                            </table>
+            <!-- Modal for Viewing Progress History -->
+            <div class="modal fade" id="progressHistoryModal1" tabindex="-1"
+                aria-labelledby="progressHistoryModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="progressHistoryModalLabel">History Progress</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="table-responsive">
+                                <table class="table table-1" id="historyTable">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Date</th>
+                                            <th>User</th>
+                                            <th>Progress Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="historyBody">
+                                        <!-- Data akan ditambahkan melalui AJAX -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- jQuery -->
         <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
@@ -1130,7 +1156,7 @@
             });
         </script>
 
-        <script>
+        {{-- <script>
             function showDropdown(id) {
                 document.getElementById(id).style.display = "block";
             }
@@ -1160,7 +1186,7 @@
                     document.querySelectorAll(".dropdown-menu").forEach(menu => menu.style.display = "none");
                 }
             });
-        </script>
+        </script> --}}
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {

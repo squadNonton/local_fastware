@@ -889,6 +889,8 @@
                                         'FAJAR BAGASKARA',
                                         'M. IQBAL',
                                         'SARAH EGA BUDI ASTUTI',
+                                        'YULMAI RIDO WINANDA',
+                                        'HARDI SAPUTRA',
                                     ]))
                                     <li><a class="dropdown-item" href="{{ route('index.PO') }}">Form Pengajuan
                                             Barang/Jasa</a></li>
@@ -1043,7 +1045,8 @@
                                         <li><a class="dropdown-item" href="">Persetujuan Ka.Sie</a></li>
                                         <li><a class="dropdown-item" href="">Persetujuan Ka.Dept</a></li>
                                         <li><a class="dropdown-item" href="">Persetujuan Inventory</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('overviewPurchaseImport') }}">Overview Import</a></li>
+                                        <li><a class="dropdown-item"
+                                                href="{{ route('overviewPurchaseImport') }}">Overview Import</a></li>
                                         <li><a class="dropdown-item" href="">Overview Inquiry Import</a></li>
                                     </ul>
                                 </li>
@@ -1298,7 +1301,7 @@
                                             <li><a class="dropdown-item" href="{{ route('indexPD2') }}">Persetujuan
                                                     Development</a></li>
                                         @endif
-                                        
+
                                         @if (in_array(auth()->user()->name, [
                                                 'ADMINSTRATOR',
                                                 'MUGI PRAMONO',

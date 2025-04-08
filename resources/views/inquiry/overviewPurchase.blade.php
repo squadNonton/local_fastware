@@ -531,6 +531,10 @@
                                                     CV. GLOBAL METAL INDONESIA</option>
                                                 <option value="PT. KREASI INTI SUKSES">
                                                     PT. KREASI INTI SUKSES</option>
+                                                <option value="METAL JAYA UTAMA">
+                                                    METAL JAYA UTAMA</option>
+                                                {{-- <option value="DAVID MURDIYANTO">
+                                                    DAVID MURDIYANTO</option> --}}
                                                 <!-- Tambahkan opsi lain jika diperlukan -->
                                             </select>
                                         </div>

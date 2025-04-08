@@ -435,7 +435,8 @@
                         <button class="btn btn-add btn-sm me-2" data-bs-toggle="modal" data-bs-target="#inquiryModal">
                             <i class="bx bx-plus-medical fw-bold"> Add Local</i>
                         </button>
-                        <a href="{{ route('export.inquiry') }}" class="bx bx-download btn btn-success btn-sm me-2"> Export Inquiry</a>
+                        <a href="{{ route('export.inquiry') }}" class="bx bx-download btn btn-success btn-sm me-2"> Export
+                            Inquiry</a>
                         {{-- <h5 class="card-title1 font-sii text-center">Data Inquiry Sales View</h5> --}}
                     </div>
 
@@ -678,7 +679,8 @@
                                         </select>
                                     </div> --}}
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-danger"
+                                            data-bs-dismiss="modal">Close</button>
                                         <button type="submit" class="btn btn-primary">Submit</button>
                                     </div>
                                 </form>

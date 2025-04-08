@@ -186,6 +186,7 @@
                 body {
                     margin: 0;
                     padding: 0;
+                    zoom: 64%
                 }
 
                 @page {
@@ -349,7 +350,7 @@
                             @endif
 
                             <div style="overflow-x: auto;">
-                                <table class="datatable table table-hover">
+                                <table>
                                     <thead>
                                         <tr>
                                             <th style="width: 4px">No</th>

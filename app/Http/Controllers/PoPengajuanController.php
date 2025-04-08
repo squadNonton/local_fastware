@@ -600,6 +600,7 @@ class PoPengajuanController extends Controller
                 $allowedNames = [
                     'NURSALIM',
                     'ABDUR RAHMAN AL FAAIZ',
+                    'YULMAI RIDO WINANDA',
                 ];
             } elseif ($roleId == 3) {
                 $allowedNames = [

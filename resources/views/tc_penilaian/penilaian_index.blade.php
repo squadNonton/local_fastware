@@ -61,7 +61,16 @@
                                         </button>
                                     @endif
 
-                                    @if ($item->status == 2 && $userName == 'CAHYO')
+                                    @php
+                                        $userDeptH = [
+                                            'MARTINUS CAHYO RAHASTO',
+                                            'YULMAI RIDO WINANDA',
+                                            'HARDI SAPUTRA',
+                                            'ARY RODJO PRASETYO',
+                                        ];
+                                    @endphp
+
+                                    @if ($item->status == 2 && in_array($userName, $userDeptH))
                                         <button type="button" class="btn btn-success"
                                             onclick="kirimData2('{{ $item->id_job_position }}')">
                                             <i class="fas fa-paper-plane"></i> Kirim
@@ -186,7 +195,8 @@
                     if (result.isConfirmed) {
                         // Jika pengguna memilih Yes, lakukan AJAX request
                         $.ajax({
-                            url: '{{ route('update.status2', ':id_job_position') }}'.replace(':id_job_position',
+                            url: '{{ route('update.status2', ':id_job_position') }}'.replace(
+                                ':id_job_position',
                                 id_job_position),
                             type: 'POST',
                             data: {

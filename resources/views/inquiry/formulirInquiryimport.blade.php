@@ -215,21 +215,21 @@
             }
 
             table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+            }
 
-        table th,
-        table td {
-            border: 1px solid #015974;
-            padding: 8px;
-            text-align: center;
-        }
+            table th,
+            table td {
+                border: 1px solid #015974;
+                padding: 8px;
+                text-align: center;
+            }
 
-        table th {
-            background-color: #f2f2f2;
-        }
+            table th {
+                background-color: #f2f2f2;
+            }
 
             .datatable-table>tbody>tr>td {
                 text-align: center;
@@ -561,7 +561,7 @@
                                         <th style="width: 60px;">Ship-to</th>
                                         <th style="width: 60px;">Sales Order</th>
                                         <th style="width: 50px;">Remark</th>
-                                        <th style="width: 300px;">Customer</th>
+                                        <th style="width: 50px;">Customer</th>
                                     </tr>
                                 </thead>
                                 <tbody id="table-body">
@@ -575,23 +575,23 @@
                 </div>
             </section>
             <!-- jQuery -->
-        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-        {{-- excel --}}
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+            <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+            {{-- excel --}}
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 
-        <!-- SimpleDataTables JS -->
-        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
+            <!-- SimpleDataTables JS -->
+            <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
 
-        <script>
-            $(document).ready(function() {
-                // Hover function for dropdowns
-                $('.nav-item.dropdown').hover(function() {
-                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
-                }, function() {
-                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
+            <script>
+                $(document).ready(function() {
+                    // Hover function for dropdowns
+                    $('.nav-item.dropdown').hover(function() {
+                        $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+                    }, function() {
+                        $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
+                    });
                 });
-            });
-        </script>
+            </script>
 
             <!-- Modal for Uploading File -->
             <div class="modal fade" id="uploadFileModal" tabindex="-1" aria-labelledby="uploadFileModalLabel"
@@ -630,22 +630,22 @@
 
             <script>
                 function toggle(source) {
-                checkboxes = document.getElementsByName('record');
-                for (var i = 0, n = checkboxes.length; i < n; i++) {
-                    checkboxes[i].checked = source.checked;
-                }
-            }
-
-            function deleteRow() {
-                var tableBody = document.getElementById('table-body');
-                var rows = tableBody.querySelectorAll('tr');
-                rows.forEach(function(row) {
-                    var checkbox = row.querySelector('input[name="record"]');
-                    if (checkbox && checkbox.checked) {
-                        tableBody.removeChild(row);
+                    checkboxes = document.getElementsByName('record');
+                    for (var i = 0, n = checkboxes.length; i < n; i++) {
+                        checkboxes[i].checked = source.checked;
                     }
-                });
-            }
+                }
+
+                function deleteRow() {
+                    var tableBody = document.getElementById('table-body');
+                    var rows = tableBody.querySelectorAll('tr');
+                    rows.forEach(function(row) {
+                        var checkbox = row.querySelector('input[name="record"]');
+                        if (checkbox && checkbox.checked) {
+                            tableBody.removeChild(row);
+                        }
+                    });
+                }
 
                 function openUploadFileModal(id) {
                     document.getElementById('inquiryIdForFile').value = id; // Set inquiry ID
@@ -898,7 +898,6 @@
                     let uniqueId = `search_customer_${rowCount}`;
                     let uniqueHiddenId = `customer_${rowCount}`;
                     let uniqueNameCustomerId = `name_customer_${rowCount}`;
-
                     let searchContainer = document.createElement("div");
                     searchContainer.classList.add("searchable-dropdown");
 
@@ -911,8 +910,8 @@
                     let dropdownMenu = document.createElement("div");
                     dropdownMenu.id = `customer_list_${rowCount}`;
                     dropdownMenu.classList.add("dropdown-menu", "show");
-                    dropdownMenu.style.width = "300px";
-                    dropdownMenu.style.display = "none";
+                    dropdownMenu.style.width = "500x";
+                    dropdownMenu.style.display = "none"; // Sebaiknya tetap disembunyikan saat tidak aktif
                     dropdownMenu.style.maxHeight = "200px";
                     dropdownMenu.style.overflowY = "auto";
 

@@ -453,8 +453,8 @@
                                                 </td>
                                                 <td>{{ $inquiry->est_date }}</td>
                                                 <td>
-                                                    <a href="{{ route('showFormSS', ['id' => $inquiry->id]) }}" class="btn btn-warning btn-sm"
-                                                        title="View Form">
+                                                    <a href="{{ route('showFormSS', ['id' => $inquiry->id]) }}"
+                                                        class="btn btn-warning btn-sm" title="View Form">
                                                         <i class="bi bi-eye-fill"></i>
                                                     </a>
                                                 </td>
@@ -501,6 +501,8 @@
                                                     PT. SURYA SEJAHTERA METALINDO LESTARI</option>
                                                 <option value="CV. DIMA RAMA SAKTI">
                                                     CV. DIMA RAMA SAKTI</option>
+                                                <option value="METAL JAYA UTAMA">
+                                                    METAL JAYA UTAMA</option>
                                                 <!-- Tambahkan opsi lain jika diperlukan -->
                                             </select>
                                         </div>
