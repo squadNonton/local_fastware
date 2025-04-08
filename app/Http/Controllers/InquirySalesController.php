@@ -1487,25 +1487,34 @@ public function editimport($id)
         return response()->json(['success' => 'Inquiry marked as finished.']);
     }
 
-    public function finishInquiryimport($id)
-    {
-        // Temukan inquiry berdasarkan ID
-        $inquiry = InquirySales::findOrFail($id);
-        $userName = Auth::user()->name;
+    public function finishInquiryimport(Request $request)
+{
+    $ids = $request->input('ids');
 
-        // Ubah status inquiry menjadi "Finished" (status 6)
-        $inquiry->status = 6; // Finished
-        $inquiry->save();
-
-        // Ketika Finished by Procurement
-        TrxDboProgPurchase::create([
-            'inquiry_id' => $inquiry->id,
-            'user_id' => auth()->id(),
-            'description' => 'Finished Inquiry by ' . $userName
-        ]);
-
-        return response()->json(['success' => 'Inquiry marked as finished.']);
+    if (!is_array($ids) || empty($ids)) {
+        return response()->json(['error' => 'No inquiry IDs provided.'], 400);
     }
+
+    $userId = auth()->id();
+    $userName = auth()->user()->name;
+
+    foreach ($ids as $id) {
+        $inquiry = InquirySales::find($id);
+        if ($inquiry) {
+            $inquiry->status = 6; // Finished
+            $inquiry->save();
+
+            TrxDboProgPurchase::create([
+                'inquiry_id' => $inquiry->id,
+                'user_id' => $userId,
+                'description' => 'Finished Inquiry by ' . $userName,
+            ]);
+        }
+    }
+
+    return response()->json(['success' => 'Inquiries marked as finished.']);
+}
+
 
     public function exportInquiry()
     {

@@ -911,39 +911,39 @@
                 });
             }
 
-            function finishInquiry(id) {
-                // Menampilkan konfirmasi sebelum melanjutkan
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "This will mark the inquiry as finished.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, finish it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Jika pengguna mengkonfirmasi, lanjutkan dengan AJAX
-                        $.ajax({
-                            url: '{{ route('finishInquiryimport', '') }}/' + id, // Route untuk finishing inquiry
-                            method: 'POST',
-                            data: {
-                                '_token': '{{ csrf_token() }}' // CSRF token
-                            },
-                            success: function(response) {
-                                Swal.fire('Success!', 'Inquiry marked as finished.', 'success').then(() => {
-                                    location.reload(); // Reload halaman untuk melihat update
-                                });
-                            },
-                            error: function(xhr) {
-                                console.error(xhr.responseText);
-                                Swal.fire('Error!', 'An error occurred while finishing the inquiry.',
-                                    'error');
-                            }
+            function finishInquiry(ids) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This will mark the selected inquiries as finished.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, finish them!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '{{ route('finishInquiryimport') }}', // Route tanpa parameter ID
+                method: 'POST',
+                data: {
+                    '_token': '{{ csrf_token() }}',
+                    'ids': ids // Kirim array of IDs
+                },
+                success: function(response) {
+                    Swal.fire('Success!', 'Selected inquiries marked as finished.', 'success')
+                        .then(() => {
+                            location.reload();
                         });
-                    }
-                });
-            }
+                },
+                error: function(xhr) {
+                    console.error(xhr.responseText);
+                    Swal.fire('Error!', 'An error occurred while finishing the inquiries.', 'error');
+                }
+            });
+        }
+    });
+}
+
 
             function showInquiry(id) {
                 // Tampilkan detail inquiry dan tambahkan parameter query

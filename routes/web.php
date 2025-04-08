@@ -323,7 +323,8 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/inquiry/reject-inventoryimport/{id}', [InquirySalesController::class, 'rejectInventoryImport'])->name('rejectInventoryImport');
 
 
-    Route::post('/inquiry/finish/{id}', [InquirySalesController::class, 'finishInquiryimport'])->name('finishInquiryimport');
+    Route::post('/inquiry/finish-import', [InquirySalesController::class, 'finishInquiryimport'])->name('finishInquiryimport');
+
     Route::get('/showFormSSimport/pdf/{id}', [InquirySalesController::class, 'generatePDFimport'])->name('showFormSSimport.pdf');
     Route::get('/inquiry/form-import/{month}/{klasifikasi}', [InquirySalesController::class, 'showFormSSimportpurchase'])->name('showFormSSimportpurchase');
 
