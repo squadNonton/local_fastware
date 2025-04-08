@@ -16,9 +16,12 @@ use Illuminate\Support\Facades\Log;
 use PDF;
 use App\Exports\InquirySalesExport;
 use App\Exports\DraftInquiryExport;
+use App\Exports\InquiryImportInventoryExport;
+use App\Exports\InquiryImportPurchaseExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Response;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Support\Facades\DB;
 
 class InquirySalesController extends Controller
 {
