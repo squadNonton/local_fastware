@@ -1159,7 +1159,7 @@
 
                                         </div>
 
-                                        <div class="mb-3">
+                                        {{-- <div class="mb-3">
                                             <label for="id_customer" class="form-label fw-bold">Order from</label>
                                             <div class="searchable-dropdown">
                                                 <input type="text" id="search_customer">
@@ -1171,7 +1171,7 @@
                                             </div>
                                             <input type="hidden" id="id_customer" name="id_customer" required>
                                             <div id="selected_customers_list"></div>
-                                        </div>
+                                        </div> --}}
 
                                         <!-- Region (Searchable Dropdown) -->
                                         <div class="mb-3">

@@ -154,6 +154,7 @@
                             <tr>
                                 <th style="width: 25px;">No</th>                                
                                 <th style="width: 50px; text-align:center;">klasifikasi</th>
+                                <th style="width: 50px; text-align:center;">Region</th>
                                 <th style="width: 100px;">Raw Material</th>
                                 <th style="width: 50px;">Shapes</th>
                                 <th style="width: 40px;">Thickness</th>
@@ -172,7 +173,9 @@
                                 <th style="width: 50px; text-align:center;">Remark</th>
                                 <th style="width: 50px; text-align:center;">Customer</th>
                                 <th style="width: 50px; text-align:center;">Partner</th>
+                                <th style="width: 50px; text-align:center;">Progress</th>
                                 <th style="width: 50px; text-align:center;">No PO</th>
+                                <th style="width: 50px; text-align:center;">Supplier</th>
                                 <th style="width: 50px; text-align:center;">Aksi</th>
                             </tr>
                         </thead>
@@ -184,6 +187,16 @@
                                 <tr data-id="{{ $material->id }}">
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $material['klasifikasi'] }}</td>
+                                    @php
+                                        $region = '';
+                                        foreach ($inquiries as $inquirys){
+                                            if ($inquirys->id == $material->id_inquiry){
+                                                $region = $inquirys->region;
+                                                break;
+                                            }
+                                        }
+                                    @endphp
+                                    <td>{{ $region }}</td>
                                     <td>{{ $material->type_materials ? $material->type_materials->type_name : 'N/A' }}</td>
                                     <td>{{ $material['jenis'] }}</td>
                                     <td>{{ $material['thickness'] }}</td>
@@ -222,7 +235,9 @@
                                         @endphp
                                         <span>{{ $partnerName }}</span>
                                     </td>
+                                    <td>{{ $material['progress'] }}</td>
                                     <td>{{ $material['nopo'] }}</td>
+                                    <td>{{ $material['supplier'] }}</td>
                                     <td>
                                         @if ($inquiry->status == 1 && $material->create_by == Auth::id() && in_array(Auth::id(), [1, 2, 3, 4]))
                                             <a href="{{ route('editimport', ['id' => $material->id]) }}" class="btn btn-warning btn-sm">Edit</a>
@@ -276,10 +291,13 @@
                         <i class="bi bi-file-earmark-excel-fill"></i> Export Data
                     </a>
 
-                
+                    @if ($inquiry->status == 8 || $inquiry->status == 9)
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importModal">
                         <i class="bi bi-file-earmark-excel"></i> Import Data
-                    </button>
+                    </button>    
+                    @endif
+                
+                    
                 </div>
                 
                 <!-- Import Modal -->

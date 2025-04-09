@@ -159,7 +159,7 @@ class InquirySalesController extends Controller
     {
         $request->validate([
             'jenis_inquiry' => 'required',
-            'id_customer' => 'required',
+            // 'id_customer' => 'required',
             'region' => 'required',
             // 'supplier' => 'required',
 
@@ -189,7 +189,7 @@ class InquirySalesController extends Controller
         $inquiry = new InquirySales();
         $inquiry->kode_inquiry = $kodeInquiry;
         $inquiry->jenis_inquiry = $jenisInquiry;
-        $inquiry->id_customer = $request->id_customer;
+        // $inquiry->id_customer = $request->id_customer;
         $inquiry->loc_imp = 'Import';
         $inquiry->region = $request->region;
         // $inquiry->supplier = $request->supplier;
@@ -205,7 +205,7 @@ class InquirySalesController extends Controller
         TrxDboProgPurchase::create([
             'inquiry_id' => $inquiry->id,
             'user_id' => Auth::id(),
-            'description' => 'Inquiry created by ' . Auth::user()->name,
+            'description' => 'Inquiry untuk Region [' . $inquiry->region . '] ditambahkan oleh ' . Auth::user()->name,
         ]);
 
         return redirect()->route('createinquiryImport')->with('success', 'Inquiry successfully saved.');
@@ -628,12 +628,16 @@ class InquirySalesController extends Controller
             'description' => 'Approved by Ka. Dept.'
         ]);
         
-        // Ketika menyetujui oleh Ka.Dept
-        TrxDboProgPurchase::create([
-            'inquiry_id' => $inquiry->id,
-            'user_id' => auth()->id(),
-            'description' => 'Approved by Ka. Dept. ' . Auth::user()->name
-        ]);
+        // Format bulan dan tahun dibuat
+        $createdMonth = Carbon::parse($inquiry->created_at)->format('F');
+        $createdYear = Carbon::parse($inquiry->created_at)->format('Y');
+
+       // Ketika menyetujui oleh Inventory
+       TrxDboProgPurchase::create([
+           'inquiry_id' => $inquiry->id,
+           'user_id' => auth()->id(),
+           'description' => 'inquiry Region [ ' . $inquiry->region . ' ] Bulan '. $createdMonth . ' '. $createdYear .' di submit oleh ' . auth::user()->name
+       ]);
 
         return redirect()->route('showApprovalInventoryImport')->with('success', 'Inquiry approved successfully by Ka.Dept.');
     }
@@ -708,11 +712,15 @@ class InquirySalesController extends Controller
         $inquiry->approved_inventory_at = now();
         $inquiry->save();
 
+         // Format bulan dan tahun dibuat
+         $createdMonth = Carbon::parse($inquiry->created_at)->format('F');
+         $createdYear = Carbon::parse($inquiry->created_at)->format('Y');
+
         // Ketika menyetujui oleh Inventory
         TrxDboProgPurchase::create([
             'inquiry_id' => $inquiry->id,
             'user_id' => auth()->id(),
-            'description' => 'Approved by Inventory. ' . Auth::user()->name
+            'description' => 'inquiry Region [ ' . $inquiry->region . ' ] Bulan '. $createdMonth . ' '. $createdYear .' di konfirmasi inventory oleh ' . auth::user()->name
         ]);
 
         return redirect()->route('showApprovalInventoryImport')->with('success', 'Inquiry approved successfully by Inventory.');
@@ -823,11 +831,15 @@ class InquirySalesController extends Controller
         $inquiry->confirmed_purchasing_at = now();
         $inquiry->save();
 
+        // Format bulan dan tahun dibuat
+        $createdMonth = Carbon::parse($inquiry->created_at)->format('F');
+        $createdYear = Carbon::parse($inquiry->created_at)->format('Y');
+
         // Insert progress ke trx
         TrxDboProgPurchase::create([
             'inquiry_id' => $inquiry->id,
             'user_id' => $user->id,
-            'description' => 'Confirm Inquiry by Procurement ' . $user->name
+            'description' => 'inquiry Region [ ' . $inquiry->region . ' ] Bulan '. $createdMonth . ' '. $createdYear .' di konfirmasi purchase oleh ' . $user->name
         ]);
     }
     return response()->json(['success' => 'Selected inquiries have been successfully confirmed for purchasing.']);
@@ -1020,6 +1032,7 @@ class InquirySalesController extends Controller
 
     // Temukan detail inquiry berdasarkan ID
     $inquiryDetail = DetailInquiryImport::findOrFail($validatedData['id']);
+    $originalData = $inquiryDetail->getOriginal();
 
     // Perbarui data detail inquiry
     $inquiryDetail->update([
@@ -1039,6 +1052,23 @@ class InquirySalesController extends Controller
         'note' => $validatedData['note'],
         'customer' => $validatedData['customer'],
     ]);
+
+    // Cek perubahan
+    $changes = [];
+    foreach ($validatedData as $key => $value) {
+        if (array_key_exists($key, $originalData) && $originalData[$key] != $value) {
+            $changes[] = "$key: " . ($originalData[$key] ?? '-') . " → " . $value;
+        }
+    }
+
+    // Buat log jika ada perubahan
+    if (!empty($changes)) {
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $inquiryDetail->id_inquiry,
+            'user_id' => Auth::id(),
+            'description' => 'Detail Inquiry diupdate oleh ' . Auth::user()->name . ' | Perubahan: ' . implode(', ', $changes),
+        ]);
+    }
 
     // Kembalikan respons JSON
     return response()->json(['success' => true]);
@@ -1146,8 +1176,8 @@ public function editimport($id)
         $userId = Auth::id();
 
         // Ambil type_materials untuk reference
-        $typeMaterials = DB::table('type_materials')->pluck('id', 'type_name');
-        $partner = DB::table('users')->pluck('id', 'name');
+        $typeId = DB::table('type_materials')->pluck('id', 'type_name');
+        $partnerId = DB::table('users')->pluck('id', 'name');
 
         // Array untuk batch insert/update
         $inquiryUpdates = [];
@@ -1155,27 +1185,22 @@ public function editimport($id)
         $logs = [];
 
         foreach ($rows as $index => $row) {
-            // **Lewati 2 baris pertama (judul) & baris kosong**
             if ($index < 1 || empty(array_filter($row))) {
                 continue;
             }
-
-            // **Pastikan jumlah kolom cukup sebelum akses indeks**
+        
             if (count($row) < 32) {
                 continue;
             }
-
-            $partnerId = isset($row[29]) ? ($partner[$row[29]] ?? null) : null;
-            // **Ambil Type ID dengan cek validitas data**
-            $typeId = isset($row[14]) ? ($typeMaterials[$row[14]] ?? null) : null;
-
-            // **Pastikan ID inquiry tidak kosong**
-            if (empty($row[0])) {
-                continue;
-            }
-
-            $inquiryUpdates[] = [
-                'id' => $row[30] ?? null,
+        
+            $inquiryId = $row[30] ?? null;
+            $detailId = $row[31] ?? null;
+        
+            $oldInquiry = DB::table('inquiry_sales')->where('id', $inquiryId)->first();
+            $oldDetail = DB::table('detail_inquiry_import')->where('id', $detailId)->first();
+        
+            // Data baru (newData)
+            $newInquiryData = [
                 'region' => $row[2] ?? null,
                 'kode_inquiry' => $row[4] ?? null,
                 'type_order' => $row[5] ?? null,
@@ -1187,12 +1212,9 @@ public function editimport($id)
                 'refnopo' => $row[11] ?? null,
                 'progress' => $row[32] ?? null,
                 'attach_file' => $row[12] ?? null,
-                'updated_at' => $now,
             ];
-
-            $detailUpdates[] = [
-                'id' => $row[31] ?? null,
-                'id_inquiry' => $row[30] ?? null,
+        
+            $newDetailData = [
                 'id_type' => $typeId,
                 'jenis' => $row[15] ?? null,
                 'thickness' => $row[16] ?? null,
@@ -1209,16 +1231,35 @@ public function editimport($id)
                 'note' => $row[27] ?? null,
                 'customer' => $row[3] ?? null,
                 'create_by' => $partnerId,
-                'updated_at' => $now,
             ];
-
-            $logs[] = [
-                'inquiry_id' => $row[30] ?? null,
-                'description' => 'Updated via Excel Import by ' . Auth::user()->name,
-                'user_id' => $userId,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
+        
+            $changeDescription = '';
+        
+            if ($oldInquiry) {
+                foreach ($newInquiryData as $key => $value) {
+                    if ($oldInquiry->$key != $value) {
+                        $changeDescription .= "[inquiry_sales] {$key}: '{$oldInquiry->$key}' → '{$value}'; ";
+                    }
+                }
+            }
+        
+            if ($oldDetail) {
+                foreach ($newDetailData as $key => $value) {
+                    if ($oldDetail->$key != $value) {
+                        $changeDescription .= "[detail_inquiry_import] {$key}: '{$oldDetail->$key}' → '{$value}'; ";
+                    }
+                }
+            }
+        
+            if ($changeDescription) {
+                $logs[] = [
+                    'inquiry_id' => $inquiryId,
+                    'description' => "Updated via Excel Import by " . Auth::user()->name . ". Changes: " . $changeDescription,
+                    'user_id' => $userId,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
         }
 
         // **Batch insert/update hanya jika ada data**
@@ -1378,30 +1419,42 @@ public function editimport($id)
 }
 
 
-    public function deleteInquiryDetailImport($id)
-    {
-        try {
+public function deleteInquiryDetailImport($id)
+{
+    try {
+        $userName = Auth::user()->name;
 
-            $userName = Auth::user()->name;
-            $material = DetailInquiryImport::find($id); // Ganti dengan model yang sesuai
-            if (!$material) {
-                return Response::json(['success' => false, 'message' => 'Material not found'], 404);
-            }
-
-            $material->delete();
-            $inquiry = InquirySales::findOrFail($material->id_inquiry);
-
-            TrxDboProgPurchase::create([
-                'inquiry_id' => $inquiry->id,
-                'user_id' => auth()->id(),
-                'description' => "Inquiry {$material->id} dihapus oleh " . $userName
-            ]);
-
-            return Response::json(['success' => true, 'message' => 'Material deleted successfully']);
-        } catch (\Exception $e) {
-            return Response::json(['success' => false, 'message' => 'Failed to delete material'], 500);
+        // Ambil data material + relasi type
+        $material = DetailInquiryImport::find($id);
+        if (!$material) {
+            return Response::json(['success' => false, 'message' => 'Material not found'], 404);
         }
+
+        // Ambil type material
+        $typeMaterial = TypeMaterial::find($material->id_type);
+        $typeName = $typeMaterial ? $typeMaterial->type_name : 'Unknown Type';
+
+        // Ambil inquiry
+        $inquiry = InquirySales::findOrFail($material->id_inquiry);
+        $region = $inquiry->region ?? 'Unknown Region';
+        $monthYear = Carbon::parse($inquiry->created_at)->translatedFormat('F Y');
+
+        // Hapus material
+        $material->delete();
+
+        // Catat ke log progress purchase
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $inquiry->id,
+            'user_id' => auth()->id(),
+            'description' => "Material dengan tipe '{$typeName}' untuk region '{$region}' bulan {$monthYear} dihapus oleh {$userName}.",
+        ]);
+
+        return Response::json(['success' => true, 'message' => 'Material deleted successfully']);
+    } catch (\Exception $e) {
+        return Response::json(['success' => false, 'message' => 'Failed to delete material'], 500);
     }
+}
+
 
     public function deleteInquiryDetail($id)
     {
@@ -1504,16 +1557,40 @@ public function editimport($id)
             $inquiry->status = 6; // Finished
             $inquiry->save();
 
-            TrxDboProgPurchase::create([
-                'inquiry_id' => $inquiry->id,
-                'user_id' => $userId,
-                'description' => 'Finished Inquiry by ' . $userName,
-            ]);
-        }
+             // Format bulan dan tahun dibuat
+        $createdMonth = Carbon::parse($inquiry->created_at)->format('F');
+        $createdYear = Carbon::parse($inquiry->created_at)->format('Y');
+
+        // Insert progress ke trx
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $inquiry->id,
+            'user_id' => $userId,
+            'description' => 'Inquiry Region [ ' . $inquiry->region . ' ] bulan ' . $createdMonth . ' ' . $createdYear . ' diselesaikan oleh ' . $userName
+        ]);
     }
+}
 
     return response()->json(['success' => 'Inquiries marked as finished.']);
 }
+
+public function exportInquiries(Request $request)
+        {
+            // Ambil ID dari query string dan pastikan formatnya benar
+            $idString = $request->query('id');
+            $ids = !empty($idString) ? explode(',', $idString) : [];
+            
+            // Log raw dan processed IDs untuk debugging
+            \Log::info('Raw ID string received: ' . $idString);
+            \Log::info('IDs received for export:', $ids);
+            
+            // Pastikan ID tidak kosong
+            if (empty($ids)) {
+                return response()->json(['message' => 'No IDs provided'], 400);
+            }
+            
+            // Ekspor data
+            return Excel::download(new InquiryImportInventoryExport($ids), 'inquiries.xlsx');
+        }
 
 
     public function exportInquiry()
@@ -1678,14 +1755,17 @@ public function generatePDFimport($id)
         return $inquiry->created_at->format('Y-m'); // Format sebagai "2025-04"
     });
 
-    // Ambil satu inquiry per bulan untuk Daido
-    $Daido = $groupedByMonth->map(function ($group) {
-        return $group->first(function ($inquiry) {
-            return $inquiry->detailinquiryimport->contains(function ($detail) {
-                return $detail->klasifikasi === 'Daido';
-            });
+    // Ambil satu inquiry terbaru per bulan untuk Daido
+$Daido = $groupedByMonth->map(function ($group) {
+    // Urutkan dari yang paling baru
+    $sortedGroup = $group->sortByDesc('created_at');
+
+    return $sortedGroup->first(function ($inquiry) {
+        return $inquiry->detailinquiryimport->contains(function ($detail) {
+            return $detail->klasifikasi === 'Daido';
         });
-    })->filter(); // Buang null values jika tidak ada inquiry Daido di bulan tersebut
+    });
+})->filter();// Buang null values jika tidak ada inquiry Daido di bulan tersebut
 
     // Ambil satu inquiry per bulan untuk NonDaido
     $NonDaido = $groupedByMonth->map(function ($group) {
@@ -1741,7 +1821,7 @@ public function generatePDFimport($id)
     }
 
 
-    $inquiry = $inquiries->first();
+    $inquiry = $inquiries->sortByDesc('created_at')->first();
 
     $customers = Customer::all();
     $users = User::all();
