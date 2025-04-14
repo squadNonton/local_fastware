@@ -495,6 +495,17 @@
             font-size: 8pt;
             color: red;
         }
+
+        .selected-customer {
+        display: inline-block;
+        background-color: #007bff;
+        color: white;
+        padding: 2px 8px;
+        margin: 2px;
+        border-radius: 4px;
+        font-size: 0.9em;
+    }
+
     </style>
 
     <main id="main" class="main">
@@ -678,103 +689,7 @@
                 });
             }
 
-            document.addEventListener("DOMContentLoaded", function() {
-                let searchInput = document.getElementById("search_customer");
-                let customerList = document.getElementById("customer_list");
-                let hiddenInput = document.getElementById("customer");
-                let selectedCustomersList = document.getElementById("selected_customers_list");
-
-                // Mencari customer berdasarkan input
-                searchInput.addEventListener("input", function() {
-                    const filter = searchInput.value.toLowerCase();
-                    const items = customerList.getElementsByTagName("div");
-
-                    for (let i = 0; i < items.length; i++) {
-                        const txtValue = items[i].textContent || items[i].innerText;
-                        items[i].style.display = txtValue.toLowerCase().includes(filter) ? "" : "none";
-                    }
-
-                    // Tampilkan dropdown jika ada hasil
-                    customerList.style.display = filter ? "block" : "none";
-                });
-
-                // Menangani pemilihan customer
-                customerList.addEventListener("click", function(e) {
-                    if (e.target && e.target.matches("div[data-value]")) {
-                        const selectedValue = e.target.getAttribute("data-value");
-                        const selectedText = e.target.textContent;
-
-                        // Set input dan hidden value
-                        searchInput.value = selectedText;
-                        hiddenInput.value = selectedValue;
-
-                        // Sembunyikan daftar setelah memilih
-                        customerList.style.display = "none";
-
-                        // Kosongkan daftar sebelumnya dan tambahkan yang baru
-                        selectedCustomersList.innerHTML =
-                            `<span class="selected-customer">${selectedText}</span>`;
-                    }
-                });
-
-                // Sembunyikan dropdown jika klik di luar
-                document.addEventListener("click", function(e) {
-                    if (!searchInput.contains(e.target) && !customerList.contains(e.target)) {
-                        customerList.style.display = "none";
-                    }
-                });
-
-                // Inisialisasi searchable dropdown untuk setiap baris yang ada
-                initializeSearchableDropdowns();
-            });
-
-            function initializeSearchableDropdowns() {
-                const searchableDropdowns = document.querySelectorAll('.searchable-dropdown');
-                searchableDropdowns.forEach(dropdown => {
-                    const searchInput = dropdown.querySelector('input[type="text"]');
-                    const dropdownMenu = dropdown.querySelector('.dropdown-menu');
-                    const hiddenInput = dropdown.querySelector('input[type="hidden"]');
-
-                    searchInput.addEventListener("input", function() {
-                        const filter = searchInput.value.toLowerCase();
-                        const items = dropdownMenu.querySelectorAll("div");
-
-                        for (let i = 0; i < items.length; i++) {
-                            const txtValue = items[i].textContent || items[i].innerText;
-                            items[i].style.display = txtValue.toLowerCase().includes(filter) ? "" : "none";
-                        }
-
-                        // Tampilkan dropdown jika ada hasil
-                        dropdownMenu.style.display = filter ? "block" : "none";
-                    });
-
-                    dropdownMenu.addEventListener("click", function(e) {
-                        if (e.target && e.target.matches("div[data-value]")) {
-                            const selectedValue = e.target.getAttribute("data-value");
-                            const selectedText = e.target.textContent;
-
-                            // Set input dan hidden value
-                            searchInput.value = selectedText;
-                            hiddenInput.value = selectedValue;
-
-                            // Sembunyikan daftar setelah memilih
-                            dropdownMenu.style.display = "none";
-
-                            // Kosongkan daftar sebelumnya dan tambahkan yang baru
-                            const selectedCustomersList = dropdown.querySelector('.selected-customers-list');
-                            selectedCustomersList.innerHTML =
-                                `<span class="selected-customer">${selectedText}</span>`;
-                        }
-                    });
-
-                    // Sembunyikan dropdown jika klik di luar
-                    document.addEventListener("click", function(e) {
-                        if (!searchInput.contains(e.target) && !dropdownMenu.contains(e.target)) {
-                            dropdownMenu.style.display = "none";
-                        }
-                    });
-                });
-            }
+        
 
             function addRow() {
                 let tableBody = document.getElementById('table-body');
@@ -979,47 +894,68 @@
             }
 
             // Fungsi untuk mengaktifkan pencarian dalam searchable dropdown
-            function initializeSearchableDropdown(searchInput, dropdownMenu, hiddenInput, nameCustomerInput,
-                selectedCustomersList) {
-                searchInput.addEventListener("input", function() {
-                    let filter = searchInput.value.toLowerCase();
-                    let items = dropdownMenu.querySelectorAll("div");
+            function initializeSearchableDropdown(input, menu, hiddenInput, nameInput, selectedList) {
+                input.addEventListener("focus", () => {
+                    menu.style.display = "block";
+                });
 
-                    items.forEach(item => {
-                        let text = item.textContent.toLowerCase();
-                        item.style.display = text.includes(filter) ? "block" : "none";
+                input.addEventListener("input", () => {
+                    const query = input.value.toLowerCase();
+                    Array.from(menu.children).forEach(item => {
+                        item.style.display = item.textContent.toLowerCase().includes(query) ? "block" : "none";
                     });
-
-                    // Tampilkan dropdown jika ada hasil
-                    dropdownMenu.style.display = filter ? "block" : "none";
                 });
 
-                dropdownMenu.addEventListener("click", function(e) {
-                    if (e.target && e.target.matches("div[data-value]")) {
-                        const selectedValue = e.target.getAttribute("data-value");
-                        const selectedName = e.target.getAttribute("data-name"); // Ambil nama customer
-                        const selectedText = e.target.textContent;
-
-                        // Set input dan hidden value
-                        searchInput.value = selectedText;
-                        hiddenInput.value = selectedValue;
-                        nameCustomerInput.value = selectedName; // Set nama customer
-
-                        // Sembunyikan daftar setelah memilih
-                        dropdownMenu.style.display = "none";
-
-                        // Kosongkan daftar sebelumnya dan tambahkan yang baru
-                        selectedCustomersList.innerHTML = `<span class="selected-customer">${selectedText}</span>`;
+                document.addEventListener("click", (e) => {
+                    if (!menu.contains(e.target) && e.target !== input) {
+                        menu.style.display = "none";
                     }
                 });
 
-                // Sembunyikan dropdown jika klik di luar
-                document.addEventListener("click", function(e) {
-                    if (!searchInput.contains(e.target) && !dropdownMenu.contains(e.target)) {
-                        dropdownMenu.style.display = "none";
-                    }
+                // Untuk menyimpan data multiple customer
+                let selectedCustomers = [];
+
+                Array.from(menu.children).forEach(item => {
+                    item.addEventListener("click", () => {
+                        const id = item.dataset.value;
+                        const name = item.dataset.name;
+
+                        // Cegah duplikat
+                        if (!selectedCustomers.find(c => c.id === id)) {
+                            selectedCustomers.push({ id, name });
+
+                            const badge = document.createElement("span");
+                            badge.className = "badge bg-primary me-1";
+                            badge.textContent = name;
+
+                            const removeBtn = document.createElement("button");
+                            removeBtn.textContent = "×";
+                            removeBtn.style.marginLeft = "5px";
+                            removeBtn.classList.add("btn", "btn-sm", "btn-danger");
+                            removeBtn.addEventListener("click", () => {
+                                selectedCustomers = selectedCustomers.filter(c => c.id !== id);
+                                selectedList.removeChild(badge);
+                                updateHiddenField();
+                            });
+
+                            badge.appendChild(removeBtn);
+                            selectedList.appendChild(badge);
+
+                            updateHiddenField();
+                        }
+
+                        input.value = "";
+                        menu.style.display = "none";
+                    });
                 });
+
+                function updateHiddenField() {
+                hiddenInput.value = JSON.stringify(selectedCustomers.map(c => String(c.id))); // ← Ubah jadi string array
+                nameInput.value = JSON.stringify(selectedCustomers.map(c => c.name));
+                }
+
             }
+
 
 
             function updateDropdownListeners() {
@@ -1122,14 +1058,13 @@
                             m2: m2Element ? m2Element.value : null,
                             m3: m3Element ? m3Element.value : null,
                             ship: shipElement ? shipElement.value : null,
-                            so: formattedSO, // Gunakan SO yang sudah diformat
+                            so: formattedSO,
                             note: noteElement ? noteElement.value : null,
-                            customer: customerElement ? customerElement.value :
-                            null, // Ambil ID customer dari input hidden
-                            name_customer: nameCustomerElement ? nameCustomerElement.value :
-                            null, // Ambil nama customer dari input hidden
+                            customer: customerElement ? customerElement.value : [],
+                            name_customer: nameCustomerElement ? customerElement.value : [],
                             klasifikasi: klasifikasiElement ? klasifikasiElement.value : null,
                         };
+
 
                         data.materials.push(rowData);
                     }
@@ -1162,6 +1097,7 @@
                     });
                     return;
                 }
+
 
                 // Kirim data dengan AJAX
                 $.ajax({

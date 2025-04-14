@@ -8,6 +8,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use App\Models\Customer;
 
 class InquiryImportPurchaseExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
@@ -28,10 +29,11 @@ class InquiryImportPurchaseExport implements FromCollection, WithHeadings, WithM
     public function collection()
 {
     $result = DB::table('detail_inquiry_import')
+        ->whereNull('detail_inquiry_import.deleted_at')
         ->leftjoin('inquiry_sales', 'detail_inquiry_import.id_inquiry', '=', 'inquiry_sales.id')
         ->leftjoin('type_materials', 'detail_inquiry_import.id_type', '=', 'type_materials.id')
         ->leftjoin('users', 'detail_inquiry_import.create_by', '=', 'users.id')
-        ->leftjoin('customers', 'detail_inquiry_import.customer', '=', 'customers.name_customer')
+        // ->leftjoin('customers', 'detail_inquiry_import.customer', '=', 'customers.name_customer')
         ->leftJoin(
             DB::raw('(SELECT inquiry_id, MIN(created_at) AS created_at 
                       FROM trx_dbo_progpurchase 
@@ -44,8 +46,7 @@ class InquiryImportPurchaseExport implements FromCollection, WithHeadings, WithM
         ->select([
             DB::raw('DATE_FORMAT(trx_approved.created_at, "%M %Y") AS bulan'),
             'inquiry_sales.region', 'detail_inquiry_import.id_inquiry AS inquiry_id',
-            'detail_inquiry_import.id AS detail_id',
-            'customers.name_customer', 'inquiry_sales.kode_inquiry', 'inquiry_sales.type_order',
+            'detail_inquiry_import.id AS detail_id', 'inquiry_sales.kode_inquiry', 'inquiry_sales.type_order',
             'inquiry_sales.jenis_inquiry', 'inquiry_sales.loc_imp', 'inquiry_sales.est_date',
             'inquiry_sales.supplier', 'inquiry_sales.create_by AS sales_person', 'inquiry_sales.progress',
             'inquiry_sales.refnopo AS ref_po', 'inquiry_sales.attach_file AS files', 'inquiry_sales.status',
@@ -57,6 +58,8 @@ class InquiryImportPurchaseExport implements FromCollection, WithHeadings, WithM
             'detail_inquiry_import.m3 AS forecast_month_3', 'detail_inquiry_import.so AS ref_so',
             'detail_inquiry_import.ship AS ship_to', 'detail_inquiry_import.note AS remark',
             'detail_inquiry_import.klasifikasi AS klasifikasi',
+            'detail_inquiry_import.customer AS customer',
+            'detail_inquiry_import.supplier AS supplier',
             'users.name AS partner', 'detail_inquiry_import.nopo AS nopo'
         ])
         ->whereIn('detail_inquiry_import.id_inquiry', $this->ids);
@@ -82,7 +85,7 @@ class InquiryImportPurchaseExport implements FromCollection, WithHeadings, WithM
             'Est. Date', 'Supplier', 'Sales Person', 'Ref. PO', 'Files', 'Status', 'Raw Material', 'Shapes', 'Thickness',
             'Inner Diameter', 'Outer Diameter', 'Weight', 'Length', 'Qty *Unit', 'Forecast Month 1',
             'Forecast Month 2', 'Forecast Month 3', 'Ref. SO', 'Ship-To', 'Remark', 'Partner',
-            'Sec ID', 'Sec Detail ID', 'Progress', 'NO PO'
+            'Sec ID', 'Sec Detail ID', 'Progress', 'NO PO', 'Supplier'
         ];
     }
     
@@ -96,44 +99,73 @@ class InquiryImportPurchaseExport implements FromCollection, WithHeadings, WithM
     private $row = 1; // Inisialisasi di class untuk nomor urut
 
     public function map($inquiry): array
-    {
-        return [
-            $this->row++, // No
-            $inquiry->bulan,
-            $inquiry->region,
-            $inquiry->klasifikasi,
-            $inquiry->name_customer,
-            $inquiry->kode_inquiry,
-            $inquiry->type_order,
-            $inquiry->jenis_inquiry,
-            $inquiry->loc_imp,
-            $inquiry->est_date,
-            $inquiry->supplier,
-            $inquiry->sales_person,
-            $inquiry->ref_po,
-            $inquiry->files,
-            $inquiry->status,
-            $inquiry->raw_material,
-            $inquiry->shapes,
-            $inquiry->thickness,
-            $inquiry->inner_diameter,
-            $inquiry->outer_diameter,
-            $inquiry->weight,
-            $inquiry->length,
-            $inquiry->qty_unit,
-            $inquiry->forecast_month_1,
-            $inquiry->forecast_month_2,
-            $inquiry->forecast_month_3,
-            $inquiry->ref_so,
-            $inquiry->ship_to,
-            $inquiry->remark,
-            $inquiry->partner,
-            $inquiry->inquiry_id,
-            $inquiry->detail_id,
-            $inquiry->progress,
-            $inquiry->nopo
-        ];
+{
+    
+    $customerNames = [];
+
+    $rawCustomer = $inquiry->customer;
+
+    // Decode jika JSON
+    $decoded = json_decode($rawCustomer, true);
+
+    if (is_array($decoded)) {
+        // ✅ Bentuk array → loop dan ambil nama
+        foreach ($decoded as $custVal) {
+            if (is_numeric($custVal)) {
+                $customer = Customer::find($custVal);
+                $customerNames[] = $customer ? $customer->name_customer : $custVal;
+            } else {
+                $customerNames[] = $custVal; // bisa jadi nama langsung
+            }
+        }
+    } else {
+        // ✅ Bukan array → bisa ID atau nama langsung
+        if (is_numeric($rawCustomer)) {
+            $customer = Customer::find($rawCustomer);
+            $customerNames[] = $customer ? $customer->name_customer : $rawCustomer;
+        } else {
+            $customerNames[] = $rawCustomer; // nama langsung
+        }
     }
+
+    return [
+        $this->row++, // No
+        $inquiry->bulan,
+        $inquiry->region,
+        $inquiry->klasifikasi,
+        implode('; ', $customerNames), // ✅ hasil final
+        $inquiry->kode_inquiry,
+        $inquiry->type_order,
+        $inquiry->jenis_inquiry,
+        $inquiry->loc_imp,
+        $inquiry->est_date,
+        $inquiry->supplier,
+        $inquiry->sales_person,
+        $inquiry->ref_po,
+        $inquiry->files,
+        $inquiry->status,
+        $inquiry->raw_material,
+        $inquiry->shapes,
+        $inquiry->thickness,
+        $inquiry->inner_diameter,
+        $inquiry->outer_diameter,
+        $inquiry->weight,
+        $inquiry->length,
+        $inquiry->qty_unit,
+        $inquiry->forecast_month_1,
+        $inquiry->forecast_month_2,
+        $inquiry->forecast_month_3,
+        $inquiry->ref_so,
+        $inquiry->ship_to,
+        $inquiry->remark,
+        $inquiry->partner,
+        $inquiry->inquiry_id,
+        $inquiry->detail_id,
+        $inquiry->progress,
+        $inquiry->nopo,
+        $inquiry->supplier
+    ];
+}
     
             /**
      * Mengatur gaya pada Excel.

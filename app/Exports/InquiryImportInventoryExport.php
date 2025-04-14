@@ -8,6 +8,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use App\Models\Customer;
 
 class InquiryImportInventoryExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
@@ -22,11 +23,12 @@ class InquiryImportInventoryExport implements FromCollection, WithHeadings, With
 {
     $result = DB::table('detail_inquiry_import')
         ->whereIn('id_inquiry', $this->ids)
+        ->whereNull('detail_inquiry_import.deleted_at')
         ->where('inquiry_sales.status', '3')
         ->join('inquiry_sales', 'detail_inquiry_import.id_inquiry', '=', 'inquiry_sales.id')
         ->join('type_materials', 'detail_inquiry_import.id_type', '=', 'type_materials.id')
         ->join('users', 'detail_inquiry_import.create_by', '=', 'users.id')
-        ->join('customers', 'inquiry_sales.id_customer', '=', 'customers.id')
+        // ->join('customers', 'detail_inquiry_import.customer', '=', 'customers.id')
         ->leftJoin(
             DB::raw('(SELECT inquiry_id, MIN(created_at) AS created_at 
                       FROM trx_dbo_progpurchase 
@@ -40,7 +42,8 @@ class InquiryImportInventoryExport implements FromCollection, WithHeadings, With
             DB::raw('DATE_FORMAT(trx_approved.created_at, "%M %Y") AS bulan'),
             'inquiry_sales.region', 'detail_inquiry_import.id_inquiry AS inquiry_id',
             'detail_inquiry_import.id AS detail_id',
-            'customers.name_customer', 'inquiry_sales.kode_inquiry', 'inquiry_sales.type_order',
+            // 'customers.name_customer',
+            'inquiry_sales.kode_inquiry', 'inquiry_sales.type_order',
             'inquiry_sales.jenis_inquiry', 'inquiry_sales.loc_imp', 'inquiry_sales.est_date',
             'inquiry_sales.supplier', 'inquiry_sales.create_by AS sales_person', 'inquiry_sales.progress',
             'inquiry_sales.refnopo AS ref_po', 'inquiry_sales.attach_file AS files', 'inquiry_sales.status',
@@ -52,10 +55,10 @@ class InquiryImportInventoryExport implements FromCollection, WithHeadings, With
             'detail_inquiry_import.m3 AS forecast_month_3', 'detail_inquiry_import.so AS ref_so',
             'detail_inquiry_import.ship AS ship_to', 'detail_inquiry_import.note AS remark', 'detail_inquiry_import.file',
             'detail_inquiry_import.created_at AS detail_created_at', 'detail_inquiry_import.updated_at AS detail_updated_at',
+            'detail_inquiry_import.customer AS customer',
             'users.name AS partner'
         ])
         ->get();
-
     return $result;
 }
 
@@ -82,46 +85,75 @@ class InquiryImportInventoryExport implements FromCollection, WithHeadings, With
  * @param object $inquiry
  * @return array
  */
-public function map($inquiry): array
-{
-    static $no = 1;
 
-    return [
-        $no++,
-        $inquiry->bulan,
-        $inquiry->region,
-        $inquiry->name_customer,
-        $inquiry->kode_inquiry,
-        $inquiry->type_order,
-        $inquiry->jenis_inquiry,
-        $inquiry->loc_imp,
-        $inquiry->est_date,
-        $inquiry->supplier,
-        $inquiry->sales_person,
-        $inquiry->ref_po,
-        $inquiry->files,
-        $inquiry->status,
-        $inquiry->raw_material,
-        $inquiry->shapes,
-        $inquiry->thickness,
-        $inquiry->inner_diameter,
-        $inquiry->outer_diameter,
-        $inquiry->weight,
-        $inquiry->length,
-        $inquiry->qty_unit,
-        $inquiry->forecast_month_1,
-        $inquiry->forecast_month_2,
-        $inquiry->forecast_month_3,
-        $inquiry->ref_so,
-        $inquiry->ship_to,
-        $inquiry->remark,
-        $inquiry->file,
-        $inquiry->partner,
-        $inquiry->inquiry_id,
-        $inquiry->detail_id,
-        $inquiry->progress
-    ];
-}
+ private $row = 1; // Inisialisasi di class untuk nomor urut
+
+ public function map($inquiry): array
+ {
+     $customerNames = [];
+ 
+     $rawCustomer = $inquiry->customer;
+ 
+     // Coba decode jika JSON
+     $decoded = json_decode($rawCustomer, true);
+ 
+     if (is_array($decoded)) {
+         // Jika bentuk array (hasil decode sukses)
+         foreach ($decoded as $custVal) {
+             if (is_numeric($custVal)) {
+                 $customer = Customer::find($custVal);
+                 $customerNames[] = $customer ? $customer->name_customer : "(ID: $custVal)";
+             } else {
+                 $customerNames[] = $custVal; // Nama langsung
+             }
+         }
+     } else {
+         // Jika bukan array (mungkin ID tunggal atau nama langsung)
+         if (is_numeric($rawCustomer)) {
+             $customer = Customer::find($rawCustomer);
+             $customerNames[] = $customer ? $customer->name_customer : "(ID: $rawCustomer)";
+         } else {
+             $customerNames[] = $rawCustomer;
+         }
+     }
+ 
+     return [
+         $this->row++, // No
+         $inquiry->bulan,
+         $inquiry->region,
+         implode('; ', $customerNames), // <- Pastikan kolom ini sesuai urutan 'Customer Name'
+         $inquiry->kode_inquiry,
+         $inquiry->type_order,
+         $inquiry->jenis_inquiry,
+         $inquiry->loc_imp,
+         $inquiry->est_date,
+         $inquiry->supplier,
+         $inquiry->sales_person,
+         $inquiry->ref_po,
+         $inquiry->files,
+         $inquiry->status,
+         $inquiry->raw_material,
+         $inquiry->shapes,
+         $inquiry->thickness,
+         $inquiry->inner_diameter,
+         $inquiry->outer_diameter,
+         $inquiry->weight,
+         $inquiry->length,
+         $inquiry->qty_unit,
+         $inquiry->forecast_month_1,
+         $inquiry->forecast_month_2,
+         $inquiry->forecast_month_3,
+         $inquiry->ref_so,
+         $inquiry->ship_to,
+         $inquiry->remark,
+         $inquiry->file,
+         $inquiry->partner,
+         $inquiry->inquiry_id,
+         $inquiry->detail_id,
+         $inquiry->progress,
+     ];
+ }
+ 
 
 
         /**

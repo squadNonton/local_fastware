@@ -213,16 +213,48 @@
                                     <td>{{ $material['note'] }}</td>
                                     <td>
                                         @php
-                                            $customerName = '';
-                                            foreach ($customers as $customer) {
-                                                if ($customer->id == $material->customer) {
-                                                    $customerName = $customer->name_customer;
-                                                    break;
+                                            $customerNames = [];
+                                            $decoded = json_decode($material->customer, true);
+                                    
+                                            // Cek apakah hasil decode adalah array
+                                            if (is_array($decoded)) {
+                                                foreach ($decoded as $item) {
+                                                    // Jika item berupa ID (angka dan cocok di daftar customer), ambil nama dari relasi
+                                                    $found = false;
+                                                    foreach ($customers as $customer) {
+                                                        if ($customer->id == $item) {
+                                                            $customerNames[] = $customer->name_customer;
+                                                            $found = true;
+                                                            break;
+                                                        }
+                                                    }
+                                    
+                                                    // Jika tidak ditemukan sebagai ID, anggap itu adalah nama langsung
+                                                    if (!$found) {
+                                                        $customerNames[] = $item;
+                                                    }
+                                                }
+                                            } else {
+                                                // Bukan array → bisa ID atau nama langsung
+                                                $found = false;
+                                                foreach ($customers as $customer) {
+                                                    if ($customer->id == $material->customer) {
+                                                        $customerNames[] = $customer->name_customer;
+                                                        $found = true;
+                                                        break;
+                                                    }
+                                                }
+                                    
+                                                // Jika tidak cocok ID, anggap nama langsung
+                                                if (!$found && !empty($material->customer)) {
+                                                    $customerNames[] = $material->customer;
                                                 }
                                             }
                                         @endphp
-                                        <span>{{ $customerName }}</span>
+                                        <span>{{ implode(', ', $customerNames) }}</span>
                                     </td>
+                                    
+                                    
                                     <td>
                                         @php
                                             $partnerName = '';
@@ -247,7 +279,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="19" style="text-align: center;">Data tidak ditemukan</td>
+                                    <td colspan="22" style="text-align: center;">Data tidak ditemukan</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -279,7 +311,7 @@
                 @endif
 
                 @if ($inquiry->loc_imp == 'Import')
-                    <a href="{{ route('showFormSSimport.pdf', $inquiry->id) }}" class="btn btn-danger btn-sm m-1">
+                    <a href="{{ route('generatePDFimport.multi', ['month' => request()->route('month'), 'klasifikasi' => request()->route('klasifikasi')]) }}" class="btn btn-danger btn-sm m-1">
                         <i class="bi bi-file-earmark-pdf"></i> Download PDF
                     </a>
                 @endif

@@ -178,7 +178,7 @@
 
                         <tbody id="table-body">
                             @forelse ($materials as $index => $material)
-                                <tr data-id="{{ $material->id }}">
+                                <tr data-id="{{ $material->id }}" @if($material->trashed()) style="background-color: #e0e0e0;" @endif>
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $material['klasifikasi'] }}</td>
                                     <td>{{ $material->type_materials ? $material->type_materials->type_name : 'N/A' }}</td>
@@ -197,16 +197,47 @@
                                     <td>{{ $material['note'] }}</td>
                                     <td>
                                         @php
-                                            $customerName = '';
-                                            foreach ($customers as $customer) {
-                                                if ($customer->id == $material->customer) {
-                                                    $customerName = $customer->name_customer;
-                                                    break;
+                                            $customerNames = [];
+                                            $decoded = json_decode($material->customer, true);
+                                    
+                                            // Cek apakah hasil decode adalah array
+                                            if (is_array($decoded)) {
+                                                foreach ($decoded as $item) {
+                                                    // Jika item berupa ID (angka dan cocok di daftar customer), ambil nama dari relasi
+                                                    $found = false;
+                                                    foreach ($customers as $customer) {
+                                                        if ($customer->id == $item) {
+                                                            $customerNames[] = $customer->name_customer;
+                                                            $found = true;
+                                                            break;
+                                                        }
+                                                    }
+                                    
+                                                    // Jika tidak ditemukan sebagai ID, anggap itu adalah nama langsung
+                                                    if (!$found) {
+                                                        $customerNames[] = $item;
+                                                    }
+                                                }
+                                            } else {
+                                                // Bukan array → bisa ID atau nama langsung
+                                                $found = false;
+                                                foreach ($customers as $customer) {
+                                                    if ($customer->id == $material->customer) {
+                                                        $customerNames[] = $customer->name_customer;
+                                                        $found = true;
+                                                        break;
+                                                    }
+                                                }
+                                    
+                                                // Jika tidak cocok ID, anggap nama langsung
+                                                if (!$found && !empty($material->customer)) {
+                                                    $customerNames[] = $material->customer;
                                                 }
                                             }
                                         @endphp
-                                        <span>{{ $customerName }}</span>
+                                        <span>{{ implode(', ', $customerNames) }}</span>
                                     </td>
+                                    
                                     <td>
                                         @php
                                             $partnerName = '';
@@ -222,18 +253,37 @@
                                     <td>{{ $material['progress'] }}</td>
                                     <td>{{ $material['nopo'] }}</td>
                                     <td>
-                                        @if ($inquiry->status == 1 && $material->create_by == Auth::id() && in_array(Auth::id(), [1, 2, 3, 4]))
+                                        @if (
+                                            !$material->trashed() && 
+                                            $inquiry->status == 1 && 
+                                            ($material->create_by == Auth::id() || in_array(Auth::id(), [1, 2, 3, 4]))
+                                        )
                                             <a href="{{ route('editimport', ['id' => $material->id]) }}" class="btn btn-warning btn-sm">Edit</a>
-                                            <button class="btn btn-danger btn-sm" onclick="deleteRow({{ $material->id }})">Delete</button>
+                                    
+                                            @if ($material->create_by == Auth::id())
+                                                <button class="btn btn-danger btn-sm" onclick="deleteRowPermanen({{ $material->id }})">
+                                                    Delete
+                                                </button>
+                                            @else
+                                                <button class="btn btn-danger btn-sm" onclick="deleteRow({{ $material->id }})">
+                                                    Delete
+                                                </button>
+                                            @endif
+                                        @elseif ($material->trashed())
+                                            <p>Sudah dihapus</p>
                                         @endif
-                                    </td>                                    
+                                    </td>
+                                    
+                                    
+                                    
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="19" style="text-align: center;">Data tidak ditemukan</td>
+                                    <td colspan="21" style="text-align: center;">Data tidak ditemukan</td>
                                 </tr>
                             @endforelse
                         </tbody>
+                        
                     
                     </table>
                 </div>
@@ -255,19 +305,11 @@
                     @endif
                 @endif
 
-                @if ($inquiry->loc_imp == 'Local')
+                {{-- @if ($inquiry->loc_imp == 'Local')
                     <a href="{{ route('showFormSS.pdf', $inquiry->id) }}" class="btn btn-danger btn-sm m-1">
                         <i class="bi bi-file-earmark-pdf"></i> Download PDF
                     </a>
-                @endif
-
-                @if ($inquiry->loc_imp == 'Import')
-                    <a href="{{ route('showFormSSimport.pdf', $inquiry->id) }}" class="btn btn-danger btn-sm m-1">
-                        <i class="bi bi-file-earmark-pdf"></i> Download PDF
-                    </a>
-                @endif
-                    
-                
+                @endif --}}
 
                 {{-- @if ($inquiry->status == 2)
                     <div class="d-flex justify-content-end">
@@ -614,6 +656,30 @@
             }
         }
 
+        function deleteRowPermanen(id) {
+            if (confirm('Are you sure you want to delete this row?')) {
+                fetch(`{{ url('deleteInquiryDetailImportpermanen') }}/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Row deleted successfully');
+                        location.reload(); // Reload the page to see the changes
+                    } else {
+                        alert('Failed to delete row');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the row');
+                });
+            }
+        }
+
         function updateFileList() {
             var fileInput = document.getElementById('attachments');
             var fileListContainer = document.getElementById('uploaded-files-list');
@@ -726,7 +792,7 @@
                     $('a.btn-approve, a.btn-reject').attr('disabled', true);
 
                     // Alihkan ke halaman approval inventory
-                    window.location.href = '{{ route('showApprovalInventoryImport') }}';
+                    window.location.href = '{{ route('showApprovalKaDeptImport') }}';
                 },
                 error: function(xhr) {
                     console.error(xhr.responseText);

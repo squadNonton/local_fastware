@@ -296,9 +296,11 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('createinquiryImport1/{id}', [InquirySalesController::class, 'createInquirySalesImport1'])->name('createinquiryImport1');
     Route::post('storeinquiryImport', [InquirySalesController::class, 'storeInquiryImport'])->name('storeinquiryImport');
     Route::get('showFormSSimport/{id}', [InquirySalesController::class, 'showFormSSimport'])->name('showFormSSimport');
+    Route::get('showFormSSimportinventory/{id}', [InquirySalesController::class, 'showFormSSimportinventory'])->name('showFormSSimportinventory');
     Route::get('formulirInquiryimport/{id}', [InquirySalesController::class, 'formulirInquiryImport'])->name('formulirInquiryimport');
     Route::post('/inquiry/previewSSImport', [InquirySalesController::class, 'previewSSImport'])->name('inquiry.previewSSImport');
     Route::delete('/deleteInquiryDetailImport/{id}', [InquirySalesController::class, 'deleteInquiryDetailImport'])->name('deleteInquiryDetailImport');
+    Route::delete('/deleteInquiryDetailImportpermanen/{id}', [InquirySalesController::class, 'deleteInquiryDetailImportpermanen'])->name('deleteInquiryDetailImportpermanen');
     Route::delete('/deleteInquiryDetail/{id}', [InquirySalesController::class, 'deleteInquiryDetail'])->name('deleteInquiryDetail');
     Route::put('updateInquiryDetailsImport/{id}', [InquirySalesController::class, 'updateInquiryDetailsImport'])->name('updateInquiryDetailsImport');
     Route::get('/editimport/{id}', [InquirySalesController::class, 'editimport'])->name('editimport');
@@ -325,6 +327,7 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     Route::post('/inquiry/finish-import', [InquirySalesController::class, 'finishInquiryimport'])->name('finishInquiryimport');
 
+    Route::get('/inquiry/form-purchase-import/{month}/{klasifikasi}', [InquirySalesController::class, 'generatePDFimportMulti'])->name('generatePDFimport.multi');
     Route::get('/showFormSSimport/pdf/{id}', [InquirySalesController::class, 'generatePDFimport'])->name('showFormSSimport.pdf');
     Route::get('/inquiry/form-import/{month}/{klasifikasi}', [InquirySalesController::class, 'showFormSSimportpurchase'])->name('showFormSSimportpurchase');
 

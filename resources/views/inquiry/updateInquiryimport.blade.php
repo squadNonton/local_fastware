@@ -529,35 +529,34 @@
                                         <td>
                                             <div class="searchable-dropdown">
                                                 @php
-        // Jika $material->customer adalah ID string, cari objek customer
-        $customerObj = is_object($material->customer) ? $material->customer : $customers->firstWhere('id', $material->customer);
-    @endphp
-
-    <!-- Menampilkan nama customer yang sudah ada di database -->
-    <span id="selected_customer_{{ $index }}">{{ optional($customerObj)->name_customer }}</span>
-
-                                                <!-- Input pencarian customer -->
-                                                <input type="text" id="search_customer_{{ $index }}" class="form-control" placeholder="Search customer..." value="{{ $material->customer->name_customer ?? '' }}">
+                                                    $selectedCustomerIds = json_decode($material->customer ?? '[]');
+                                                    $selectedCustomers = $customers->whereIn('id', $selectedCustomerIds);
+                                                @endphp
                                             
-                                                <!-- Daftar customer yang dapat dipilih -->
+                                                <!-- Menampilkan nama-nama customer yang dipilih -->
+                                                <div class="selected-customers-list" id="selected_customers_{{ $index }}">
+                                                    {{-- @foreach ($selectedCustomers as $cust)
+                                                        <span class="selected-customer" data-id="{{ $cust->id }}">{{ $cust->name_customer }}</span>
+                                                    @endforeach --}}
+                                                </div>
+                                            
+                                                <!-- Input pencarian -->
+                                                <input type="text" id="search_customer_{{ $index }}" class="form-control search-input" placeholder="Search customer...">
+                                            
+                                                <!-- Daftar pilihan customer -->
                                                 <div id="customer_list_{{ $index }}" class="dropdown-menu show" style="width: 300px; display: none; max-height: 200px; overflow-y: auto;">
                                                     @foreach ($customers as $customer)
-                                                        <div class="dropdown-item customer-option" data-value="{{ $customer->id }}" data-name="{{ $customer->name_customer }}" 
-                                                            @if ($customer->id == $material->customer) style="background-color: #007bff; color: white;" @endif>
+                                                        <div class="dropdown-item customer-option" data-value="{{ $customer->id }}" data-name="{{ $customer->name_customer }}"
+                                                            @if(in_array($customer->id, $selectedCustomerIds)) style="background-color: #007bff; color: white;" @endif>
                                                             {{ $customer->name_customer }}
                                                         </div>
                                                     @endforeach
                                                 </div>
                                             
-                                                <!-- Input hidden untuk menyimpan ID customer yang dipilih -->
-                                                <input type="hidden" id="customer_{{ $index }}" name="materials[{{ $index }}][customer]" value="{{ $material->customer }}">
-                                                <input type="hidden" id="name_customer_{{ $index }}" name="name_customer" value="{{ $material->customer->name_customer ?? '' }}">
-                                            
-                                                <!-- Menampilkan customer yang sudah dipilih -->
-                                                <div class="selected-customers-list">
-                                                    <span class="selected-customer">{{ $material->customer->name_customer ?? '' }}</span>
-                                                </div>
+                                                <!-- Input tersembunyi untuk mengirimkan array ID -->
+                                                <input type="hidden" name="materials[{{ $index }}][customer]" id="customer_input_{{ $index }}" value="{{ $material->customer }}">
                                             </div>
+                                            
                                             
                                         </td>
                                     </tr>
@@ -642,94 +641,105 @@
             });
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            let searchInputs = document.querySelectorAll('.searchable-dropdown input[type="text"]');
-            let customerLists = document.querySelectorAll('.searchable-dropdown .dropdown-menu');
-            let hiddenInputs = document.querySelectorAll('.searchable-dropdown input[type="hidden"]');
-            let selectedCustomersLists = document.querySelectorAll('.searchable-dropdown .selected-customers-list');
+        document.addEventListener("DOMContentLoaded", function () {
+    let dropdowns = document.querySelectorAll('.searchable-dropdown');
 
-            searchInputs.forEach((searchInput, index) => {
-                let customerList = customerLists[index];
-                let hiddenInput = hiddenInputs[index];
-                let selectedCustomersList = selectedCustomersLists[index];
+    dropdowns.forEach(dropdown => {
+        const searchInput = dropdown.querySelector('.search-input');
+        const customerList = dropdown.querySelector('.dropdown-menu');
+        const selectedList = dropdown.querySelector('.selected-customers-list');
+        const hiddenInput = dropdown.querySelector('input[type="hidden"]');
 
-                searchInput.addEventListener("input", function() {
-                    const filter = searchInput.value.toLowerCase();
-                    const items = customerList.getElementsByTagName("div");
+        let selectedCustomers = [];
 
-                    for (let i = 0; i < items.length; i++) {
-                        const txtValue = items[i].textContent || items[i].innerText;
-                        items[i].style.display = txtValue.toLowerCase().includes(filter) ? "" : "none";
-                    }
+        // Inisialisasi customer dari value yang sudah tersimpan
+        try {
+            const initialIds = JSON.parse(hiddenInput.value || "[]");
 
-                    customerList.style.display = filter ? "block" : "none";
-                });
-
-                customerList.addEventListener("click", function(e) {
-                    if (e.target && e.target.matches("div[data-value]")) {
-                        const selectedValue = e.target.getAttribute("data-value");
-                        const selectedText = e.target.textContent;
-
-                        searchInput.value = selectedText;
-                        hiddenInput.value = selectedValue;
-
-                        customerList.style.display = "none";
-
-                        selectedCustomersList.innerHTML = `<span class="selected-customer">${selectedText}</span>`;
-                    }
-                });
-
-                document.addEventListener("click", function(e) {
-                    if (!searchInput.contains(e.target) && !customerList.contains(e.target)) {
-                        customerList.style.display = "none";
-                    }
-                });
+            initialIds.forEach(id => {
+                const option = customerList.querySelector(`.customer-option[data-value="${id}"]`);
+                if (option) {
+                    const name = option.getAttribute('data-name');
+                    selectedCustomers.push({ id, name });
+                    addCustomerBadge(id, name);
+                }
             });
 
-            initializeSearchableDropdowns();
+        } catch (e) {
+            console.warn("Invalid JSON in hidden input:", hiddenInput.value);
+        }
+
+        updateHiddenInput(); // pastikan tersinkron
+
+        // Event pencarian
+        searchInput.addEventListener("focus", () => {
+            customerList.style.display = "block";
         });
 
-        function initializeSearchableDropdowns() {
-            const searchableDropdowns = document.querySelectorAll('.searchable-dropdown');
-            searchableDropdowns.forEach(dropdown => {
-                const searchInput = dropdown.querySelector('input[type="text"]');
-                const dropdownMenu = dropdown.querySelector('.dropdown-menu');
-                const hiddenInput = dropdown.querySelector('input[type="hidden"]');
-
-                searchInput.addEventListener("input", function() {
-                    const filter = searchInput.value.toLowerCase();
-                    const items = dropdownMenu.querySelectorAll("div");
-
-                    for (let i = 0; i < items.length; i++) {
-                        const txtValue = items[i].textContent || items[i].innerText;
-                        items[i].style.display = txtValue.toLowerCase().includes(filter) ? "" : "none";
-                    }
-
-                    dropdownMenu.style.display = filter ? "block" : "none";
-                });
-
-                dropdownMenu.addEventListener("click", function(e) {
-                    if (e.target && e.target.matches("div[data-value]")) {
-                        const selectedValue = e.target.getAttribute("data-value");
-                        const selectedText = e.target.textContent;
-
-                        searchInput.value = selectedText;
-                        hiddenInput.value = selectedValue;
-
-                        dropdownMenu.style.display = "none";
-
-                        const selectedCustomersList = dropdown.querySelector('.selected-customers-list');
-                        selectedCustomersList.innerHTML = `<span class="selected-customer">${selectedText}</span>`;
-                    }
-                });
-
-                document.addEventListener("click", function(e) {
-                    if (!searchInput.contains(e.target) && !dropdownMenu.contains(e.target)) {
-                        dropdownMenu.style.display = "none";
-                    }
-                });
+        searchInput.addEventListener("input", () => {
+            const query = searchInput.value.toLowerCase();
+            Array.from(customerList.children).forEach(item => {
+                item.style.display = item.textContent.toLowerCase().includes(query) ? "block" : "none";
             });
+        });
+
+        // Tutup dropdown jika klik di luar
+        document.addEventListener("click", (e) => {
+            if (!dropdown.contains(e.target)) {
+                customerList.style.display = "none";
+            }
+        });
+
+        // Pilih customer dari list
+        Array.from(customerList.children).forEach(item => {
+            item.addEventListener("click", () => {
+                const id = item.dataset.value;
+                const name = item.dataset.name;
+
+                // Tambah hanya jika belum ada
+                if (!selectedCustomers.some(c => c.id === id)) {
+                    selectedCustomers.push({ id, name });
+                    addCustomerBadge(id, name);
+                    updateHiddenInput();
+                }
+
+                searchInput.value = "";
+                customerList.style.display = "none";
+            });
+        });
+
+        function addCustomerBadge(id, name) {
+            if (selectedList.querySelector(`[data-id="${id}"]`)) return;
+
+            const badge = document.createElement("span");
+            badge.className = "badge bg-primary me-1 selected-customer d-inline-flex align-items-center";
+            badge.dataset.id = id;
+            badge.textContent = name;
+
+            const removeBtn = document.createElement("button");
+            removeBtn.textContent = "×";
+            removeBtn.type = "button";
+            removeBtn.classList.add("btn-close", "btn-close-white", "ms-2", "btn-sm");
+            removeBtn.setAttribute("aria-label", "Remove");
+
+            removeBtn.addEventListener("click", () => {
+                selectedCustomers = selectedCustomers.filter(c => c.id !== id);
+                badge.remove();
+                updateHiddenInput();
+            });
+
+            badge.appendChild(removeBtn);
+            selectedList.appendChild(badge);
         }
+
+        function updateHiddenInput() {
+            hiddenInput.value = JSON.stringify(selectedCustomers.map(c => c.id));
+        }
+    });
+});
+
+
+
 
         function updateDropdownListeners() {
             let dropdowns = document.querySelectorAll('.jenis-dropdown');
