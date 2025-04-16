@@ -126,12 +126,15 @@
                                         <td>{{ $item->kategori_competency ?? '-' }}</td>
                                         <td>{{ $item->competency ?? '-' }}</td>
                                         <td>{{ $item->due_date ?? '-' }}</td>
-                                        <td>{{ $item->biaya ? 'Rp ' . number_format($item->biaya, 0, ',', '.') : '-' }}</td>
+                                        <td>
+                                            {{ $item->biaya ? 'Rp ' . number_format((float) str_replace(['Rp', '.', ' '], '', $item->biaya), 0, ',', '.') : '-' }}
+                                        </td>
                                         <td>{{ $item->lembaga ?? '-' }}</td>
                                         <td>{{ $item->keterangan_tujuan ?? '-' }}</td>
                                         <td>{{ $item->program_training_plan ?? '-' }}</td>
                                         <td>{{ $item->due_date_plan ?? '-' }}</td>
-                                        <td>{{ $item->biaya_plan ? 'Rp ' . number_format($item->biaya_plan, 0, ',', '.') : '-' }}
+                                        <td>
+                                            {{ $item->biaya_plan ? 'Rp ' . number_format((float) str_replace(['Rp', '.', ' '], '', $item->biaya_plan), 0, ',', '.') : '-' }}
                                         </td>
                                         <td>{{ $item->lembaga_plan ?? '-' }}</td>
                                         <td>{{ $item->keterangan_plan ?? '-' }}</td>
@@ -175,13 +178,19 @@
                                     ->filter(function ($item) {
                                         return empty($item->tahun_usulan);
                                     })
-                                    ->sum('biaya');
+                                    ->sum(function ($item) {
+                                        // Konversi biaya ke float
+                                        return (float) str_replace(['Rp', '.', ' '], '', $item->biaya);
+                                    });
 
                                 $totalBudget2 = $data
                                     ->filter(function ($item) {
                                         return empty($item->tahun_usulan);
                                     })
-                                    ->sum('biaya_plan');
+                                    ->sum(function ($item) {
+                                        // Konversi biaya_plan ke float
+                                        return (float) str_replace(['Rp', '.', ' '], '', $item->biaya_plan);
+                                    });
                             @endphp
                             <tr>
                                 <td></td>
@@ -263,20 +272,30 @@
                                 });
 
                                 // Hitung total budget dan biaya_plan untuk data yang memiliki tahun_usulan
-                                $totalBudgetTabelKedua = $filteredData->sum('biaya');
-                                $totalBudgetTabelKeduasub2 = $filteredData->sum('biaya_plan');
+                                $totalBudgetTabelKedua = $filteredData->sum(function ($item) {
+                                    return (float) str_replace(['Rp', '.', ' '], '', $item->biaya); // Konversi ke float
+                                });
+
+                                $totalBudgetTabelKeduasub2 = $filteredData->sum(function ($item) {
+                                    return (float) str_replace(['Rp', '.', ' '], '', $item->biaya_plan); // Konversi ke float
+                                });
 
                                 // Total budget dari tabel pertama (data tanpa tahun_usulan)
                                 $totalBudgetTabelPertama = $data
                                     ->filter(function ($item) {
                                         return is_null($item->tahun_usulan);
                                     })
-                                    ->sum('biaya');
+                                    ->sum(function ($item) {
+                                        return (float) str_replace(['Rp', '.', ' '], '', $item->biaya); // Konversi ke float
+                                    });
+
                                 $totalBudgetTabelPertama2 = $data
                                     ->filter(function ($item) {
                                         return is_null($item->tahun_usulan);
                                     })
-                                    ->sum('biaya_plan');
+                                    ->sum(function ($item) {
+                                        return (float) str_replace(['Rp', '.', ' '], '', $item->biaya_plan); // Konversi ke float
+                                    });
 
                                 // Hitung total biaya keseluruhan
                                 $totalBiayaPlan = $totalBudgetTabelPertama + $totalBudgetTabelKedua;
@@ -347,19 +366,19 @@
                 </div>
             </div>
         </section>
-                        <!-- jQuery -->
-                        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-                        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
-                        <script>
-                            $(document).ready(function() {
-                                // Hover function for dropdowns
-                                $('.nav-item.dropdown').hover(function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
-                                }, function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
-                                });
-                            });
-                            </script>
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
+        <script>
+            $(document).ready(function() {
+                // Hover function for dropdowns
+                $('.nav-item.dropdown').hover(function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+                }, function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
+                });
+            });
+        </script>
         <!-- jQuery -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>

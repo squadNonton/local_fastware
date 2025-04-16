@@ -1020,12 +1020,12 @@
                                                     href="{{ route('showApprovalKaDept') }}">Persetujuan Ka. Dept</a>
                                             </li>
                                         @endif
-                                        @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'RANGGA FADILLAH']))
+                                        @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'M. IQBAL']))
                                             <li><a class="dropdown-item"
                                                     href="{{ route('showApprovalInventory') }}">Persetujuan
                                                     Inventory</a></li>
                                         @endif
-                                        @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'JESSICA PAUNE', 'M. IQBAL']))
+                                        @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'JESSICA PAUNE', 'VIVIAN ANGELIKA', 'M. IQBAL']))
                                             <li><a class="dropdown-item"
                                                     href="{{ route('overviewPurchase') }}">Overview Purchase</a></li>
                                         @endif
@@ -1042,12 +1042,15 @@
                                     <ul class="dropdown-menu" aria-labelledby="childDropdown">
                                         <li><a class="dropdown-item" href="{{ route('createinquiryImport') }}">Form
                                                 Inquiry Import</a></li>
-                                        <li><a class="dropdown-item" href="">Persetujuan Ka.Sie</a></li>
-                                        <li><a class="dropdown-item" href="">Persetujuan Ka.Dept</a></li>
-                                        <li><a class="dropdown-item" href="">Persetujuan Inventory</a></li>
                                         <li><a class="dropdown-item"
-                                                href="{{ route('overviewPurchaseImport') }}">Overview Import</a></li>
-                                        <li><a class="dropdown-item" href="">Overview Inquiry Import</a></li>
+                                                href="{{ route('showApprovalInventoryImport') }}">Persetujuan
+                                                Inventory</a></li>
+                                        <li><a class="dropdown-item"
+                                                href="{{ route('overviewPurchaseImport') }}">Overview Purchasing
+                                                Import</a></li>
+                                        <li><a class="dropdown-item"
+                                                href="{{ route('overviewInquiryImport') }}">Overview Inquiry
+                                                Import</a></li>
                                     </ul>
                                 </li>
                             </ul>

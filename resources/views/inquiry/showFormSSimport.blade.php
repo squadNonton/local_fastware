@@ -89,6 +89,7 @@
         .swal2-title {
             font-family: 'Cambria', serif;
         }
+
         .dropdown-menu {
             position: absolute;
             background-color: #fff;
@@ -105,213 +106,220 @@
         .dropdown-item:hover {
             background-color: #f0f0f0;
         }
-
     </style>
 
 
-<main id="main" class="main">
-    <div class="pagetitle">
-        <h1>Preview</h1>
-        <nav>
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item active"><a href="{{ route('createinquiryImport') }}">Menu Inquiry Sales</a></li>
-                <li class="breadcrumb-item active">Formulir Inquiry Sales</li>
-            </ol>
-        </nav>
-    </div>
-    <section class="section">
-        <div class="card">
-            <div class="card-body">
-                <div class="form-section mt-3">
-                    <div class="form-group">
-                        <label>Create By :</label>
-                        <div class="form-value">{{ $inquiry->create_by }}</div>
+    <main id="main" class="main">
+        <div class="pagetitle">
+            <h1>Preview</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item active"><a href="{{ route('createinquiryImport') }}">Menu Inquiry Sales</a>
+                    </li>
+                    <li class="breadcrumb-item active">Formulir Inquiry Sales</li>
+                </ol>
+            </nav>
+        </div>
+        <section class="section">
+            <div class="card">
+                <div class="card-body">
+                    <div class="form-section mt-3">
+                        <div class="form-group">
+                            <label>Create By :</label>
+                            <div class="form-value">{{ $inquiry->create_by }}</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Category :</label>
+                            <div class="form-value">{{ $inquiry->loc_imp }}</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Reference :</label>
+                            <div class="form-value">{{ $inquiry->kode_inquiry }}</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Date Create :</label>
+                            <div class="form-value">{{ $inquiry->created_at }}</div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Category :</label>
-                        <div class="form-value">{{ $inquiry->loc_imp }}</div>
-                    </div>
-                    <div class="form-group">
-                        <label>Reference :</label>
-                        <div class="form-value">{{ $inquiry->kode_inquiry }}</div>
-                    </div>
-                    <div class="form-group">
-                        <label>Date Create :</label>
-                        <div class="form-value">{{ $inquiry->created_at }}</div>
-                    </div>
-                </div>
-                <form action="{{ route('updateInquiryDetailsImport', $inquiry->id) }}" method="POST">
-                    @csrf
-                    @method('PUT')
+                    <form action="{{ route('updateInquiryDetailsImport', $inquiry->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
 
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 25px;">No</th>                                
-                                <th style="width: 50px; text-align:center;">klasifikasi</th>
-                                <th style="width: 100px;">Raw Material</th>
-                                <th style="width: 50px;">Shapes</th>
-                                <th style="width: 40px;">Thickness</th>
-                                <th style="width: 40px;">Width</th>
-                                <th style="width: 40px; text-align:center;">Inner Dia</th>
-                                <th style="width: 40px; text-align:center;">Outer Dia</th>
-                                <th style="width: 50px;">Length</th>
-                                <th style="width: 50px; text-align:center;">Qty
-                                    <p style="font-size: 9pt; text-align:center;">(in Pcs)</p>
-                                </th>
-                                <th style="width: 50px; text-align:center;">Forecast Month 1</th>
-                                <th style="width: 50px; text-align:center;">Forecast Month 2</th>
-                                <th style="width: 50px; text-align:center;">Forecast Month 3</th>
-                                <th style="width: 90px; text-align:center;">Ship-to</th>
-                                <th style="width: 50px; text-align:center;">Sales Order</th>
-                                <th style="width: 50px; text-align:center;">Remark</th>
-                                <th style="width: 50px; text-align:center;">Customer</th>
-                                <th style="width: 50px; text-align:center;">Partner</th>
-                                <th style="width: 50px; text-align:center;">Progress</th>
-                                <th style="width: 50px; text-align:center;">No PO</th>
-                                <th style="width: 50px; text-align:center;">Aksi</th>
-                            </tr>
-                        </thead>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 25px;">No</th>
+                                        <th style="width: 50px; text-align:center;">klasifikasi</th>
+                                        <th style="width: 100px;">Raw Material</th>
+                                        <th style="width: 50px;">Shapes</th>
+                                        <th style="width: 40px;">Thickness</th>
+                                        <th style="width: 40px;">Width</th>
+                                        <th style="width: 40px; text-align:center;">Inner Dia</th>
+                                        <th style="width: 40px; text-align:center;">Outer Dia</th>
+                                        <th style="width: 50px;">Length</th>
+                                        <th style="width: 50px; text-align:center;">Qty
+                                            <p style="font-size: 9pt; text-align:center;">(in Pcs)</p>
+                                        </th>
+                                        <th style="width: 50px; text-align:center;">Forecast Month 1</th>
+                                        <th style="width: 50px; text-align:center;">Forecast Month 2</th>
+                                        <th style="width: 50px; text-align:center;">Forecast Month 3</th>
+                                        <th style="width: 90px; text-align:center;">Ship-to</th>
+                                        <th style="width: 50px; text-align:center;">Sales Order</th>
+                                        <th style="width: 50px; text-align:center;">Remark</th>
+                                        <th style="width: 50px; text-align:center;">Customer</th>
+                                        <th style="width: 50px; text-align:center;">Partner</th>
+                                        <th style="width: 50px; text-align:center;">Progress</th>
+                                        <th style="width: 50px; text-align:center;">No PO</th>
+                                        <th style="width: 50px; text-align:center;">Aksi</th>
+                                    </tr>
+                                </thead>
 
-                        
 
-                        <tbody id="table-body">
-                            @forelse ($materials as $index => $material)
-                                <tr data-id="{{ $material->id }}" @if($material->trashed()) style="background-color: #e0e0e0;" @endif>
-                                    <td>{{ $index + 1 }}</td>
-                                    <td>{{ $material['klasifikasi'] }}</td>
-                                    <td>{{ $material->type_materials ? $material->type_materials->type_name : 'N/A' }}</td>
-                                    <td>{{ $material['jenis'] }}</td>
-                                    <td>{{ $material['thickness'] }}</td>
-                                    <td>{{ $material['weight'] }}</td>
-                                    <td>{{ $material['inner_diameter'] }}</td>
-                                    <td>{{ $material['outer_diameter'] }}</td>
-                                    <td>{{ $material['length'] }}</td>
-                                    <td>{{ $material['qty'] }}</td>
-                                    <td>{{ $material['m1'] }}</td>
-                                    <td>{{ $material['m2'] }}</td>
-                                    <td>{{ $material['m3'] }}</td>
-                                    <td>{{ $material['ship'] }}</td>
-                                    <td>{{ $material['so'] }}</td>
-                                    <td>{{ $material['note'] }}</td>
-                                    <td>
-                                        @php
-                                            $customerNames = [];
-                                            $decoded = json_decode($material->customer, true);
-                                    
-                                            // Cek apakah hasil decode adalah array
-                                            if (is_array($decoded)) {
-                                                foreach ($decoded as $item) {
-                                                    // Jika item berupa ID (angka dan cocok di daftar customer), ambil nama dari relasi
-                                                    $found = false;
-                                                    foreach ($customers as $customer) {
-                                                        if ($customer->id == $item) {
-                                                            $customerNames[] = $customer->name_customer;
-                                                            $found = true;
+
+                                <tbody id="table-body">
+                                    @forelse ($materials as $index => $material)
+                                        <tr data-id="{{ $material->id }}"
+                                            @if ($material->trashed()) style="background-color: #e0e0e0;" @endif>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $material['klasifikasi'] }}</td>
+                                            <td>{{ $material->type_materials ? $material->type_materials->type_name : 'N/A' }}
+                                            </td>
+                                            <td>{{ $material['jenis'] }}</td>
+                                            <td>{{ $material['thickness'] }}</td>
+                                            <td>{{ $material['weight'] }}</td>
+                                            <td>{{ $material['inner_diameter'] }}</td>
+                                            <td>{{ $material['outer_diameter'] }}</td>
+                                            <td>{{ $material['length'] }}</td>
+                                            <td>{{ $material['qty'] }}</td>
+                                            <td>{{ $material['m1'] }}</td>
+                                            <td>{{ $material['m2'] }}</td>
+                                            <td>{{ $material['m3'] }}</td>
+                                            <td>{{ $material['ship'] }}</td>
+                                            <td>{{ $material['so'] }}</td>
+                                            <td>{{ $material['note'] }}</td>
+                                            <td>
+                                                @php
+                                                    $customerNames = [];
+                                                    $decoded = json_decode($material->customer, true);
+
+                                                    // Cek apakah hasil decode adalah array
+                                                    if (is_array($decoded)) {
+                                                        foreach ($decoded as $item) {
+                                                            // Jika item berupa ID (angka dan cocok di daftar customer), ambil nama dari relasi
+                                                            $found = false;
+                                                            foreach ($customers as $customer) {
+                                                                if ($customer->id == $item) {
+                                                                    $customerNames[] = $customer->name_customer;
+                                                                    $found = true;
+                                                                    break;
+                                                                }
+                                                            }
+
+                                                            // Jika tidak ditemukan sebagai ID, anggap itu adalah nama langsung
+                                                            if (!$found) {
+                                                                $customerNames[] = $item;
+                                                            }
+                                                        }
+                                                    } else {
+                                                        // Bukan array → bisa ID atau nama langsung
+                                                        $found = false;
+                                                        foreach ($customers as $customer) {
+                                                            if ($customer->id == $material->customer) {
+                                                                $customerNames[] = $customer->name_customer;
+                                                                $found = true;
+                                                                break;
+                                                            }
+                                                        }
+
+                                                        // Jika tidak cocok ID, anggap nama langsung
+                                                        if (!$found && !empty($material->customer)) {
+                                                            $customerNames[] = $material->customer;
+                                                        }
+                                                    }
+                                                @endphp
+                                                <span>{{ implode(', ', $customerNames) }}</span>
+                                            </td>
+
+                                            <td>
+                                                @php
+                                                    $partnerName = '';
+                                                    foreach ($users as $user) {
+                                                        if ($user->id == $material->create_by) {
+                                                            $partnerName = $user->name;
                                                             break;
                                                         }
                                                     }
-                                    
-                                                    // Jika tidak ditemukan sebagai ID, anggap itu adalah nama langsung
-                                                    if (!$found) {
-                                                        $customerNames[] = $item;
-                                                    }
-                                                }
-                                            } else {
-                                                // Bukan array → bisa ID atau nama langsung
-                                                $found = false;
-                                                foreach ($customers as $customer) {
-                                                    if ($customer->id == $material->customer) {
-                                                        $customerNames[] = $customer->name_customer;
-                                                        $found = true;
-                                                        break;
-                                                    }
-                                                }
-                                    
-                                                // Jika tidak cocok ID, anggap nama langsung
-                                                if (!$found && !empty($material->customer)) {
-                                                    $customerNames[] = $material->customer;
-                                                }
-                                            }
-                                        @endphp
-                                        <span>{{ implode(', ', $customerNames) }}</span>
-                                    </td>
-                                    
-                                    <td>
-                                        @php
-                                            $partnerName = '';
-                                            foreach ($users as $user) {
-                                                if ($user->id == $material->create_by) {
-                                                    $partnerName = $user->name;
-                                                    break;
-                                                }
-                                            }
-                                        @endphp
-                                        <span>{{ $partnerName }}</span>
-                                    </td>
-                                    <td>{{ $material['progress'] }}</td>
-                                    <td>{{ $material['nopo'] }}</td>
-                                    <td>
-                                        @if (
-                                            !$material->trashed() && 
-                                            $inquiry->status == 1 && 
-                                            ($material->create_by == Auth::id() || in_array(Auth::id(), [1, 2, 3, 4]))
-                                        )
-                                            <a href="{{ route('editimport', ['id' => $material->id]) }}" class="btn btn-warning btn-sm">Edit</a>
-                                    
-                                            @if ($material->create_by == Auth::id())
-                                                <button class="btn btn-danger btn-sm" onclick="deleteRowPermanen({{ $material->id }})">
-                                                    Delete
-                                                </button>
-                                            @else
-                                                <button class="btn btn-danger btn-sm" onclick="deleteRow({{ $material->id }})">
-                                                    Delete
-                                                </button>
-                                            @endif
-                                        @elseif ($material->trashed())
-                                            <p>Sudah dihapus</p>
-                                        @endif
-                                    </td>
-                                    
-                                    
-                                    
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="21" style="text-align: center;">Data tidak ditemukan</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                        
-                    
-                    </table>
-                </div>
+                                                @endphp
+                                                <span>{{ $partnerName }}</span>
+                                            </td>
+                                            <td>{{ $material['progress'] }}</td>
+                                            <td>{{ $material['nopo'] }}</td>
+                                            <td>
+                                                @if (
+                                                    !$material->trashed() &&
+                                                        $inquiry->status == 1 &&
+                                                        ($material->create_by == Auth::id() || in_array(Auth::id(), [1, 2, 3, 4])))
+                                                    <a href="{{ route('editimport', ['id' => $material->id]) }}"
+                                                        class="btn btn-warning btn-sm">Edit</a>
 
-            </form>
-                @if ($isFromApproval)
-                    <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm m-1">Kembali</a>
-                @else
-                    <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm m-1">Kembali</a>
-                    @if ($inquiry->status == 1)
-                        @if (in_array(Auth::id(), [1, 2, 3, 4]))
-                        <form onsubmit="event.preventDefault(); approveKaDept({{ $inquiry->id }});" class="d-inline">
-                            <button type="submit" class="btn btn-primary btn-sm m-1">Submit</button>
-                        </form>
+                                                    @if ($material->create_by == Auth::id())
+                                                        <button class="btn btn-danger btn-sm"
+                                                            onclick="deleteRowPermanen({{ $material->id }})">
+                                                            Delete
+                                                        </button>
+                                                    @else
+                                                        <button class="btn btn-danger btn-sm"
+                                                            onclick="deleteRow({{ $material->id }})">
+                                                            Delete
+                                                        </button>
+                                                    @endif
+                                                @elseif ($material->trashed())
+                                                    <p>Sudah dihapus</p>
+                                                @endif
+                                            </td>
+
+
+
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="21" style="text-align: center;">Data tidak ditemukan</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+
+
+                            </table>
+                        </div>
+
+                    </form>
+                    @if ($isFromApproval)
+                        <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm m-1">Kembali</a>
+                    @else
+                        <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm m-1">Kembali</a>
+                        @if ($inquiry->status == 1)
+                            @if (in_array(Auth::id(), [1, 2, 3, 4]))
+                                <form onsubmit="event.preventDefault(); approveKaDept({{ $inquiry->id }});"
+                                    class="d-inline">
+                                    <button type="submit" class="btn btn-primary btn-sm m-1">Submit</button>
+                                </form>
+                            @endif
+                            <a class="btn btn-success btn-custom-form m-1 btn-sm"
+                                href="{{ route('formulirInquiryimport', ['id' => $inquiry->id]) }}"
+                                title="Formulir Inquiry">
+                                <i class="bi bi-file-earmark-arrow-up-fill"></i>
+                            </a>
                         @endif
-                        <a class="btn btn-success btn-custom-form m-1 btn-sm" href="{{ route('formulirInquiryimport', ['id' => $inquiry->id]) }}" title="Formulir Inquiry">
-                            <i class="bi bi-file-earmark-arrow-up-fill"></i>
-                        </a>
                     @endif
-                @endif
 
-                {{-- @if ($inquiry->loc_imp == 'Local')
+                    {{-- @if ($inquiry->loc_imp == 'Local')
                     <a href="{{ route('showFormSS.pdf', $inquiry->id) }}" class="btn btn-danger btn-sm m-1">
                         <i class="bi bi-file-earmark-pdf"></i> Download PDF
                     </a>
                 @endif --}}
 
-                {{-- @if ($inquiry->status == 2)
+                    {{-- @if ($inquiry->status == 2)
                     <div class="d-flex justify-content-end">
                         @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'ILHAM CHOLID', 'JUN JOHAMIN PD', 'ANDIK TOTOK SISWOYO']))
                             <a href="#" class="btn btn-primary btn-sm m-1"
@@ -355,517 +363,517 @@
                         @endif
                     </div>
                 @endif --}}
+                </div>
             </div>
-        </div>
 
-        <section class="section">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-lg-4">
-                            <div class="form-group mb-3 mt-2">
-                                <label for="attachments" class="fw-bold mt-2">Upload Attachments (PDF, PNG, JPG,
-                                    JPEG)</label>
-                                <input type="file" id="attachments" name="attachments[]" multiple
-                                    accept=".pdf,.png,.jpg,.jpeg" class="form-control mt-2"
-                                    onchange="updateFileList()">
+            <section class="section">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="form-group mb-3 mt-2">
+                                    <label for="attachments" class="fw-bold mt-2">Upload Attachments (PDF, PNG, JPG,
+                                        JPEG)</label>
+                                    <input type="file" id="attachments" name="attachments[]" multiple
+                                        accept=".pdf,.png,.jpg,.jpeg" class="form-control mt-2" onchange="updateFileList()">
 
-                                <button type="button" class="btn btn-success mt-3 btn-sm"
-                                    onclick="uploadFiles({{ $inquiry->id }})"
-                                    @if (in_array(Auth::user()->name, [
-                                            'NURSALIM',
-                                            'FAIZAL AFDAU',
-                                            'DIAMAN DARMAWINATA',
-                                            'MAMIK ABIDIN',
-                                            'ABDUR RAHMAN AL FAAIZ',
-                                            'FAJAR BAGASKARA',
-                                        ])) disabled @endif>
-                                    Upload Files
-                                </button>
-                            </div>
+                                    <button type="button" class="btn btn-success mt-3 btn-sm"
+                                        onclick="uploadFiles({{ $inquiry->id }})"
+                                        @if (in_array(Auth::user()->name, [
+                                                'NURSALIM',
+                                                'FAIZAL AFDAU',
+                                                'DIAMAN DARMAWINATA',
+                                                'MAMIK ABIDIN',
+                                                'ABDUR RAHMAN AL FAAIZ',
+                                                'FAJAR BAGASKARA',
+                                            ])) disabled @endif>
+                                        Upload Files
+                                    </button>
+                                </div>
 
-                            <table class="table-responsive">
-                                <thead>
-                                    <tr>
-                                        <th>File Name Attachment</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="uploaded-files-list">
-                                    @if (count($uploadedFiles) > 0)
-                                        @foreach ($uploadedFiles as $index => $file)
-                                            <tr>
-                                                <td>
-                                                    <a href="{{ asset('assets/inquiry/' . $file) }}"
-                                                        target="_blank">{{ $file }}</a>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    @else
-                                        <tr>
-                                            <td colspan="2">No files uploaded.</td>
-                                        </tr>
-                                    @endif
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="col-lg-8">
-                            <div class="table-responsive">
-                                <table>
-                                    <h5 class="card-title text-center mt-4 mb-5" style="font-family: Cambria, serif">
-                                        History Progress Inquiry Local
-                                        <br>
-                                        <small class="fw-bold"> "{{ $inquiry->kode_inquiry }}" </small>
-                                    </h5>
+                                <table class="table-responsive">
                                     <thead>
                                         <tr>
-                                            <th style="width : 60px">No</th>
-                                            <th class="text-center" style="width : 300px">Date</th>
-                                            <th class="text-center" style="width : 250px">User</th>
-                                            <th class="text-center">Progress Description</th>
+                                            <th>File Name Attachment</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        @foreach ($progressUpdates as $index => $progress)
+                                    <tbody id="uploaded-files-list">
+                                        @if (count($uploadedFiles) > 0)
+                                            @foreach ($uploadedFiles as $index => $file)
+                                                <tr>
+                                                    <td>
+                                                        <a href="{{ asset('assets/inquiry/' . $file) }}"
+                                                            target="_blank">{{ $file }}</a>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @else
                                             <tr>
-                                                <td>{{ $index + 1 }}</td>
-                                                <td style="width: 100px; text-align: center;">
-                                                    {{ $progress->created_at->format('d/m/Y H:i') }}</td>
-                                                <td style="width: 400px">
-                                                    {{ $progress->user ? $progress->user->name : '--- Procurement has not been updated ---' }}
-                                                </td>
-                                                <td>{{ $progress->description }}</td>
+                                                <td colspan="2">No files uploaded.</td>
                                             </tr>
-                                        @endforeach
+                                        @endif
                                     </tbody>
                                 </table>
+                            </div>
+                            <div class="col-lg-8">
+                                <div class="table-responsive">
+                                    <table>
+                                        <h5 class="card-title text-center mt-4 mb-5" style="font-family: Cambria, serif">
+                                            History Progress Inquiry Local
+                                            <br>
+                                            <small class="fw-bold"> "{{ $inquiry->kode_inquiry }}" </small>
+                                        </h5>
+                                        <thead>
+                                            <tr>
+                                                <th style="width : 60px">No</th>
+                                                <th class="text-center" style="width : 300px">Date</th>
+                                                <th class="text-center" style="width : 250px">User</th>
+                                                <th class="text-center">Progress Description</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($progressUpdates as $index => $progress)
+                                                <tr>
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td style="width: 100px; text-align: center;">
+                                                        {{ $progress->created_at->format('d/m/Y H:i') }}</td>
+                                                    <td style="width: 400px">
+                                                        {{ $progress->user ? $progress->user->name : '--- Procurement has not been updated ---' }}
+                                                    </td>
+                                                    <td>{{ $progress->description }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
         </section>
-    </section>
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
-    <script>
-        $(document).ready(function() {
-            // Hover function for dropdowns
-            $('.nav-item.dropdown').hover(function() {
-                $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
-            }, function() {
-                $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
+        <script>
+            $(document).ready(function() {
+                // Hover function for dropdowns
+                $('.nav-item.dropdown').hover(function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+                }, function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
+                });
             });
-        });
-    </script>
+        </script>
 
-    <script>
-        function goBack() {
-            window.history.back();
-        }
-    </script>
-
-<script>
-    function uploadexcel() {
-        let fileInput = document.getElementById('file');
-
-        if (fileInput.files.length === 0) {
-            alert("Pilih file terlebih dahulu!");
-            return;
-        }
-
-        let formData = new FormData();
-        formData.append("file", fileInput.files[0]);
-
-        $.ajax({
-            url: "{{ route('import.purchaseimport') }}", // Pastikan rute ini benar
-            type: "POST",
-            data: formData,
-            processData: false,
-            contentType: false,
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-            },
-            success: function(response) {
-                alert(response.message);
-                location.reload(); // Reload halaman setelah sukses
-            },
-            error: function(xhr) {
-                alert("Terjadi kesalahan: " + xhr.responseText);
+        <script>
+            function goBack() {
+                window.history.back();
             }
-        });
-    }
-</script>
+        </script>
+
+        <script>
+            function uploadexcel() {
+                let fileInput = document.getElementById('file');
+
+                if (fileInput.files.length === 0) {
+                    alert("Pilih file terlebih dahulu!");
+                    return;
+                }
+
+                let formData = new FormData();
+                formData.append("file", fileInput.files[0]);
+
+                $.ajax({
+                    url: "{{ route('import.purchaseimport') }}", // Pastikan rute ini benar
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        alert(response.message);
+                        location.reload(); // Reload halaman setelah sukses
+                    },
+                    error: function(xhr) {
+                        alert("Terjadi kesalahan: " + xhr.responseText);
+                    }
+                });
+            }
+        </script>
 
 
-    <script>
-        function toggleEdit(event, button) {
-        event.preventDefault(); // Mencegah form submission
+        <script>
+            function toggleEdit(event, button) {
+                event.preventDefault(); // Mencegah form submission
 
-        const row = button.closest('tr');
-        const inputs = row.querySelectorAll('input, select');
-        const isEditing = button.classList.contains('editing');
+                const row = button.closest('tr');
+                const inputs = row.querySelectorAll('input, select');
+                const isEditing = button.classList.contains('editing');
 
-        if (isEditing) {
-            // Jika dalam mode edit (Save ditekan), kirim data ke database
-            const formData = new FormData();
-            formData.append('_token', '{{ csrf_token() }}'); // Tambahkan token CSRF
-            formData.append('id', row.dataset.id); // Ambil ID dari atribut data-id
-            inputs.forEach(input => {
-                formData.append(input.name, input.value);
-                input.setAttribute('disabled', 'true'); // Kunci input kembali
-            });
+                if (isEditing) {
+                    // Jika dalam mode edit (Save ditekan), kirim data ke database
+                    const formData = new FormData();
+                    formData.append('_token', '{{ csrf_token() }}'); // Tambahkan token CSRF
+                    formData.append('id', row.dataset.id); // Ambil ID dari atribut data-id
+                    inputs.forEach(input => {
+                        formData.append(input.name, input.value);
+                        input.setAttribute('disabled', 'true'); // Kunci input kembali
+                    });
 
-            // Kirim data ke server dengan AJAX
-            fetch(`{{ route('updateInquiryDetailsImport', ['id' => $inquiry->id]) }}`, {
-                method: 'PUT',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    button.innerText = 'Edit'; // Ubah tombol kembali ke Edit
-                    button.classList.remove('editing'); // Hapus status editing
-                    Swal.fire('Success!', 'Data berhasil disimpan.', 'success');
+                    // Kirim data ke server dengan AJAX
+                    fetch(`{{ route('updateInquiryDetailsImport', ['id' => $inquiry->id]) }}`, {
+                            method: 'PUT',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                button.innerText = 'Edit'; // Ubah tombol kembali ke Edit
+                                button.classList.remove('editing'); // Hapus status editing
+                                Swal.fire('Success!', 'Data berhasil disimpan.', 'success');
+                            } else {
+                                Swal.fire('Error!', data.message || 'Gagal menyimpan perubahan.', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire('Error!', 'Terjadi kesalahan saat menyimpan data.', 'error');
+                        });
                 } else {
-                    Swal.fire('Error!', data.message || 'Gagal menyimpan perubahan.', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire('Error!', 'Terjadi kesalahan saat menyimpan data.', 'error');
-            });
-        } else {
-            // Jika dalam mode non-editing (Edit ditekan), aktifkan input
-            inputs.forEach(input => {
-                if (input.name !== 'partner') { // Kunci field partner agar tidak bisa diedit
-                    input.removeAttribute('disabled');
-                }
-            });
-
-            button.innerText = 'Save'; // Ubah tombol ke Save
-            button.classList.add('editing'); // Tandai sebagai sedang diedit
-        }
-    }
-
-
-
-        function handleShapeChange(selectElement) {
-            const row = selectElement.closest('tr');
-            const thicknessInput = row.querySelector('input[name="thickness"]');
-            const weightInput = row.querySelector('input[name="weight"]');
-            const innerDiameterInput = row.querySelector('input[name="inner_diameter"]');
-            const outerDiameterInput = row.querySelector('input[name="outer_diameter"]');
-
-            // Reset all inputs
-            thicknessInput.setAttribute('disabled', 'true');
-            weightInput.setAttribute('disabled', 'true');
-            innerDiameterInput.setAttribute('disabled', 'true');
-            outerDiameterInput.setAttribute('disabled', 'true');
-
-            // Enable inputs based on selected shape
-            if (selectElement.value === 'Flat') {
-                thicknessInput.removeAttribute('disabled');
-                weightInput.removeAttribute('disabled');
-            } else if (selectElement.value === 'Round') {
-                outerDiameterInput.removeAttribute('disabled');
-            } else if (selectElement.value === 'Honed Tube') {
-                innerDiameterInput.removeAttribute('disabled');
-                outerDiameterInput.removeAttribute('disabled');
-            }
-        }
-
-        // Update dropdown listeners on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            const dropdowns = document.querySelectorAll('.jenis-dropdown');
-            dropdowns.forEach(dropdown => {
-                handleShapeChange(dropdown); // Set initial state
-                dropdown.addEventListener('change', () => handleShapeChange(dropdown));
-            });
-        });
-
-        document.addEventListener("DOMContentLoaded", function() {
-            // Mengambil semua input customer
-            const customerInputs = document.querySelectorAll('.searchable-dropdown input[type="text"]');
-
-            customerInputs.forEach(input => {
-                const dropdownId = input.getAttribute('id') + '_list';
-                const dropdown = document.getElementById(dropdownId);
-                const hiddenInputId = input.getAttribute('id').replace('search_customer_', 'id_customer_').replace('search_partner_', 'id_partner_');
-                const hiddenInput = document.getElementById(hiddenInputId);
-
-                input.addEventListener("input", function() {
-                    const value = this.value.toLowerCase();
-                    const items = dropdown.querySelectorAll('.dropdown-item');
-
-                    items.forEach(item => {
-                        if (item.getAttribute('data-name').toLowerCase().includes(value)) {
-                            item.style.display = '';
-                        } else {
-                            item.style.display = 'none';
+                    // Jika dalam mode non-editing (Edit ditekan), aktifkan input
+                    inputs.forEach(input => {
+                        if (input.name !== 'partner') { // Kunci field partner agar tidak bisa diedit
+                            input.removeAttribute('disabled');
                         }
                     });
 
-                    if (value) {
-                        dropdown.style.display = 'block';
-                    } else {
-                        dropdown.style.display = 'none';
-                    }
-                });
+                    button.innerText = 'Save'; // Ubah tombol ke Save
+                    button.classList.add('editing'); // Tandai sebagai sedang diedit
+                }
+            }
 
-                dropdown.addEventListener("click", function(event) {
-                    const item = event.target;
-                    if (item.classList.contains('dropdown-item')) {
-                        input.value = item.getAttribute('data-name');
-                        hiddenInput.value = item.getAttribute('data-value');
-                        dropdown.style.display = 'none';
-                    }
-                });
 
-                document.addEventListener("click", function(event) {
-                    if (!dropdown.contains(event.target) && !input.contains(event.target)) {
-                        dropdown.style.display = 'none';
-                    }
+
+            function handleShapeChange(selectElement) {
+                const row = selectElement.closest('tr');
+                const thicknessInput = row.querySelector('input[name="thickness"]');
+                const weightInput = row.querySelector('input[name="weight"]');
+                const innerDiameterInput = row.querySelector('input[name="inner_diameter"]');
+                const outerDiameterInput = row.querySelector('input[name="outer_diameter"]');
+
+                // Reset all inputs
+                thicknessInput.setAttribute('disabled', 'true');
+                weightInput.setAttribute('disabled', 'true');
+                innerDiameterInput.setAttribute('disabled', 'true');
+                outerDiameterInput.setAttribute('disabled', 'true');
+
+                // Enable inputs based on selected shape
+                if (selectElement.value === 'Flat') {
+                    thicknessInput.removeAttribute('disabled');
+                    weightInput.removeAttribute('disabled');
+                } else if (selectElement.value === 'Round') {
+                    outerDiameterInput.removeAttribute('disabled');
+                } else if (selectElement.value === 'Honed Tube') {
+                    innerDiameterInput.removeAttribute('disabled');
+                    outerDiameterInput.removeAttribute('disabled');
+                }
+            }
+
+            // Update dropdown listeners on page load
+            document.addEventListener('DOMContentLoaded', () => {
+                const dropdowns = document.querySelectorAll('.jenis-dropdown');
+                dropdowns.forEach(dropdown => {
+                    handleShapeChange(dropdown); // Set initial state
+                    dropdown.addEventListener('change', () => handleShapeChange(dropdown));
                 });
             });
-        });
+
+            document.addEventListener("DOMContentLoaded", function() {
+                // Mengambil semua input customer
+                const customerInputs = document.querySelectorAll('.searchable-dropdown input[type="text"]');
+
+                customerInputs.forEach(input => {
+                    const dropdownId = input.getAttribute('id') + '_list';
+                    const dropdown = document.getElementById(dropdownId);
+                    const hiddenInputId = input.getAttribute('id').replace('search_customer_', 'id_customer_')
+                        .replace('search_partner_', 'id_partner_');
+                    const hiddenInput = document.getElementById(hiddenInputId);
+
+                    input.addEventListener("input", function() {
+                        const value = this.value.toLowerCase();
+                        const items = dropdown.querySelectorAll('.dropdown-item');
+
+                        items.forEach(item => {
+                            if (item.getAttribute('data-name').toLowerCase().includes(value)) {
+                                item.style.display = '';
+                            } else {
+                                item.style.display = 'none';
+                            }
+                        });
+
+                        if (value) {
+                            dropdown.style.display = 'block';
+                        } else {
+                            dropdown.style.display = 'none';
+                        }
+                    });
+
+                    dropdown.addEventListener("click", function(event) {
+                        const item = event.target;
+                        if (item.classList.contains('dropdown-item')) {
+                            input.value = item.getAttribute('data-name');
+                            hiddenInput.value = item.getAttribute('data-value');
+                            dropdown.style.display = 'none';
+                        }
+                    });
+
+                    document.addEventListener("click", function(event) {
+                        if (!dropdown.contains(event.target) && !input.contains(event.target)) {
+                            dropdown.style.display = 'none';
+                        }
+                    });
+                });
+            });
 
 
 
-        function deleteRow(id) {
-            if (confirm('Are you sure you want to delete this row?')) {
-                fetch(`{{ url('deleteInquiryDetailImport') }}/${id}`, {
-                    method: 'DELETE',
+            function deleteRow(id) {
+                if (confirm('Are you sure you want to delete this row?')) {
+                    fetch(`{{ url('deleteInquiryDetailImport') }}/${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Row deleted successfully');
+                                location.reload(); // Reload the page to see the changes
+                            } else {
+                                alert('Failed to delete row');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred while deleting the row');
+                        });
+                }
+            }
+
+            function deleteRowPermanen(id) {
+                if (confirm('Are you sure you want to delete this row?')) {
+                    fetch(`{{ url('deleteInquiryDetailImportpermanen') }}/${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Row deleted successfully');
+                                location.reload(); // Reload the page to see the changes
+                            } else {
+                                alert('Failed to delete row');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred while deleting the row');
+                        });
+                }
+            }
+
+            function updateFileList() {
+                var fileInput = document.getElementById('attachments');
+                var fileListContainer = document.getElementById('uploaded-files-list');
+
+                // Kosongkan daftar jika belum ada file
+                if (fileInput.files.length === 0) {
+                    fileListContainer.innerHTML = '<li>No files uploaded.</li>';
+                    return;
+                }
+
+                // Kosongkan daftar sebelumnya
+                fileListContainer.innerHTML = '';
+
+                // Tampilkan semua file yang dipilih
+                Array.from(fileInput.files).forEach((file, index) => {
+                    var li = document.createElement('li'); // Buat item list baru
+                    var link = document.createElement('a'); // Buat elemen link
+
+                    // Buat URL objek untuk preview
+                    link.href = URL.createObjectURL(file);
+                    link.target = '_blank'; // Buka tautan di tab baru
+                    link.textContent = file.name; // Nama file
+                    li.textContent = `${index + 1}. `; // Menambahkan nomor urut
+                    li.appendChild(link); // Tambahkan link ke item list
+
+                    fileListContainer.appendChild(li); // Tambahkan item list ke dalam daftar
+                });
+            }
+
+            function uploadFiles(id_inquiry) {
+                var fileInput = document.getElementById('attachments');
+                var formData = new FormData();
+
+                // Tambahkan semua file yang dipilih ke formData
+                for (var i = 0; i < fileInput.files.length; i++) {
+                    formData.append('attachments[]', fileInput.files[i]);
+                }
+
+                formData.append('id_inquiry', id_inquiry); // Tambahkan ID inquiry
+
+                // Kirim data ke route 'uploadFile'
+                $.ajax({
+                    url: '{{ route('uploadFile') }}',
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        alert('Files uploaded successfully');
+                        updateFileList(); // Kembali update daftar
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        alert('Error while uploading files');
                     }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Row deleted successfully');
-                        location.reload(); // Reload the page to see the changes
-                    } else {
-                        alert('Failed to delete row');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while deleting the row');
                 });
             }
-        }
 
-        function deleteRowPermanen(id) {
-            if (confirm('Are you sure you want to delete this row?')) {
-                fetch(`{{ url('deleteInquiryDetailImportpermanen') }}/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            function approveInquiry(id) {
+                $.ajax({
+                    url: '{{ route('approveKaSieImport', '') }}/' + id,
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        Swal.fire('Success!', 'Inquiry approved successfully.', 'success').then(() => {
+                            $('a.btn-approve, a.btn-reject').attr('disabled', true);
+
+                            // Alihkan ke halaman approval inventory
+                            window.location.href = '{{ route('showApprovalKaSieImport') }}';
+                        });
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
                     }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Row deleted successfully');
-                        location.reload(); // Reload the page to see the changes
-                    } else {
-                        alert('Failed to delete row');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while deleting the row');
                 });
             }
-        }
 
-        function updateFileList() {
-            var fileInput = document.getElementById('attachments');
-            var fileListContainer = document.getElementById('uploaded-files-list');
-
-            // Kosongkan daftar jika belum ada file
-            if (fileInput.files.length === 0) {
-                fileListContainer.innerHTML = '<li>No files uploaded.</li>';
-                return;
+            function rejectInquiry(id) {
+                $.ajax({
+                    url: '{{ route('rejectKaSieImport', '') }}/' + id, // Buat route untuk reject
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        Swal.fire('Success!', 'Inquiry rejected successfully.', 'success').then(() => {
+                            location.reload(); // Reload halaman
+                        });
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                    }
+                });
             }
 
-            // Kosongkan daftar sebelumnya
-            fileListContainer.innerHTML = '';
+            function approveKaDept(id) {
+                $.ajax({
+                    url: '{{ route('approveKaDeptImport', '') }}/' + id,
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}' // Sertakan token CSRF
+                    },
+                    success: function(response) {
+                        Swal.fire('Success!', 'Inquiry approved successfully.', 'success');
+                        $('a.btn-approve, a.btn-reject').attr('disabled', true);
 
-            // Tampilkan semua file yang dipilih
-            Array.from(fileInput.files).forEach((file, index) => {
-                var li = document.createElement('li'); // Buat item list baru
-                var link = document.createElement('a'); // Buat elemen link
-
-                // Buat URL objek untuk preview
-                link.href = URL.createObjectURL(file);
-                link.target = '_blank'; // Buka tautan di tab baru
-                link.textContent = file.name; // Nama file
-                li.textContent = `${index + 1}. `; // Menambahkan nomor urut
-                li.appendChild(link); // Tambahkan link ke item list
-
-                fileListContainer.appendChild(li); // Tambahkan item list ke dalam daftar
-            });
-        }
-
-        function uploadFiles(id_inquiry) {
-            var fileInput = document.getElementById('attachments');
-            var formData = new FormData();
-
-            // Tambahkan semua file yang dipilih ke formData
-            for (var i = 0; i < fileInput.files.length; i++) {
-                formData.append('attachments[]', fileInput.files[i]);
+                        // Alihkan ke halaman approval inventory
+                        window.location.href = '{{ route('createinquiryImport') }}';
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        Swal.fire('Error!', 'An error occurred while approving the inquiry.', 'error');
+                    }
+                });
             }
 
-            formData.append('id_inquiry', id_inquiry); // Tambahkan ID inquiry
-
-            // Kirim data ke route 'uploadFile'
-            $.ajax({
-                url: '{{ route('uploadFile') }}',
-                method: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    alert('Files uploaded successfully');
-                    updateFileList(); // Kembali update daftar
-                },
-                error: function(xhr) {
-                    console.error(xhr.responseText);
-                    alert('Error while uploading files');
-                }
-            });
-        }
-
-        function approveInquiry(id) {
-            $.ajax({
-                url: '{{ route('approveKaSieImport', '') }}/' + id,
-                method: 'POST',
-                data: {
-                    '_token': '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    Swal.fire('Success!', 'Inquiry approved successfully.', 'success').then(() => {
+            function rejectKaDept(id) {
+                $.ajax({
+                    url: '{{ route('rejectKaDeptImport', '') }}/' + id,
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        Swal.fire('Success!', 'Inquiry rejected successfully.', 'success');
                         $('a.btn-approve, a.btn-reject').attr('disabled', true);
 
                         // Alihkan ke halaman approval inventory
-                        window.location.href = '{{ route('showApprovalKaSieImport') }}';
-                    });
-                },
-                error: function(xhr) {
-                    console.error(xhr.responseText);
-                }
-            });
-        }
+                        window.location.href = '{{ route('showApprovalKaDeptImport') }}';
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        Swal.fire('Error!', 'An error occurred while rejecting the inquiry.', 'error');
+                    }
+                });
+            }
 
-        function rejectInquiry(id) {
-            $.ajax({
-                url: '{{ route('rejectKaSieImport', '') }}/' + id, // Buat route untuk reject
-                method: 'POST',
-                data: {
-                    '_token': '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    Swal.fire('Success!', 'Inquiry rejected successfully.', 'success').then(() => {
-                        location.reload(); // Reload halaman
-                    });
-                },
-                error: function(xhr) {
-                    console.error(xhr.responseText);
-                }
-            });
-        }
+            function approveInventory(id) {
+                $.ajax({
+                    url: '{{ route('approveInventoryImport', '') }}/' + id,
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}' // Sertakan CSRF token
+                    },
+                    success: function(response) {
+                        Swal.fire('Success!', 'Inquiry approved successfully.', 'success').then(() => {
+                            $('a.btn-approve, a.btn-reject').attr('disabled', true);
 
-        function approveKaDept(id) {
-            $.ajax({
-                url: '{{ route('approveKaDeptImport', '') }}/' + id,
-                method: 'POST',
-                data: {
-                    '_token': '{{ csrf_token() }}' // Sertakan token CSRF
-                },
-                success: function(response) {
-                    Swal.fire('Success!', 'Inquiry approved successfully.', 'success');
-                    $('a.btn-approve, a.btn-reject').attr('disabled', true);
+                            // Alihkan ke halaman approval inventory
+                            window.location.href = '{{ route('showApprovalInventoryImport') }}';
+                        });
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        Swal.fire('Error!', 'An error occurred while approving the inquiry.', 'error');
+                    }
+                });
+            }
 
-                    // Alihkan ke halaman approval inventory
-                    window.location.href = '{{ route('showApprovalKaDeptImport') }}';
-                },
-                error: function(xhr) {
-                    console.error(xhr.responseText);
-                    Swal.fire('Error!', 'An error occurred while approving the inquiry.', 'error');
-                }
-            });
-        }
+            function rejectInventory(id) {
+                $.ajax({
+                    url: '{{ route('rejectInventoryImport', '') }}/' + id,
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}' // Sertakan CSRF token
+                    },
+                    success: function(response) {
+                        Swal.fire('Success!', 'Inquiry rejected successfully.', 'success').then(() => {
+                            $('a.btn-approve, a.btn-reject').attr('disabled', true);
 
-        function rejectKaDept(id) {
-            $.ajax({
-                url: '{{ route('rejectKaDeptImport', '') }}/' + id,
-                method: 'POST',
-                data: {
-                    '_token': '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    Swal.fire('Success!', 'Inquiry rejected successfully.', 'success');
-                    $('a.btn-approve, a.btn-reject').attr('disabled', true);
+                            // Alihkan ke halaman approval inventory
+                            window.location.href = '{{ route('showApprovalInventoryImport') }}';
+                        });
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        Swal.fire('Error!', 'An error occurred while rejecting the inquiry.', 'error');
+                    }
+                });
+            }
+        </script>
 
-                    // Alihkan ke halaman approval inventory
-                    window.location.href = '{{ route('showApprovalKaDeptImport') }}';
-                },
-                error: function(xhr) {
-                    console.error(xhr.responseText);
-                    Swal.fire('Error!', 'An error occurred while rejecting the inquiry.', 'error');
-                }
-            });
-        }
-
-        function approveInventory(id) {
-            $.ajax({
-                url: '{{ route('approveInventoryImport', '') }}/' + id,
-                method: 'POST',
-                data: {
-                    '_token': '{{ csrf_token() }}' // Sertakan CSRF token
-                },
-                success: function(response) {
-                    Swal.fire('Success!', 'Inquiry approved successfully.', 'success').then(() => {
-                        $('a.btn-approve, a.btn-reject').attr('disabled', true);
-
-                        // Alihkan ke halaman approval inventory
-                        window.location.href = '{{ route('showApprovalInventoryImport') }}';
-                    });
-                },
-                error: function(xhr) {
-                    console.error(xhr.responseText);
-                    Swal.fire('Error!', 'An error occurred while approving the inquiry.', 'error');
-                }
-            });
-        }
-
-        function rejectInventory(id) {
-            $.ajax({
-                url: '{{ route('rejectInventoryImport', '') }}/' + id,
-                method: 'POST',
-                data: {
-                    '_token': '{{ csrf_token() }}' // Sertakan CSRF token
-                },
-                success: function(response) {
-                    Swal.fire('Success!', 'Inquiry rejected successfully.', 'success').then(() => {
-                        $('a.btn-approve, a.btn-reject').attr('disabled', true);
-
-                        // Alihkan ke halaman approval inventory
-                        window.location.href = '{{ route('showApprovalInventoryImport') }}';
-                    });
-                },
-                error: function(xhr) {
-                    console.error(xhr.responseText);
-                    Swal.fire('Error!', 'An error occurred while rejecting the inquiry.', 'error');
-                }
-            });
-        }
-    </script>
-
-</main><!-- End #main -->
+    </main><!-- End #main -->
 @endsection

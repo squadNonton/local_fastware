@@ -235,7 +235,8 @@
                                                     disabled></td>
                                             <td>
                                                 @if ($inquiry->status == 1)
-                                                <button class="btn btn-danger btn-sm" onclick="deleteRow({{ $material->id }})">Delete</button>
+                                                    <button class="btn btn-danger btn-sm"
+                                                        onclick="deleteRow({{ $material->id }})">Delete</button>
                                                 @endif
                                             </td>
                                         </tr>
@@ -276,23 +277,25 @@
                         </table>
                     </div>
                     @if ($isFromApproval)
-                    <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm m-1">Kembali</a>
-                @else
-                    <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm m-1">Kembali</a>
-                    @if ($inquiry->status == 1)
-                        <form action="{{ route('createinquiry1', ['id' => $inquiry->id]) }}" method="GET" class="d-inline">
-                            <input type="hidden" name="id" value="{{ $inquiry->id }}">
-                            <button type="submit" class="btn btn-primary btn-sm m-1">Submit</button>
-                        </form>
+                        <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm m-1">Kembali</a>
+                    @else
+                        <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm m-1">Kembali</a>
+                        @if ($inquiry->status == 1)
+                            <form action="{{ route('createinquiry1', ['id' => $inquiry->id]) }}" method="GET"
+                                class="d-inline">
+                                <input type="hidden" name="id" value="{{ $inquiry->id }}">
+                                <button type="submit" class="btn btn-primary btn-sm m-1">Submit</button>
+                            </form>
                             <a class="btn btn-custom-form m-1 btn-sm"
-                                href="{{ route('formulirInquiry', ['id' => $inquiry->id]) }}"
-                                title="Formulir Inquiry">
+                                href="{{ route('formulirInquiry', ['id' => $inquiry->id]) }}" title="Formulir Inquiry">
                                 <i class="bi bi-file-earmark-arrow-up-fill btn btn-primary btn-sm m-1"></i>
                             </a>
-                        <button id="edit-button" onclick="enableEdit()" class="btn btn-primary btn-sm m-1">Edit</button>
-                        <button id="save-button" onclick="saveChanges()" style="display: none;" class="btn btn-primary btn-sm m-1">Save</button>
+                            <button id="edit-button" onclick="enableEdit()"
+                                class="btn btn-primary btn-sm m-1">Edit</button>
+                            <button id="save-button" onclick="saveChanges()" style="display: none;"
+                                class="btn btn-primary btn-sm m-1">Save</button>
+                        @endif
                     @endif
-                @endif
 
 
                     {{-- @if ($inquiry->status == 1)
@@ -341,7 +344,7 @@
                     @if ($inquiry->status == 3)
                         {{-- Action User Inventory --}}
                         <div class="d-flex justify-content-end">
-                            @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'RANGGA FADILLAH']))
+                            @if (in_array(Auth::user()->name, ['ADMINSTRATOR', 'M. IQBAL']))
                                 <a href="#" class="btn btn-primary btn-sm m-1"
                                     onclick="approveInventory({{ $inquiry->id }}); return false;">
                                     <i class="bi bi-check-square-fill fs-6"> Approve</i>
@@ -473,28 +476,28 @@
 
         <script>
             function deleteRow(id) {
-            if (confirm('Are you sure you want to delete this row?')) {
-                fetch(`{{ url('deleteInquiryDetail') }}/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Row deleted successfully');
-                        location.reload(); // Reload the page to see the changes
-                    } else {
-                        alert('Failed to delete row');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while deleting the row');
-                });
+                if (confirm('Are you sure you want to delete this row?')) {
+                    fetch(`{{ url('deleteInquiryDetail') }}/${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Row deleted successfully');
+                                location.reload(); // Reload the page to see the changes
+                            } else {
+                                alert('Failed to delete row');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred while deleting the row');
+                        });
+                }
             }
-        }
 
             function enableEdit() {
                 document.querySelectorAll('.editable').forEach(element => {

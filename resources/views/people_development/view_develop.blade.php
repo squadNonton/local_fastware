@@ -118,7 +118,7 @@
                         <tbody id="table-body">
                             <!-- Baris data akan diisi di sini -->
                         </tbody>
-                        <tfoot>
+                        {{-- <tfoot>
                             @php
                                 // Hitung total budget hanya jika tahun_usulan kosong
                                 $totalBudget = $data
@@ -126,6 +126,26 @@
                                         return empty($item->tahun_usulan);
                                     })
                                     ->sum('biaya');
+                            @endphp
+                            <tr>
+                                <th></th>
+                                <th colspan="8" style="text-align:right;">Sub Total 1: Rp
+                                    {{ number_format($totalBudget, 0, ',', '.') }}</th>
+                            </tr>
+                        </tfoot> --}}
+
+                        <tfoot>
+                            @php
+                                // Hitung total budget hanya jika tahun_usulan kosong
+                                $totalBudget = $data
+                                    ->filter(function ($item) {
+                                        // Memastikan bahwa $item->tahun_usulan memang kosong
+                                        return empty($item->tahun_usulan);
+                                    })
+                                    ->sum(function ($item) {
+                                        // Konversi nilai 'biaya' dari string ke angka
+                                        return (float) str_replace(['Rp', '.', ' '], '', $item->biaya);
+                                    });
                             @endphp
                             <tr>
                                 <th></th>
@@ -166,7 +186,7 @@
                                 <h3><b>ADDITIONAL</b> <i class="fas fa-chevron-down"></i></h3>
                                 <!-- Baris data akan diisi di sini -->
                             </tbody>
-                            <tfoot>
+                            {{-- <tfoot>
                                 @php
                                     // Hitung total budget dari tabel pertama
                                     $totalBudgetTabelPertama = $data->sum('biaya');
@@ -180,6 +200,43 @@
                                     $totalBiayaPlan = $filteredData->sum('biaya') + $totalBudgetTabelPertama;
                                     $selisihBiaya = $totalBudgetTabelKedua - $totalBiayaPlan;
 
+                                    // Total biaya keseluruhan dari tabel pertama dan kedua
+                                    $totalKeseluruhan = $totalBudgetTabelPertama + $totalBudgetTabelKedua;
+                                @endphp
+
+                                <!-- Bagian untuk tabel kedua, hanya ditampilkan jika ada data yang memenuhi syarat -->
+                                @if ($filteredData->isNotEmpty())
+                                    <tr>
+                                        <th></th>
+                                        <th colspan="8" style="text-align:right;">Sub Total 2: Rp
+                                            {{ number_format($totalBudgetTabelKedua, 0, ',', '.') }}</th>
+                                    </tr>
+                                    <tr>
+                                        <th></th>
+                                        <th colspan="8" style="text-align:right;">Total: Rp
+                                            {{ number_format($totalBiayaPlan, 0, ',', '.') }}</th>
+                                        <th colspan="2"></th>
+                                    </tr>
+                                @endif
+                            </tfoot> --}}
+                            <tfoot>
+                                @php
+                                    // Hitung total budget dari tabel pertama
+                                    $totalBudgetTabelPertama = $data->sum(function ($item) {
+                                        return (float) str_replace(['Rp', '.', ' '], '', $item->biaya); // Konversi biaya ke float
+                                    });
+
+                                    // Hitung total budget, total biaya aktual, dan selisih biaya untuk tabel kedua
+                                    $filteredData = $data->filter(function ($item) {
+                                        return !is_null($item->tahun_usulan);
+                                    });
+
+                                    $totalBudgetTabelKedua = $filteredData->sum(function ($item) {
+                                        return (float) str_replace(['Rp', '.', ' '], '', $item->biaya); // Konversi biaya ke float
+                                    });
+
+                                    $totalBiayaPlan = $totalBudgetTabelKedua + $totalBudgetTabelPertama; // Total biaya rencana
+                                    $selisihBiaya = $totalBudgetTabelKedua - $totalBiayaPlan; // Selisih biaya
                                     // Total biaya keseluruhan dari tabel pertama dan kedua
                                     $totalKeseluruhan = $totalBudgetTabelPertama + $totalBudgetTabelKedua;
                                 @endphp
@@ -284,19 +341,19 @@
 
         </section>
 
-                        <!-- jQuery -->
-                        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-                        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
-                        <script>
-                            $(document).ready(function() {
-                                // Hover function for dropdowns
-                                $('.nav-item.dropdown').hover(function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
-                                }, function() {
-                                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
-                                });
-                            });
-                            </script>
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
+        <script>
+            $(document).ready(function() {
+                // Hover function for dropdowns
+                $('.nav-item.dropdown').hover(function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+                }, function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
+                });
+            });
+        </script>
 
         <!-- jQuery -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -400,11 +457,11 @@
                                      ${
                                         item.status_2 === 'Done'
                                             ? `<a href="${updateEvaluasiRoute.replace(':id', item.id)}" class="btn ${
-                                                item.diketahui ? 'btn-success' : 'btn-danger'
-                                            } btn-sm">
-                                                <i class="fas fa-file-alt"></i> <!-- Ikon form -->
-                                                Evaluasi
-                                            </a>`
+                                                                                item.diketahui ? 'btn-success' : 'btn-danger'
+                                                                            } btn-sm">
+                                                                                <i class="fas fa-file-alt"></i> <!-- Ikon form -->
+                                                                                Evaluasi
+                                                                            </a>`
                                             : ''
                                     }
                                 </td>
@@ -553,11 +610,11 @@
                                      ${
                                         item.status_2 === 'Done'
                                             ? `<a href="${updateEvaluasiRoute.replace(':id', item.id)}" class="btn ${
-                                                        item.diketahui ? 'btn-success' : 'btn-danger'
-                                                    } btn-sm">
-                                                        <i class="fas fa-file-alt"></i> <!-- Ikon form -->
-                                                        Evaluasi
-                                                    </a>`
+                                                                                        item.diketahui ? 'btn-success' : 'btn-danger'
+                                                                                    } btn-sm">
+                                                                                        <i class="fas fa-file-alt"></i> <!-- Ikon form -->
+                                                                                        Evaluasi
+                                                                                    </a>`
                                             : ''
                                     }
                             </td>
