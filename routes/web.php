@@ -298,6 +298,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('showFormSSimport/{id}', [InquirySalesController::class, 'showFormSSimport'])->name('showFormSSimport');
     Route::get('showFormSSimportinventory/{id}', [InquirySalesController::class, 'showFormSSimportinventory'])->name('showFormSSimportinventory');
     Route::get('formulirInquiryimport/{id}', [InquirySalesController::class, 'formulirInquiryImport'])->name('formulirInquiryimport');
+    Route::post('/inquiry/updateImport', [InquirySalesController::class, 'updateInquiryImport'])->name('updateInquiryImport');
     Route::post('/inquiry/previewSSImport', [InquirySalesController::class, 'previewSSImport'])->name('inquiry.previewSSImport');
     Route::delete('/deleteInquiryDetailImport/{id}', [InquirySalesController::class, 'deleteInquiryDetailImport'])->name('deleteInquiryDetailImport');
     Route::delete('/deleteInquiryDetailImportpermanen/{id}', [InquirySalesController::class, 'deleteInquiryDetailImportpermanen'])->name('deleteInquiryDetailImportpermanen');

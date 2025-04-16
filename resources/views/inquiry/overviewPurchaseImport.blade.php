@@ -493,6 +493,11 @@
                                                                         onclick='confirmPurchasing({!! json_encode($idsToConfirm) !!}); return false;'>
                                                                             <i class="bi bi-check-square-fill"></i>
                                                                         </a>
+                                                                        <a href="#" class="btn btn-primary btn-sm"
+                                                                        onclick="showEditDataModal({{ $inquiry->id }}); return false;" 
+                                                                        title="Add Inquiry Description">
+                                                                        <i class="bi bi-pencil"></i>
+                                                                        </a>
                                                                     @endif
 
                                                                     <!-- Tombol Finish -->
@@ -500,6 +505,11 @@
                                                                         <a href="#" class="btn btn-success btn-sm"
                                                                         onclick='finishInquiry({!! json_encode($idsToFinish) !!}); return false;'>
                                                                             <i class="bi bi-check-square-fill"></i>
+                                                                        </a>
+                                                                        <a href="#" class="btn btn-primary btn-sm"
+                                                                        onclick="showEditDataModal({{ $inquiry->id }}); return false;" 
+                                                                        title="Add Inquiry Description">
+                                                                        <i class="bi bi-pencil"></i>
                                                                         </a>
                                                                     @endif
 
@@ -654,6 +664,11 @@
                                                                         onclick='confirmPurchasing({!! json_encode($idsToConfirm) !!}); return false;'>
                                                                             <i class="bi bi-check-square-fill"></i>
                                                                         </a>
+                                                                        <a href="#" class="btn btn-primary btn-sm"
+                                                                        onclick="showEditDataModal({{ $inquiry->id }}); return false;" 
+                                                                        title="Add Inquiry Description">
+                                                                        <i class="bi bi-pencil"></i>
+                                                                        </a>
                                                                     @endif
 
                                                                     <!-- Tombol Finish -->
@@ -662,6 +677,12 @@
                                                                         onclick='finishInquiry({!! json_encode($idsToFinish) !!}); return false;'>
                                                                             <i class="bi bi-check-square-fill"></i>
                                                                         </a>
+                                                                        <a href="#" class="btn btn-primary btn-sm"
+                                                                        onclick="showEditDataModal({{ $inquiry->id }}); return false;" 
+                                                                        title="Add Inquiry Description">
+                                                                        <i class="bi bi-pencil"></i>
+                                                                        </a>
+
                                                                     @endif
 
                                                                         </td>
@@ -693,7 +714,7 @@
                                         <input type="hidden" id="inquiryId" name="inquiry_id">
 
                                         <!-- Field Supplier (Dropdown List) -->
-                                        <div class="mb-3">
+                                        {{-- <div class="mb-3">
                                             <label for="supplier" class="form-label">Supplier</label>
                                             <select class="form-select" id="supplier" name="supplier" required>
                                                 <option value="">Select Supplier</option>
@@ -723,28 +744,29 @@
                                                     CV. GLOBAL METAL INDONESIA</option>
                                                 <!-- Tambahkan opsi lain jika diperlukan -->
                                             </select>
-                                        </div>
+                                        </div> --}}
 
                                         <!-- Field Last Update (Free Text) -->
-                                        <div class="mb-3">
-                                            <label for="progress" class="form-label">Last Update</label>
-                                            <input type="text" class="form-control" id="progress" name="progress"
-                                                required>
-                                        </div>
+                                        <!-- Field Description (Free Text) -->
+                                            <div class="mb-3">
+                                                <label for="description" class="form-label">Description</label>
+                                                <input type="text" class="form-control" id="description" name="description" required>
+                                            </div>  
 
-                                        <div class="mb-3">
+
+                                        {{-- <div class="mb-3">
                                             <label for="refnopo" class="form-label">Ref PO Number</label>
                                             <input type="text" class="form-control" id="refnopo" name="refnopo"
                                                 required>
-                                        </div>
+                                        </div> --}}
 
                                         <!-- Field Est. Date (Date Picker) -->
-                                        <div class="mb-3">
+                                        {{-- <div class="mb-3">
                                             <label for="estDate" class="form-label">Est. Date <span>
                                                     (Incoming Shipment)</span></label>
                                             <input type="date" class="form-control" id="estDate" name="est_date"
                                                 required>
-                                        </div>
+                                        </div> --}}
                                     </form>
                                 </div>
                                 <div class="modal-footer">
@@ -875,33 +897,28 @@
             });
         }
 
+                        function showEditDataModal(inquiryId) {
+                        // Set inquiry_id pada form hidden
+                        document.getElementById('inquiryId').value = inquiryId;
 
-            function showEditDataModal(id, supplier, progress, refnopo, estDate) {
-                // Set inquiry_id
-                document.getElementById('inquiryId').value = id;
-                document.getElementById('supplier').value = supplier; // Set supplier
-                document.getElementById('progress').value = progress; // Set last update
-                document.getElementById('refnopo').value = refnopo; // Set nopo
-                document.getElementById('estDate').value = estDate; // Set est. date
-
-                // Tampilkan modal
-                var myModal = new bootstrap.Modal(document.getElementById('editDataModal'), {});
-                myModal.show();
-            }
+                        // Tampilkan modal
+                        var myModal = new bootstrap.Modal(document.getElementById('editDataModal'), {});
+                        myModal.show();
+                    }
 
             function submitEditDataForm() {
                 const form = document.getElementById('editDataForm');
                 const formData = new FormData(form);
 
                 $.ajax({
-                    url: '{{ route('updateInquiry') }}', // Route untuk update inquiry
+                    url: '{{ route('updateInquiryImport') }}', // Route untuk update inquiry
                     method: 'POST',
                     data: formData,
                     processData: false,
                     contentType: false,
                     success: function(response) {
                         Swal.fire('Success!', response.message, 'success').then(() => {
-                            location.reload(); // Reload halaman
+                            location.reload();
                         });
                     },
                     error: function(xhr) {
@@ -910,6 +927,7 @@
                     }
                 });
             }
+
 
             function finishInquiry(ids) {
     Swal.fire({

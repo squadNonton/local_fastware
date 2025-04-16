@@ -993,6 +993,26 @@ class InquirySalesController extends Controller
         return response()->json(['message' => 'Inquiry updated successfully.']);
     }
 
+    public function updateInquiryImport(Request $request)
+{
+    $request->validate([
+        'inquiry_id' => 'required|integer|exists:inquiry_sales,id',
+        'description' => 'required|string',
+    ]);
+
+    $inquiry = InquirySales::findOrFail($request->inquiry_id);
+
+    // Tidak perlu update field progress
+    TrxDboProgPurchase::create([
+        'inquiry_id' => $inquiry->id,
+        'user_id' => auth()->id(),
+        'description' => $request->description,
+    ]);
+
+    return response()->json(['message' => 'Inquiry description updated successfully.']);
+}
+
+
     public function updateInquiryDetails(Request $request, $id)
     {
         // Validasi input
