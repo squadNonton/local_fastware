@@ -856,41 +856,54 @@ class InquirySalesController extends Controller
     }
 
     public function confirmPurchaseimport(Request $request)
-    {
-        $ids = $request->input('ids');
+{
+    $ids = $request->input('ids');
+    $klasifikasi = $request->input('klasifikasi');
 
-        if (!is_array($ids) || empty($ids)) {
-            return response()->json(['error' => 'No inquiry IDs provided.'], 400);
-        }
-
-        $user = Auth::user();
-
-        foreach ($ids as $id) {
-            $inquiry = InquirySales::find($id);
-
-            if (!$inquiry || $inquiry->status != 8) {
-                continue; // Lewati jika inquiry tidak valid atau bukan status 8
-            }
-
-            // Update inquiry
-            $inquiry->status = 9;
-            $inquiry->purchasing_id = $user->id;
-            $inquiry->confirmed_purchasing_at = now();
-            $inquiry->save();
-
-            // Format bulan dan tahun dibuat
-            $createdMonth = Carbon::parse($inquiry->created_at)->format('F');
-            $createdYear = Carbon::parse($inquiry->created_at)->format('Y');
-
-            // Insert progress ke trx
-            TrxDboProgPurchase::create([
-                'inquiry_id' => $inquiry->id,
-                'user_id' => $user->id,
-                'description' => 'inquiry Region [ ' . $inquiry->region . ' ] Bulan ' . $createdMonth . ' ' . $createdYear . ' di konfirmasi purchase oleh ' . $user->name
-            ]);
-        }
-        return response()->json(['success' => 'Selected inquiries have been successfully confirmed for purchasing.']);
+    if (!is_array($ids) || empty($ids)) {
+        return response()->json(['error' => 'No inquiry IDs provided.'], 400);
     }
+
+    $user = Auth::user();
+
+    foreach ($ids as $id) {
+        // Cek apakah ada detail inquiry dengan klasifikasi yang dimaksud
+        $hasValidDetail = DetailInquiryImport::where('id_inquiry', $id)
+            ->where('klasifikasi', $klasifikasi)
+            ->exists();
+
+        if (!$hasValidDetail) {
+            continue; // Skip jika tidak ada klasifikasi yang sesuai
+        }
+
+        // Ambil inquiry-nya
+        $inquiry = InquirySales::find($id);
+
+        if (!$inquiry || $inquiry->status != 8) {
+            continue; // Skip jika tidak ditemukan atau status bukan 8
+        }
+
+        // Update inquiry
+        $inquiry->status = 9;
+        $inquiry->purchasing_id = $user->id;
+        $inquiry->confirmed_purchasing_at = now();
+        $inquiry->save();
+
+        // Format tanggal
+        $createdMonth = Carbon::parse($inquiry->created_at)->format('F');
+        $createdYear = Carbon::parse($inquiry->created_at)->format('Y');
+
+        // Simpan progress ke tracking
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $inquiry->id,
+            'user_id' => $user->id,
+            'description' => 'Inquiry Region [ ' . $inquiry->region . ' ] Bulan ' . $createdMonth . ' ' . $createdYear . ' dikonfirmasi purchase oleh ' . $user->name
+        ]);
+    }
+
+    return response()->json(['success' => 'Selected inquiries have been successfully confirmed for purchasing.']);
+}
+
 
     public function exportexceloverviewimportpurchase()
     {
@@ -1010,6 +1023,30 @@ class InquirySalesController extends Controller
     ]);
 
     return response()->json(['message' => 'Inquiry description updated successfully.']);
+}
+
+public function updateProgressImport(Request $request, $id)
+{
+    try {
+        $request->validate([
+            'progress' => 'required|in:ok,pending,cancelled',
+        ]);
+
+        $inquiry = DetailInquiryImport::findOrFail($id);
+        $inquiry->progress = $request->progress;
+        $inquiry->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Progress updated successfully',
+        ], 200);
+    } catch (\Exception $e) {
+        \Log::error('Error updating progress: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to update progress',
+        ], 500);
+    }
 }
 
 
@@ -1586,9 +1623,11 @@ class InquirySalesController extends Controller
             abort(400, 'ID inquiry tidak ditemukan');
         }
 
+        $currentDateExport = Carbon::now()->format('d-m-y');
+
         return Excel::download(
             new InquiryImportPurchaseExport($ids, $klasifikasi),
-            "inquiry_export_{$klasifikasi}.xlsx"
+            'IMP_Purch_Export_' . $currentDateExport . '.xlsx'
         );
     }
 
@@ -1754,6 +1793,7 @@ class InquirySalesController extends Controller
     public function finishInquiryimport(Request $request)
     {
         $ids = $request->input('ids');
+        $klasifikasi = $request->input('klasifikasi');
 
         if (!is_array($ids) || empty($ids)) {
             return response()->json(['error' => 'No inquiry IDs provided.'], 400);
@@ -1763,22 +1803,35 @@ class InquirySalesController extends Controller
         $userName = auth()->user()->name;
 
         foreach ($ids as $id) {
+            $hasValidDetail = DetailInquiryImport::where('id_inquiry', $id)
+                ->where('klasifikasi', $klasifikasi)
+                ->exists();
+
+            if (!$hasValidDetail) {
+                continue; // Skip if no valid detail found
+            }
+
             $inquiry = InquirySales::find($id);
-            if ($inquiry) {
-                $inquiry->status = 6; // Finished
-                $inquiry->save();
+
+            if(!$inquiry || $inquiry->status != 8) {
+                continue; // Skip if inquiry not found
+            }
+
+            
+            $inquiry->status = 6; // Finished
+            $inquiry->save();
 
                 // Format bulan dan tahun dibuat
-                $createdMonth = Carbon::parse($inquiry->created_at)->format('F');
-                $createdYear = Carbon::parse($inquiry->created_at)->format('Y');
+            $createdMonth = Carbon::parse($inquiry->created_at)->format('F');
+            $createdYear = Carbon::parse($inquiry->created_at)->format('Y');
 
                 // Insert progress ke trx
-                TrxDboProgPurchase::create([
-                    'inquiry_id' => $inquiry->id,
-                    'user_id' => $userId,
-                    'description' => 'Inquiry Region [ ' . $inquiry->region . ' ] bulan ' . $createdMonth . ' ' . $createdYear . ' diselesaikan oleh ' . $userName
-                ]);
-            }
+            TrxDboProgPurchase::create([
+            'inquiry_id' => $inquiry->id,
+            'user_id' => $userId,
+            'description' => 'Inquiry Region [ ' . $inquiry->region . ' ] bulan ' . $createdMonth . ' ' . $createdYear . ' diselesaikan oleh ' . $userName
+            ]);
+            
         }
 
         return response()->json(['success' => 'Inquiries marked as finished.']);

@@ -106,6 +106,19 @@
         .dropdown-item:hover {
             background-color: #f0f0f0;
         }
+
+        .progress-display {
+            display: inline-block;
+            background-color: #007bff; /* Warna biru (Bootstrap primary) */
+            color: white; /* Teks hitam */
+            padding: 5px 10px; /* Padding untuk membuat kotak */
+            border-radius: 4px; /* Sudut membulat */
+            margin-bottom: 8px; /* Jarak ke elemen di bawahnya (dropdown) */
+        }
+
+        .progress-select {
+            margin-top: 8px; /* Jarak tambahan dari span di atas */
+        }
     </style>
 
 
@@ -253,7 +266,19 @@
                                                 @endphp
                                                 <span>{{ $partnerName }}</span>
                                             </td>
-                                            <td>{{ $material['progress'] }}</td>
+                                            <td>
+                                                @if($inquiry->status == 3 && Auth::user()->id == 1)
+                                                    <span class="progress-display">{{ $material->progress ?? 'Belum diatur' }}</span>
+                                                    <select class="form-select form-select-sm progress-select" data-id="{{ $material->id }}" style="margin-bottom: 5px;">
+                                                        <option value="ok" {{ $material->progress == 'ok' ? 'selected' : '' }}>OK</option>
+                                                        <option value="pending" {{ $material->progress == 'pending' ? 'selected' : '' }}>Pending</option>
+                                                        <option value="cancelled" {{ $material->progress == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                                    </select>
+                                                @else
+                                                    <span>{{ $material->progress ?? 'Belum diatur' }}</span>
+                                                @endif
+                                            </td>
+                                                                                        
                                             <td>{{ $material['nopo'] }}</td>
                                             <td>
                                                 @if (
@@ -306,10 +331,11 @@
                                 </form>
                             @endif
                             <a class="btn btn-success btn-custom-form m-1 btn-sm"
-                                href="{{ route('formulirInquiryimport', ['id' => $inquiry->id]) }}"
-                                title="Formulir Inquiry">
-                                <i class="bi bi-file-earmark-arrow-up-fill"></i>
+                            href="{{ route('formulirInquiryimport', ['id' => $inquiry->id]) }}"
+                            title="Formulir Inquiry">
+                            <i class="bi bi-file-earmark-arrow-up-fill"></i> Tambah
                             </a>
+
                         @endif
                     @endif
 
@@ -506,137 +532,137 @@
 
 
         <script>
-            function toggleEdit(event, button) {
-                event.preventDefault(); // Mencegah form submission
+            // function toggleEdit(event, button) {
+            //     event.preventDefault(); // Mencegah form submission
 
-                const row = button.closest('tr');
-                const inputs = row.querySelectorAll('input, select');
-                const isEditing = button.classList.contains('editing');
+            //     const row = button.closest('tr');
+            //     const inputs = row.querySelectorAll('input, select');
+            //     const isEditing = button.classList.contains('editing');
 
-                if (isEditing) {
-                    // Jika dalam mode edit (Save ditekan), kirim data ke database
-                    const formData = new FormData();
-                    formData.append('_token', '{{ csrf_token() }}'); // Tambahkan token CSRF
-                    formData.append('id', row.dataset.id); // Ambil ID dari atribut data-id
-                    inputs.forEach(input => {
-                        formData.append(input.name, input.value);
-                        input.setAttribute('disabled', 'true'); // Kunci input kembali
-                    });
+            //     if (isEditing) {
+            //         // Jika dalam mode edit (Save ditekan), kirim data ke database
+            //         const formData = new FormData();
+            //         formData.append('_token', '{{ csrf_token() }}'); // Tambahkan token CSRF
+            //         formData.append('id', row.dataset.id); // Ambil ID dari atribut data-id
+            //         inputs.forEach(input => {
+            //             formData.append(input.name, input.value);
+            //             input.setAttribute('disabled', 'true'); // Kunci input kembali
+            //         });
 
-                    // Kirim data ke server dengan AJAX
-                    fetch(`{{ route('updateInquiryDetailsImport', ['id' => $inquiry->id]) }}`, {
-                            method: 'PUT',
-                            body: formData
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                button.innerText = 'Edit'; // Ubah tombol kembali ke Edit
-                                button.classList.remove('editing'); // Hapus status editing
-                                Swal.fire('Success!', 'Data berhasil disimpan.', 'success');
-                            } else {
-                                Swal.fire('Error!', data.message || 'Gagal menyimpan perubahan.', 'error');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            Swal.fire('Error!', 'Terjadi kesalahan saat menyimpan data.', 'error');
-                        });
-                } else {
-                    // Jika dalam mode non-editing (Edit ditekan), aktifkan input
-                    inputs.forEach(input => {
-                        if (input.name !== 'partner') { // Kunci field partner agar tidak bisa diedit
-                            input.removeAttribute('disabled');
-                        }
-                    });
+            //         // Kirim data ke server dengan AJAX
+            //         fetch(`{{ route('updateInquiryDetailsImport', ['id' => $inquiry->id]) }}`, {
+            //                 method: 'PUT',
+            //                 body: formData
+            //             })
+            //             .then(response => response.json())
+            //             .then(data => {
+            //                 if (data.success) {
+            //                     button.innerText = 'Edit'; // Ubah tombol kembali ke Edit
+            //                     button.classList.remove('editing'); // Hapus status editing
+            //                     Swal.fire('Success!', 'Data berhasil disimpan.', 'success');
+            //                 } else {
+            //                     Swal.fire('Error!', data.message || 'Gagal menyimpan perubahan.', 'error');
+            //                 }
+            //             })
+            //             .catch(error => {
+            //                 console.error('Error:', error);
+            //                 Swal.fire('Error!', 'Terjadi kesalahan saat menyimpan data.', 'error');
+            //             });
+            //     } else {
+            //         // Jika dalam mode non-editing (Edit ditekan), aktifkan input
+            //         inputs.forEach(input => {
+            //             if (input.name !== 'partner') { // Kunci field partner agar tidak bisa diedit
+            //                 input.removeAttribute('disabled');
+            //             }
+            //         });
 
-                    button.innerText = 'Save'; // Ubah tombol ke Save
-                    button.classList.add('editing'); // Tandai sebagai sedang diedit
-                }
-            }
+            //         button.innerText = 'Save'; // Ubah tombol ke Save
+            //         button.classList.add('editing'); // Tandai sebagai sedang diedit
+            //     }
+            // }
 
 
 
-            function handleShapeChange(selectElement) {
-                const row = selectElement.closest('tr');
-                const thicknessInput = row.querySelector('input[name="thickness"]');
-                const weightInput = row.querySelector('input[name="weight"]');
-                const innerDiameterInput = row.querySelector('input[name="inner_diameter"]');
-                const outerDiameterInput = row.querySelector('input[name="outer_diameter"]');
+            // function handleShapeChange(selectElement) {
+            //     const row = selectElement.closest('tr');
+            //     const thicknessInput = row.querySelector('input[name="thickness"]');
+            //     const weightInput = row.querySelector('input[name="weight"]');
+            //     const innerDiameterInput = row.querySelector('input[name="inner_diameter"]');
+            //     const outerDiameterInput = row.querySelector('input[name="outer_diameter"]');
 
-                // Reset all inputs
-                thicknessInput.setAttribute('disabled', 'true');
-                weightInput.setAttribute('disabled', 'true');
-                innerDiameterInput.setAttribute('disabled', 'true');
-                outerDiameterInput.setAttribute('disabled', 'true');
+            //     // Reset all inputs
+            //     thicknessInput.setAttribute('disabled', 'true');
+            //     weightInput.setAttribute('disabled', 'true');
+            //     innerDiameterInput.setAttribute('disabled', 'true');
+            //     outerDiameterInput.setAttribute('disabled', 'true');
 
-                // Enable inputs based on selected shape
-                if (selectElement.value === 'Flat') {
-                    thicknessInput.removeAttribute('disabled');
-                    weightInput.removeAttribute('disabled');
-                } else if (selectElement.value === 'Round') {
-                    outerDiameterInput.removeAttribute('disabled');
-                } else if (selectElement.value === 'Honed Tube') {
-                    innerDiameterInput.removeAttribute('disabled');
-                    outerDiameterInput.removeAttribute('disabled');
-                }
-            }
+            //     // Enable inputs based on selected shape
+            //     if (selectElement.value === 'Flat') {
+            //         thicknessInput.removeAttribute('disabled');
+            //         weightInput.removeAttribute('disabled');
+            //     } else if (selectElement.value === 'Round') {
+            //         outerDiameterInput.removeAttribute('disabled');
+            //     } else if (selectElement.value === 'Honed Tube') {
+            //         innerDiameterInput.removeAttribute('disabled');
+            //         outerDiameterInput.removeAttribute('disabled');
+            //     }
+            // }
 
-            // Update dropdown listeners on page load
-            document.addEventListener('DOMContentLoaded', () => {
-                const dropdowns = document.querySelectorAll('.jenis-dropdown');
-                dropdowns.forEach(dropdown => {
-                    handleShapeChange(dropdown); // Set initial state
-                    dropdown.addEventListener('change', () => handleShapeChange(dropdown));
-                });
-            });
+            // // Update dropdown listeners on page load
+            // document.addEventListener('DOMContentLoaded', () => {
+            //     const dropdowns = document.querySelectorAll('.jenis-dropdown');
+            //     dropdowns.forEach(dropdown => {
+            //         handleShapeChange(dropdown); // Set initial state
+            //         dropdown.addEventListener('change', () => handleShapeChange(dropdown));
+            //     });
+            // });
 
-            document.addEventListener("DOMContentLoaded", function() {
-                // Mengambil semua input customer
-                const customerInputs = document.querySelectorAll('.searchable-dropdown input[type="text"]');
+            // document.addEventListener("DOMContentLoaded", function() {
+            //     // Mengambil semua input customer
+            //     const customerInputs = document.querySelectorAll('.searchable-dropdown input[type="text"]');
 
-                customerInputs.forEach(input => {
-                    const dropdownId = input.getAttribute('id') + '_list';
-                    const dropdown = document.getElementById(dropdownId);
-                    const hiddenInputId = input.getAttribute('id').replace('search_customer_', 'id_customer_')
-                        .replace('search_partner_', 'id_partner_');
-                    const hiddenInput = document.getElementById(hiddenInputId);
+            //     customerInputs.forEach(input => {
+            //         const dropdownId = input.getAttribute('id') + '_list';
+            //         const dropdown = document.getElementById(dropdownId);
+            //         const hiddenInputId = input.getAttribute('id').replace('search_customer_', 'id_customer_')
+            //             .replace('search_partner_', 'id_partner_');
+            //         const hiddenInput = document.getElementById(hiddenInputId);
 
-                    input.addEventListener("input", function() {
-                        const value = this.value.toLowerCase();
-                        const items = dropdown.querySelectorAll('.dropdown-item');
+            //         input.addEventListener("input", function() {
+            //             const value = this.value.toLowerCase();
+            //             const items = dropdown.querySelectorAll('.dropdown-item');
 
-                        items.forEach(item => {
-                            if (item.getAttribute('data-name').toLowerCase().includes(value)) {
-                                item.style.display = '';
-                            } else {
-                                item.style.display = 'none';
-                            }
-                        });
+            //             items.forEach(item => {
+            //                 if (item.getAttribute('data-name').toLowerCase().includes(value)) {
+            //                     item.style.display = '';
+            //                 } else {
+            //                     item.style.display = 'none';
+            //                 }
+            //             });
 
-                        if (value) {
-                            dropdown.style.display = 'block';
-                        } else {
-                            dropdown.style.display = 'none';
-                        }
-                    });
+            //             if (value) {
+            //                 dropdown.style.display = 'block';
+            //             } else {
+            //                 dropdown.style.display = 'none';
+            //             }
+            //         });
 
-                    dropdown.addEventListener("click", function(event) {
-                        const item = event.target;
-                        if (item.classList.contains('dropdown-item')) {
-                            input.value = item.getAttribute('data-name');
-                            hiddenInput.value = item.getAttribute('data-value');
-                            dropdown.style.display = 'none';
-                        }
-                    });
+            //         dropdown.addEventListener("click", function(event) {
+            //             const item = event.target;
+            //             if (item.classList.contains('dropdown-item')) {
+            //                 input.value = item.getAttribute('data-name');
+            //                 hiddenInput.value = item.getAttribute('data-value');
+            //                 dropdown.style.display = 'none';
+            //             }
+            //         });
 
-                    document.addEventListener("click", function(event) {
-                        if (!dropdown.contains(event.target) && !input.contains(event.target)) {
-                            dropdown.style.display = 'none';
-                        }
-                    });
-                });
-            });
+            //         document.addEventListener("click", function(event) {
+            //             if (!dropdown.contains(event.target) && !input.contains(event.target)) {
+            //                 dropdown.style.display = 'none';
+            //             }
+            //         });
+            //     });
+            // });
 
 
 
@@ -873,6 +899,44 @@
                     }
                 });
             }
+
+            document.addEventListener('DOMContentLoaded', function () {
+    const selectElements = document.querySelectorAll('.progress-select');
+
+    selectElements.forEach(select => {
+        select.addEventListener('change', function () {
+            const materialId = this.getAttribute('data-id');
+            const newProgress = this.value;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            fetch(`{{ route('updateProgressImport', ['id' => ':id']) }}`.replace(':id', materialId), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({ progress: newProgress })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Reload halaman setelah berhasil
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to update progress');
+                // Kembalikan nilai select ke sebelumnya jika gagal
+                const displayElement = this.parentElement.querySelector('.progress-display');
+                this.value = displayElement.textContent;
+            });
+        });
+    });
+});
         </script>
 
     </main><!-- End #main -->

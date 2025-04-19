@@ -573,6 +573,7 @@
                                         </ul>
                                     </li>
                                 @endif
+                                <li><a class="dropdown-item" href="{{ route('showCustomRequest') }}">Custom Request</a></li>
 
                             </ul>
                         </li>

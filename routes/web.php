@@ -23,6 +23,7 @@ use App\Http\Controllers\PoPengajuanController;
 use App\Http\Controllers\PengajuanSubcontController;
 use App\Http\Controllers\JsonToCsvController;
 use App\Http\Controllers\CrpController;
+use App\Http\Controllers\CustomRequestController;
 use App\Models\InquirySales;
 use Illuminate\Support\Facades\Route;
 
@@ -324,8 +325,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/inquiry/approval-inventoryimport', [InquirySalesController::class, 'showApprovalInventoryImport'])->name('showApprovalInventoryImport');
     Route::post('/inquiry/approve-inventoryimport/{id}', [InquirySalesController::class, 'approveInventoryImport'])->name('approveInventoryImport');
     Route::post('/inquiry/reject-inventoryimport/{id}', [InquirySalesController::class, 'rejectInventoryImport'])->name('rejectInventoryImport');
-
-
+    Route::post('/inquiry/update-progress-import/{id}', [InquirySalesController::class, 'updateProgressImport'])->name('updateProgressImport');
     Route::post('/inquiry/finish-import', [InquirySalesController::class, 'finishInquiryimport'])->name('finishInquiryimport');
 
     Route::get('/inquiry/form-purchase-import/{month}/{klasifikasi}', [InquirySalesController::class, 'generatePDFimportMulti'])->name('generatePDFimport.multi');
@@ -540,4 +540,12 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     Route::get('/upload-json', [JsonToCsvController::class, 'showUploadForm'])->name('upload.json');
     Route::post('/convert-json-to-csv', [JsonToCsvController::class, 'convert'])->name('convert.json');
+
+    //custom request
+    Route::get('/custom-request', [CustomRequestController::class, 'showCstmReq'])->name('showCustomRequest');
+    Route::post('/materials/store', [CustomRequestController::class, 'createCstmReq'])->name('CustomRequest.store');
+    Route::post('/materials/delete', [CustomRequestController::class, 'deleteCstmReq'])->name('CustomRequest.delete');
+    Route::post('/materials/update', [CustomRequestController::class, 'updateCstmReq'])->name('CustomRequest.update');
+    Route::get('/custom-request/approve-marketing-cstmreq', [CustomRequestController::class, 'showApproveMarketing'])->name('showApproveMarketing');
+    Route::post('/custom-request/approve', [CustomRequestController::class, 'approveMarketing'])->name('approveMarketing');
 });

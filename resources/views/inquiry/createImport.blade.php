@@ -739,13 +739,6 @@
                                                                                 onclick="openEditInquiryModal({{ $inquiry->id }})"></i>
                                                                         </a>
                                                                     @endif --}}
-                                                                    @if ($inquiry->status == 1)
-                                                                        <a class="btn btn-custom-form m-1 btn-sm"
-                                                                            href="{{ route('formulirInquiryimport', ['id' => $inquiry->id]) }}"
-                                                                            title="Formulir Inquiry">
-                                                                            <i class="bi bi-file-earmark-arrow-up-fill"></i>
-                                                                        </a>
-                                                                    @endif
                                                                     <a class="btn btn-custom-view m-1 btn-sm"
                                                                         title="View Form"   
                                                                         href="{{ route('showFormSSimport', $inquiry->id) }}">
@@ -914,14 +907,6 @@
                                                                                 onclick="openEditInquiryModal({{ $inquiry->id }})"></i>
                                                                         </a>
                                                                     @endif --}}
-                                                                    @if ($inquiry->status == 1)
-                                                                        <a class="btn btn-custom-form m-1 btn-sm"
-                                                                            href="{{ route('formulirInquiryimport', ['id' => $inquiry->id]) }}"
-                                                                            title="Formulir Inquiry">
-                                                                            <i
-                                                                                class="bi bi-file-earmark-arrow-up-fill"></i>
-                                                                        </a>
-                                                                    @endif
                                                                     <a class="btn btn-custom-view m-1 btn-sm"
                                                                         title="View Form"
                                                                         href="{{ route('showFormSSimport', $inquiry->id) }}">
@@ -1090,14 +1075,6 @@
                                                                                 onclick="openEditInquiryModal({{ $inquiry->id }})"></i>
                                                                         </a>
                                                                     @endif --}}
-                                                                    @if ($inquiry->status == 1)
-                                                                        <a class="btn btn-custom-form m-1 btn-sm"
-                                                                            href="{{ route('formulirInquiryimport', ['id' => $inquiry->id]) }}"
-                                                                            title="Formulir Inquiry">
-                                                                            <i
-                                                                                class="bi bi-file-earmark-arrow-up-fill"></i>
-                                                                        </a>
-                                                                    @endif
                                                                     <a class="btn btn-custom-view m-1 btn-sm"
                                                                         title="View Form"
                                                                         href="{{ route('showFormSSimport', $inquiry->id) }}">

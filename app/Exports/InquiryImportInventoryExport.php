@@ -72,7 +72,7 @@ class InquiryImportInventoryExport implements FromCollection, WithHeadings, With
 {
     return [
         'No', 'Bulan', 'Region', 'Customer Name', 'Inquiry Code', 'Order Type', 'Inquiry Type', 'Category', 
-        'Est. Date', 'Supplier', 'Sales Person', 'Ref. PO', 'Files', 'Status', 'Raw Material', 'Shapes', 'Thickness', 
+        'Est. Date', 'Supplier', 'Sales Person', 'Files', 'Status', 'Raw Material', 'Shapes', 'Thickness', 
         'Inner Diameter', 'Outer Diameter', 'Weight', 'Length', 'Qty *Unit', 
         'Forecast Month 1', 'Forecast Month 2', 'Forecast Month 3', 
         'Ref. SO', 'Ship-To', 'Remark', 'File', 'Partner', 'ID Inquiry', 'ID Detail', 'Progress'
@@ -129,7 +129,6 @@ class InquiryImportInventoryExport implements FromCollection, WithHeadings, With
          $inquiry->est_date,
          $inquiry->supplier,
          $inquiry->sales_person,
-         $inquiry->ref_po,
          $inquiry->files,
          $inquiry->status,
          $inquiry->raw_material,

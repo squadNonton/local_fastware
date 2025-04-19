@@ -490,20 +490,16 @@
                                                                     <!-- Tombol Confirm -->
                                                                     @if ($idsToConfirm->isNotEmpty())
                                                                         <a href="#" class="btn btn-primary btn-sm"
-                                                                        onclick='confirmPurchasing({!! json_encode($idsToConfirm) !!}); return false;'>
+                                                                        onclick='confirmPurchasing({!! json_encode($idsToConfirm) !!}, "Daido"); return false;'>
                                                                             <i class="bi bi-check-square-fill"></i>
                                                                         </a>
-                                                                        <a href="#" class="btn btn-primary btn-sm"
-                                                                        onclick="showEditDataModal({{ $inquiry->id }}); return false;" 
-                                                                        title="Add Inquiry Description">
-                                                                        <i class="bi bi-pencil"></i>
-                                                                        </a>
+                                                                        
                                                                     @endif
 
                                                                     <!-- Tombol Finish -->
                                                                     @if ($idsToFinish->isNotEmpty())
                                                                         <a href="#" class="btn btn-success btn-sm"
-                                                                        onclick='finishInquiry({!! json_encode($idsToFinish) !!}); return false;'>
+                                                                        onclick='finishInquiry({!! json_encode($idsToFinish) !!}, "Daido"); return false;'>
                                                                             <i class="bi bi-check-square-fill"></i>
                                                                         </a>
                                                                         <a href="#" class="btn btn-primary btn-sm"
@@ -641,15 +637,15 @@
                                                                                 </a>
                                                                             @endif
                                                                             @php
-                                                                        $monthKey = $inquiry->created_at->format('Y-m');
+                                                                                $monthKey = $inquiry->created_at->format('Y-m');
 
-                                                                        $inquiriesForMonth = $inquiries->filter(function ($item) use ($monthKey) {
-                                                                            return $item->created_at->format('Y-m') === $monthKey;
-                                                                        });
+                                                                                $inquiriesForMonth = $inquiries->filter(function ($item) use ($monthKey) {
+                                                                                    return $item->created_at->format('Y-m') === $monthKey;
+                                                                                });
 
-                                                                        $idsToConfirm = $inquiriesForMonth->whereIn('status', 8)->pluck('id')->values();
-                                                                        $idsToFinish = $inquiriesForMonth->whereIn('status', 9)->pluck('id')->values();
-                                                                    @endphp
+                                                                                $idsToConfirm = $inquiriesForMonth->whereIn('status', 8)->pluck('id')->values();
+                                                                                $idsToFinish = $inquiriesForMonth->whereIn('status', 9)->pluck('id')->values();
+                                                                            @endphp
 
                                                                     <!-- Tombol View -->
                                                                     <a class="btn btn-custom-view m-1 btn-sm"
@@ -661,28 +657,21 @@
                                                                     <!-- Tombol Confirm -->
                                                                     @if ($idsToConfirm->isNotEmpty())
                                                                         <a href="#" class="btn btn-primary btn-sm"
-                                                                        onclick='confirmPurchasing({!! json_encode($idsToConfirm) !!}); return false;'>
+                                                                        onclick="confirmPurchasing({{ $idsToConfirm->toJson() }}, 'NonDaido'); return false;">
                                                                             <i class="bi bi-check-square-fill"></i>
-                                                                        </a>
-                                                                        <a href="#" class="btn btn-primary btn-sm"
-                                                                        onclick="showEditDataModal({{ $inquiry->id }}); return false;" 
-                                                                        title="Add Inquiry Description">
-                                                                        <i class="bi bi-pencil"></i>
                                                                         </a>
                                                                     @endif
 
-                                                                    <!-- Tombol Finish -->
                                                                     @if ($idsToFinish->isNotEmpty())
                                                                         <a href="#" class="btn btn-success btn-sm"
-                                                                        onclick='finishInquiry({!! json_encode($idsToFinish) !!}); return false;'>
+                                                                        onclick="finishInquiry({{ $idsToFinish->toJson() }}, 'NonDaido'); return false;">
                                                                             <i class="bi bi-check-square-fill"></i>
                                                                         </a>
                                                                         <a href="#" class="btn btn-primary btn-sm"
                                                                         onclick="showEditDataModal({{ $inquiry->id }}); return false;" 
                                                                         title="Add Inquiry Description">
-                                                                        <i class="bi bi-pencil"></i>
+                                                                            <i class="bi bi-pencil"></i>
                                                                         </a>
-
                                                                     @endif
 
                                                                         </td>
@@ -862,10 +851,16 @@
     
 
         <script>
-            function confirmPurchasing(ids) {
+            function confirmPurchasing(ids, klasifikasi) {
+            if (!Array.isArray(ids)) {
+                console.error('Invalid IDs format:', ids);
+                Swal.fire('Error!', 'Invalid inquiry IDs format.', 'error');
+                return;
+            }
+
             Swal.fire({
                 title: 'Confirm',
-                text: "Are you sure you want to confirm selected inquiries?",
+                text: `Are you sure you want to confirm inquiries with klasifikasi: ${klasifikasi}?`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
@@ -875,20 +870,22 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: '{{ route('confirmPurchaseimport') }}', // POST to route, no ID in URL
+                        url: '{{ route("confirmPurchaseimport") }}',
                         method: 'POST',
                         data: {
-                            '_token': '{{ csrf_token() }}',
-                            'ids': ids // array of inquiry IDs
+                            _token: '{{ csrf_token() }}',
+                            ids: ids,
+                            klasifikasi: klasifikasi
                         },
                         success: function(response) {
-                            Swal.fire('Success!', response.success, 'success').then(() => {
+                            Swal.fire('Success!', response.success || 'Inquiries confirmed successfully!', 'success').then(() => {
                                 location.reload();
                             });
                         },
                         error: function(xhr) {
-                            console.error(xhr.responseText);
-                            Swal.fire('Error!', xhr.responseJSON?.error || 'Unknown error', 'error');
+                            console.error('AJAX Error:', xhr.responseText);
+                            const errorMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'An unknown error occurred.';
+                            Swal.fire('Error!', errorMsg, 'error');
                         }
                     });
                 } else {
@@ -896,6 +893,7 @@
                 }
             });
         }
+
 
                         function showEditDataModal(inquiryId) {
                         // Set inquiry_id pada form hidden
@@ -929,38 +927,48 @@
             }
 
 
-            function finishInquiry(ids) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "This will mark the selected inquiries as finished.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, finish them!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: '{{ route('finishInquiryimport') }}', // Route tanpa parameter ID
-                method: 'POST',
-                data: {
-                    '_token': '{{ csrf_token() }}',
-                    'ids': ids // Kirim array of IDs
-                },
-                success: function(response) {
-                    Swal.fire('Success!', 'Selected inquiries marked as finished.', 'success')
-                        .then(() => {
-                            location.reload();
-                        });
-                },
-                error: function(xhr) {
-                    console.error(xhr.responseText);
-                    Swal.fire('Error!', 'An error occurred while finishing the inquiries.', 'error');
+            function finishInquiry(ids, klasifikasi) {
+                if (!Array.isArray(ids)) {
+                    console.error('Invalid IDs format:', ids);
+                    Swal.fire('Error!', 'Invalid inquiry IDs format.', 'error');
+                    return;
                 }
-            });
-        }
-    });
-}
+
+                Swal.fire({
+                    title: 'Finish',
+                    text: 'Are you sure you want to finish inquiries with klasifikasi: ' + klasifikasi + '?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, finish them!'
+                    cancelButtonText: 'No, cancel!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '{{ route('finishInquiryimport') }}', // Route tanpa parameter ID
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                ids: ids, // Kirim array of IDs
+                                klasifikasi: klasifikasi
+                            },
+                            success: function(response) {
+                                Swal.fire('Success!', response.success || 'Selected inquiries marked as finished.', 'success').then(() => {
+                                        location.reload();
+                                    });
+                            },
+                            error: function(xhr) {
+                                console.error('AJAX Error:', xhr.responseText);
+                                const errorMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'An unknown error occurred.';
+                                Swal.fire('Error!', errorMsg, 'error');
+                            }
+                        });
+                    } else {
+                        Swal.fire('Canceled', 'Finish canceled', 'info');
+                    }
+                });
+            }
 
 
             function showInquiry(id) {

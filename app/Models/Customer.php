@@ -28,4 +28,8 @@ class Customer extends Model
     {
         return $this->hasMany(InquirySales::class);
     }
+    public function customreq(): HasMany
+    {
+        return $this->hasMany(CustomDboReq::class);
+    }
 }
