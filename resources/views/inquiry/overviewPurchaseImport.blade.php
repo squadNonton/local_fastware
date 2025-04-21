@@ -476,39 +476,39 @@
                                                                             return $item->created_at->format('Y-m') === $monthKey;
                                                                         });
 
-                                                                        $idsToConfirm = $inquiriesForMonth->whereIn('status', 8)->pluck('id')->values();
-                                                                        $idsToFinish = $inquiriesForMonth->whereIn('status', 9)->pluck('id')->values();
-                                                                        $idsToDescription = $inquiriesForMonth->pluck('id')->values(); // Ambil semua ID
+                                                                        $idsToConfirm = $inquiriesForMonth->whereIn('status', [8])->pluck('id')->values();
+                                                                        $idsToFinish = $inquiriesForMonth->whereIn('status', [9])->pluck('id')->values();
+                                                                        $idsToDescription = $inquiriesForMonth->pluck('id')->values();
                                                                     @endphp
 
                                                                     <!-- Tombol View -->
                                                                     <a class="btn btn-custom-view m-1 btn-sm"
-                                                                    title="View Form"
-                                                                    href="{{ route('showFormSSimportpurchase', ['month' => $monthKey, 'klasifikasi' => 'Daido']) }}">
+                                                                        title="View Form"
+                                                                        href="{{ route('showFormSSimportpurchase', ['month' => $monthKey, 'klasifikasi' => 'Daido']) }}">
                                                                         <i class="bi bi-eye-fill"></i>
                                                                     </a>
 
                                                                     <!-- Tombol Confirm -->
                                                                     @if ($idsToConfirm->isNotEmpty())
                                                                         <a href="#" class="btn btn-primary btn-sm"
-                                                                        onclick="confirmPurchasing({!! json_encode($idsToConfirm) !!}, 'Daido'); return false;">
+                                                                            onclick="confirmPurchasing({!! json_encode($idsToConfirm) !!}, 'Daido'); return false;">
                                                                             <i class="bi bi-check-square-fill"></i>
                                                                         </a>
-                                                                        
                                                                     @endif
 
-                                                                    <!-- Tombol Finish -->
-                                                                    @if ($idsToFinish->isNotEmpty())
+                                                                    <!-- Tombol Finish hanya muncul jika tidak ada yang perlu dikonfirmasi -->
+                                                                    @if ($idsToFinish->isNotEmpty() && $idsToConfirm->isEmpty())
                                                                         <a href="#" class="btn btn-success btn-sm"
-                                                                        onclick='finishInquiry({!! json_encode($idsToFinish) !!}, "Daido"); return false;'>
+                                                                            onclick='finishInquiry({!! json_encode($idsToFinish) !!}, "Daido"); return false;'>
                                                                             <i class="bi bi-check-square-fill"></i>
                                                                         </a>
                                                                         <a href="#" class="btn btn-primary btn-sm" 
-                                                                        onclick="showEditDataModal({!! json_encode($idsToDescription, JSON_HEX_TAG) !!}); return false;" 
-                                                                        title="Edit Description for All">
+                                                                            onclick="showEditDataModal({!! json_encode($idsToDescription, JSON_HEX_TAG) !!}, 'Daido'); return false;" 
+                                                                            title="Edit Description for All">
                                                                             <i class="bi bi-pencil"></i>
                                                                         </a>
                                                                     @endif
+
 
                                                                 </td>
                                                             </tr>
@@ -664,16 +664,17 @@
                                                                         </a>
                                                                     @endif
 
-                                                                    @if ($idsToFinish->isNotEmpty())
+                                                                    @if ($idsToFinish->isNotEmpty() && $idsToConfirm->isEmpty())
                                                                         <a href="#" class="btn btn-success btn-sm"
                                                                         onclick="finishInquiry({{ $idsToFinish->toJson() }}, 'NonDaido'); return false;">
                                                                             <i class="bi bi-check-square-fill"></i>
                                                                         </a>
                                                                         <a href="#" class="btn btn-primary btn-sm" 
-                                                                        onclick="showEditDataModal({!! json_encode($idsToDescription, JSON_HEX_TAG) !!}); return false;" 
+                                                                        onclick="showEditDataModal({!! json_encode($idsToDescription, JSON_HEX_TAG) !!}, 'NonDaido'); return false;" 
                                                                         title="Edit Description for All">
-                                                                            <i class="bi bi-pencil"></i>
+                                                                        <i class="bi bi-pencil"></i>
                                                                         </a>
+
                                                                     @endif
 
                                                                         </td>
@@ -690,13 +691,14 @@
                         </div>
                     </div>
                     <!-- Modal for Edit Supplier, Last Update, and Est. Date -->
+                    <!-- Modal -->
                     <div class="modal fade" id="editDataModal">
-                        <div class="modal-dialog">
+                        <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
                                 <form id="editDataForm">
                                     @csrf
-                                    <!-- Simpan array ID sebagai JSON string -->
                                     <input type="hidden" id="inquiryIds" name="ids">
+                                    <input type="hidden" id="inquiryKlasifikasi" name="klasifikasi">
                                     <div class="modal-body">
                                         <div class="mb-3">
                                             <label>Description untuk Semua Inquiry Bulan Ini</label>
@@ -710,6 +712,7 @@
                             </div>
                         </div>
                     </div>
+
                 </section>
             </div>
         </section>
@@ -841,47 +844,45 @@
             }
 
 
-            function showEditDataModal(ids) {
-    // Simpan array ID ke input hidden sebagai JSON string
-    document.getElementById('inquiryIds').value = JSON.stringify(ids);
-    
-    // Tampilkan modal
-    new bootstrap.Modal(document.getElementById('editDataModal')).show();
-}
+            function showEditDataModal(ids, klasifikasi) {
+                document.getElementById('inquiryIds').value = JSON.stringify(ids);
+                document.getElementById('inquiryKlasifikasi').value = klasifikasi;
+                new bootstrap.Modal(document.getElementById('editDataModal')).show();
+            }
 
-function submitEditDataForm() {
-    const form = document.getElementById('editDataForm');
-    const formData = new FormData(form);
-    
-    // Ambil array ID dari JSON string
-    const ids = JSON.parse(formData.get('ids'));
-    
-    // Validasi client-side
-    if (!Array.isArray(ids) || ids.length === 0) {
-        Swal.fire('Error!', 'No inquiries selected.', 'error');
-        return;
-    }
 
-    // Kirim ke server
-    $.ajax({
-        url: '{{ route('updateInquiryImport') }}',
-        method: 'POST',
-        data: {
-            _token: '{{ csrf_token() }}',
-            ids: ids, // Kirim sebagai array
-            description: formData.get('description')
-        },
-        success: function(response) {
-            Swal.fire('Success!', response.message, 'success').then(() => {
-                location.reload();
-            });
-        },
-        error: function(xhr) {
-            const errorMsg = xhr.responseJSON?.error || 'Update failed.';
-            Swal.fire('Error!', errorMsg, 'error');
-        }
-    });
-}
+            function submitEditDataForm() {
+                const form = document.getElementById('editDataForm');
+                const formData = new FormData(form);
+                
+                const ids = JSON.parse(formData.get('ids'));
+                const klasifikasi = formData.get('klasifikasi');
+
+                if (!Array.isArray(ids) || ids.length === 0) {
+                    Swal.fire('Error!', 'No inquiries selected.', 'error');
+                    return;
+                }
+
+                $.ajax({
+                    url: '{{ route('updateInquiryImport') }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        ids: ids,
+                        klasifikasi: klasifikasi,
+                        description: formData.get('description')
+                    },
+                    success: function(response) {
+                        Swal.fire('Success!', response.message, 'success').then(() => {
+                            location.reload();
+                        });
+                    },
+                    error: function(xhr) {
+                        const errorMsg = xhr.responseJSON?.error || 'Update failed.';
+                        Swal.fire('Error!', errorMsg, 'error');
+                    }
+                });
+            }
 
 
             function finishInquiry(ids, klasifikasi) {

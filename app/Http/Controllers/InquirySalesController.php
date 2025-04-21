@@ -1012,21 +1012,37 @@ class InquirySalesController extends Controller
         'ids' => 'required|array',
         'ids.*' => 'integer|exists:inquiry_sales,id',
         'description' => 'required|string',
+        'klasifikasi' => 'required|string'
     ]);
 
     $userId = auth()->id();
     $description = $request->description;
+    $klasifikasi = $request->klasifikasi;
+
+    $updatedCount = 0;
 
     foreach ($request->ids as $id) {
-        TrxDboProgPurchase::create([
-            'inquiry_id' => $id,
-            'user_id' => $userId,
-            'description' => $description,
-        ]);
+        // Validasi klasifikasi melalui tabel detail
+        $hasValidDetail = DetailInquiryImport::where('id_inquiry', $id)
+            ->where('klasifikasi', $klasifikasi)
+            ->exists();
+
+        if ($hasValidDetail) {
+            TrxDboProgPurchase::create([
+                'inquiry_id' => $id,
+                'user_id' => $userId,
+                'description' => $description,
+            ]);
+            $updatedCount++;
+        }
     }
 
-    return response()->json(['message' => 'Description updated for ' . count($request->ids) . ' inquiries.']);
+    return response()->json([
+        'message' => "Description updated for $updatedCount inquiries with klasifikasi '$klasifikasi'."
+    ]);
 }
+
+
 
 public function updateProgressImport(Request $request, $id)
 {

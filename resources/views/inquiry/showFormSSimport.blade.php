@@ -270,31 +270,37 @@
                                             <td>
                                                 @if($inquiry->status == 3 && Auth::user()->id == 1)
                                                     @php
-                                                        $colorClass = match($material->progress) {
-                                                            'ok' => 'text-success',
-                                                            'pending' => 'text-primary',
-                                                            'cancelled' => 'text-danger',
-                                                            default => 'text-muted'
+                                                        $bgColorClass = match($material->progress) {
+                                                            'ok' => 'bg-success',
+                                                            'pending' => 'bg-primary',
+                                                            'cancelled' => 'bg-danger',
+                                                            default => 'bg-secondary'
                                                         };
                                                     @endphp
-                                                    <span class="{{ $colorClass }}">{{ $material->progress ?? 'Belum diatur' }}</span>
+                                                    <span class="{{ $bgColorClass }} text-white px-2 py-1 rounded d-inline-block mb-2">
+                                                        {{ $material->progress ?? 'No Updated' }}
+                                                    </span>
                                                     <select class="form-select form-select-sm progress-select" data-id="{{ $material->id }}" style="margin-bottom: 5px;">
+                                                        <option value="" disabled {{ is_null($material->progress) ? 'selected' : '' }}>-- Select Progress --</option>
                                                         <option value="ok" {{ $material->progress == 'ok' ? 'selected' : '' }}>OK</option>
                                                         <option value="pending" {{ $material->progress == 'pending' ? 'selected' : '' }}>Pending</option>
                                                         <option value="cancelled" {{ $material->progress == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                                                     </select>
                                                 @else
                                                     @php
-                                                        $colorClass = match($material->progress) {
-                                                            'ok' => 'text-success',
-                                                            'pending' => 'text-primary',
-                                                            'cancelled' => 'text-danger',
-                                                            default => 'text-muted'
+                                                        $bgColorClass = match($material->progress) {
+                                                            'ok' => 'bg-success',
+                                                            'pending' => 'bg-primary',
+                                                            'cancelled' => 'bg-danger',
+                                                            default => 'bg-secondary'
                                                         };
                                                     @endphp
-                                                    <span class="{{ $colorClass }}">{{ $material->progress ?? 'Belum diatur' }}</span>
+                                                    <span class="{{ $bgColorClass }} text-white px-2 py-1 rounded d-inline-block">
+                                                        {{ $material->progress ?? 'No Progress' }}
+                                                    </span>
                                                 @endif
                                             </td>
+                                            
                                             
                                                                                         
                                             <td>{{ $material['nopo'] }}</td>
@@ -328,7 +334,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="21" style="text-align: center;">Data tidak ditemukan</td>
+                                            <td colspan="22" style="text-align: center;">Data tidak ditemukan</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
