@@ -491,6 +491,7 @@
                                                                     <!-- Tombol Confirm -->
                                                                     @if ($idsToConfirm->isNotEmpty())
                                                                         <a href="#" class="btn btn-primary btn-sm"
+                                                                            title="Confirm"
                                                                             onclick="confirmPurchasing({!! json_encode($idsToConfirm) !!}, 'Daido'); return false;">
                                                                             <i class="bi bi-check-square-fill"></i>
                                                                         </a>
@@ -499,12 +500,13 @@
                                                                     <!-- Tombol Finish hanya muncul jika tidak ada yang perlu dikonfirmasi -->
                                                                     @if ($idsToFinish->isNotEmpty() && $idsToConfirm->isEmpty())
                                                                         <a href="#" class="btn btn-success btn-sm"
+                                                                            title="Finish"
                                                                             onclick='finishInquiry({!! json_encode($idsToFinish) !!}, "Daido"); return false;'>
                                                                             <i class="bi bi-check-square-fill"></i>
                                                                         </a>
                                                                         <a href="#" class="btn btn-primary btn-sm" 
                                                                             onclick="showEditDataModal({!! json_encode($idsToDescription, JSON_HEX_TAG) !!}, 'Daido'); return false;" 
-                                                                            title="Edit Description for All">
+                                                                            title="Edit Description">
                                                                             <i class="bi bi-pencil"></i>
                                                                         </a>
                                                                     @endif
@@ -659,6 +661,7 @@
                                                                     <!-- Tombol Confirm -->
                                                                     @if ($idsToConfirm->isNotEmpty())
                                                                         <a href="#" class="btn btn-primary btn-sm"
+                                                                        title="Confirm"
                                                                         onclick="confirmPurchasing({{ $idsToConfirm->toJson() }}, 'NonDaido'); return false;">
                                                                             <i class="bi bi-check-square-fill"></i>
                                                                         </a>
@@ -666,12 +669,13 @@
 
                                                                     @if ($idsToFinish->isNotEmpty() && $idsToConfirm->isEmpty())
                                                                         <a href="#" class="btn btn-success btn-sm"
+                                                                        title="Finish"
                                                                         onclick="finishInquiry({{ $idsToFinish->toJson() }}, 'NonDaido'); return false;">
                                                                             <i class="bi bi-check-square-fill"></i>
                                                                         </a>
                                                                         <a href="#" class="btn btn-primary btn-sm" 
                                                                         onclick="showEditDataModal({!! json_encode($idsToDescription, JSON_HEX_TAG) !!}, 'NonDaido'); return false;" 
-                                                                        title="Edit Description for All">
+                                                                        title="Edit Description">
                                                                         <i class="bi bi-pencil"></i>
                                                                         </a>
 
