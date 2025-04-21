@@ -176,6 +176,7 @@
                                 <th style="width: 50px; text-align:center;">Progress</th>
                                 <th style="width: 50px; text-align:center;">No PO</th>
                                 <th style="width: 50px; text-align:center;">Supplier</th>
+                                <th style="width: 50px; text-align:center;">Est. Date</th>
                                 <th style="width: 50px; text-align:center;">Aksi</th>
                             </tr>
                         </thead>
@@ -270,6 +271,7 @@
                                     <td>{{ $material['progress'] }}</td>
                                     <td>{{ $material['nopo'] }}</td>
                                     <td>{{ $material['supplier'] }}</td>
+                                    <td>{{ $material['est_date'] }}</td>
                                     <td>
                                         @if ($inquiry->status == 1 && $material->create_by == Auth::id() && in_array(Auth::id(), [1, 2, 3, 4]))
                                             <a href="{{ route('editimport', ['id' => $material->id]) }}" class="btn btn-warning btn-sm">Edit</a>
@@ -323,7 +325,7 @@
                         <i class="bi bi-file-earmark-excel-fill"></i> Export Data
                     </a>
 
-                    @if ($inquiry->status == 8 || $inquiry->status == 9)
+                    @if ($inquiry->status == 9)
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importModal">
                         <i class="bi bi-file-earmark-excel"></i> Import Data
                     </button>    

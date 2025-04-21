@@ -184,6 +184,7 @@
                                         <th style="width: 50px; text-align:center;">Partner</th>
                                         <th style="width: 50px; text-align:center;">Progress</th>
                                         <th style="width: 50px; text-align:center;">No PO</th>
+                                        <th style="width: 50px; text-align:center;">Est. Date</th>
                                         <th style="width: 50px; text-align:center;">Aksi</th>
                                     </tr>
                                 </thead>
@@ -268,18 +269,36 @@
                                             </td>
                                             <td>
                                                 @if($inquiry->status == 3 && Auth::user()->id == 1)
-                                                    <span class="progress-display">{{ $material->progress ?? 'Belum diatur' }}</span>
+                                                    @php
+                                                        $colorClass = match($material->progress) {
+                                                            'ok' => 'text-success',
+                                                            'pending' => 'text-primary',
+                                                            'cancelled' => 'text-danger',
+                                                            default => 'text-muted'
+                                                        };
+                                                    @endphp
+                                                    <span class="{{ $colorClass }}">{{ $material->progress ?? 'Belum diatur' }}</span>
                                                     <select class="form-select form-select-sm progress-select" data-id="{{ $material->id }}" style="margin-bottom: 5px;">
                                                         <option value="ok" {{ $material->progress == 'ok' ? 'selected' : '' }}>OK</option>
                                                         <option value="pending" {{ $material->progress == 'pending' ? 'selected' : '' }}>Pending</option>
                                                         <option value="cancelled" {{ $material->progress == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                                                     </select>
                                                 @else
-                                                    <span>{{ $material->progress ?? 'Belum diatur' }}</span>
+                                                    @php
+                                                        $colorClass = match($material->progress) {
+                                                            'ok' => 'text-success',
+                                                            'pending' => 'text-primary',
+                                                            'cancelled' => 'text-danger',
+                                                            default => 'text-muted'
+                                                        };
+                                                    @endphp
+                                                    <span class="{{ $colorClass }}">{{ $material->progress ?? 'Belum diatur' }}</span>
                                                 @endif
                                             </td>
+                                            
                                                                                         
                                             <td>{{ $material['nopo'] }}</td>
+                                            <td>{{ $material['est_date'] }}</td>
                                             <td>
                                                 @if (
                                                     !$material->trashed() &&

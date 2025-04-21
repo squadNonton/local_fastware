@@ -448,10 +448,10 @@
                         <label>Reference :</label>
                         <div class="form-value">{{ $inquiry->kode_inquiry }}</div>
                     </div>
-                    <div class="form-group">
+                    {{-- <div class="form-group">
                         <label>Supplier :</label>
                         <div class="form-value">{{ $inquiry->supplier }}</div>
-                    </div>
+                    </div> --}}
                     <div class="form-group">
                         <label>Date Create :</label>
                         <div class="form-value">{{ $inquiry->created_at }}</div>
@@ -495,13 +495,20 @@
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td>
+                                            {{-- Hidden input untuk mengidentifikasi baris yang akan diupdate --}}
+                                            <input type="hidden" name="materials[{{ $index }}][id]" value="{{ $material->id }}">
+                                        
+                                            {{-- Dropdown untuk memilih tipe material --}}
                                             <select name="materials[{{ $index }}][id_type]" class="material-dropdown" style="width: 180px; height: 30px;">
-                                                <option value="" disabled selected>Cari Material...</option>
+                                                <option value="" disabled {{ $material->id_type ? '' : 'selected' }}>Cari Material...</option>
                                                 @foreach ($typeMaterials as $type)
-                                                    <option value="{{ $type->id }}" {{ $type->id == $material->id_type ? 'selected' : '' }}>{{ $type->type_name }}</option>
+                                                    <option value="{{ $type->id }}" {{ $type->id == $material->id_type ? 'selected' : '' }}>
+                                                        {{ $type->type_name }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </td>
+                                        
                                         <td>
                                             <select name="materials[{{ $index }}][jenis]" class="jenis-dropdown" style="width: 80px; height: 30px;">
                                                 <option value="Flat" {{ $material->jenis == 'Flat' ? 'selected' : '' }}>Flat</option>

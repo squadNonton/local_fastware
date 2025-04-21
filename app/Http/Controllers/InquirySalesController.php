@@ -1009,20 +1009,23 @@ class InquirySalesController extends Controller
     public function updateInquiryImport(Request $request)
 {
     $request->validate([
-        'inquiry_id' => 'required|integer|exists:inquiry_sales,id',
+        'ids' => 'required|array',
+        'ids.*' => 'integer|exists:inquiry_sales,id',
         'description' => 'required|string',
     ]);
 
-    $inquiry = InquirySales::findOrFail($request->inquiry_id);
+    $userId = auth()->id();
+    $description = $request->description;
 
-    // Tidak perlu update field progress
-    TrxDboProgPurchase::create([
-        'inquiry_id' => $inquiry->id,
-        'user_id' => auth()->id(),
-        'description' => $request->description,
-    ]);
+    foreach ($request->ids as $id) {
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $id,
+            'user_id' => $userId,
+            'description' => $description,
+        ]);
+    }
 
-    return response()->json(['message' => 'Inquiry description updated successfully.']);
+    return response()->json(['message' => 'Description updated for ' . count($request->ids) . ' inquiries.']);
 }
 
 public function updateProgressImport(Request $request, $id)
@@ -1077,14 +1080,13 @@ public function updateProgressImport(Request $request, $id)
 
         // Update data materials
         foreach ($request->materials as $materialData) {
-            $material = DetailInquiry::where('id_inquiry', $id)
-                ->where('id_type', $materialData['id_type'])
-                ->first();
-
+            $material = DetailInquiry::find($materialData['id']); // Gunakan ID langsung
+        
             if ($material) {
+                $material->id_type = $materialData['id_type']; // Bisa berubah sekarang
                 $jenis = $materialData['jenis'];
-
-                // Perbarui hanya nilai yang sesuai dengan jenisnya
+        
+                // Update sesuai jenis
                 $material->jenis = $jenis;
                 $material->thickness = ($jenis === 'Flat') ? $materialData['thickness'] : null;
                 $material->weight = ($jenis === 'Flat') ? $materialData['weight'] : null;
@@ -1099,11 +1101,11 @@ public function updateProgressImport(Request $request, $id)
                 $material->so = $materialData['so'];
                 $material->note = $materialData['note'];
                 $material->save();
-
-                // Tambahkan data yang sudah diperbarui ke dalam array
+        
                 $updatedMaterials[] = $material;
             }
         }
+        
 
         return response()->json([
             'success' => true,
@@ -1238,9 +1240,8 @@ public function updateProgressImport(Request $request, $id)
         $userName = $user->name;
 
         foreach ($request->materials as $materialData) {
-            $material = DetailInquiryImport::where('id_inquiry', $id)
-                ->where('id_type', $materialData['id_type'])
-                ->first();
+            $material = DetailInquiryImport::find($materialData['id']);
+
 
             $typematerial = TypeMaterial::find($materialData['id_type']);
             if ($typematerial) {
@@ -1347,12 +1348,12 @@ public function updateProgressImport(Request $request, $id)
             }
 
             foreach ($rows as $index => $row) {
-                if ($index < 1 || empty(array_filter($row)) || count($row) < 32) {
+                if ($index < 1 || empty(array_filter($row)) || count($row) < 28) {
                     continue;
                 }
 
-                $inquiryId = $row[30] ?? null;
-                $detailId = $row[31] ?? null;
+                $inquiryId = $row[26] ?? null;
+                $detailId = $row[27] ?? null;
 
                 $oldInquiry = DB::table('inquiry_sales')->where('id', $inquiryId)->first();
                 $oldDetail = DB::table('detail_inquiry_import')->where('id', $detailId)->first();
@@ -1390,32 +1391,30 @@ public function updateProgressImport(Request $request, $id)
                     'jenis_inquiry' => $row[6] ?? null,
                     'loc_imp' => $row[7] ?? null,
                     'est_date' => !empty($row[8]) ? Carbon::parse($row[8])->format('Y-m-d') : null,
-                    'supplier' => $row[9] ?? null,
-                    'create_by' => $row[10] ?? null,
-                    'refnopo' => $row[11] ?? null,
-                    'attach_file' => $row[12] ?? null,
+                    'create_by' => $row[9] ?? null,
                 ];
 
                 $newDetailData = [
                     'id_inquiry' => $inquiryId,
                     'id' => $detailId,
-                    'id_type' => $typeIdList[$row[14] ?? ''] ?? null,
-                    'jenis' => $row[15] ?? null,
-                    'thickness' => $row[16] ?? null,
-                    'inner_diameter' => $row[17] ?? null,
-                    'outer_diameter' => $row[18] ?? null,
-                    'weight' => $row[19] ?? null,
-                    'length' => $row[20] ?? null,
-                    'qty' => $row[21] ?? null,
-                    'm1' => $row[22] ?? null,
-                    'm2' => $row[23] ?? null,
-                    'm3' => $row[24] ?? null,
-                    'so' => $row[25] ?? null,
-                    'ship' => $row[26] ?? null,
-                    'note' => $row[27] ?? null,
-                    'progress' => $row[32] ?? null,
+                    'id_type' => $typeIdList[$row[11] ?? ''] ?? null,
+                    'jenis' => $row[12] ?? null,
+                    'thickness' => $row[13] ?? null,
+                    'inner_diameter' => $row[14] ?? null,
+                    'outer_diameter' => $row[15] ?? null,
+                    'weight' => $row[16] ?? null,
+                    'length' => $row[17] ?? null,
+                    'qty' => $row[18] ?? null,
+                    'm1' => $row[19] ?? null,
+                    'm2' => $row[20] ?? null,
+                    'm3' => $row[21] ?? null,
+                    'so' => $row[22] ?? null,
+                    'ship' => $row[23] ?? null,
+                    'note' => $row[24] ?? null,
+                    'progress' => $row[28] ?? null,
                     'customer' => json_encode($customerIds),
                     'create_by' => $userId,
+                    'est_date' => $row[8] ?? null,
                 ];
 
                 $changeDescription = '';
@@ -1515,16 +1514,16 @@ public function updateProgressImport(Request $request, $id)
                 }
 
                 // *Pastikan jumlah kolom cukup sebelum akses indeks*
-                if (count($row) < 34) {
+                if (count($row) < 30) {
                     continue;
                 }
 
-                $partnerId = isset($row[29]) ? ($partner[$row[29]] ?? null) : null;
+                $partnerId = isset($row[25]) ? ($partner[$row[25]] ?? null) : null;
                 // *Ambil Type ID dengan cek validitas data*
-                $typeId = isset($row[15]) ? ($typeMaterials[$row[15]] ?? null) : null;
+                $typeId = isset($row[11]) ? ($typeMaterials[$row[11]] ?? null) : null;
 
                 // *Pastikan ID inquiry tidak kosong*
-                if (empty($row[30])) {
+                if (empty($row[26])) {
                     continue;
                 }
 
@@ -1543,47 +1542,44 @@ public function updateProgressImport(Request $request, $id)
                 }
 
                 $inquiryUpdates[] = [
-                    'id' => $row[30] ?? null,
+                    'id' => $row[26] ?? null,
                     'region' => $row[2] ?? null,
                     'kode_inquiry' => $row[5] ?? null,
                     'type_order' => $row[6] ?? null,
                     'jenis_inquiry' => $row[7] ?? null,
                     'loc_imp' => $row[8] ?? null,
                     'est_date' => !empty($row[9]) ? Carbon::parse($row[9])->format('Y-m-d') : null,
-                    'supplier' => $row[10] ?? null,
-                    'create_by' => $row[11] ?? null,
-                    'refnopo' => $row[12] ?? null,
-                    'attach_file' => $row[13] ?? null,
+                    'create_by' => $row[10] ?? null,
                     'updated_at' => $now,
                 ];
 
                 $detailUpdates[] = [
-                    'id' => $row[31] ?? null,
-                    'id_inquiry' => $row[30] ?? null,
+                    'id' => $row[27] ?? null,
+                    'id_inquiry' => $row[26] ?? null,
                     'id_type' => $typeId,
-                    'jenis' => $row[16] ?? null,
-                    'thickness' => $row[17] ?? null,
-                    'inner_diameter' => $row[18] ?? null,
-                    'outer_diameter' => $row[19] ?? null,
-                    'weight' => $row[20] ?? null,
-                    'length' => $row[21] ?? null,
-                    'qty' => $row[22] ?? null,
-                    'm1' => $row[23] ?? null,
-                    'm2' => $row[24] ?? null,
-                    'm3' => $row[25] ?? null,
-                    'so' => $row[26] ?? null,
-                    'ship' => $row[27] ?? null,
-                    'note' => $row[28] ?? null,
+                    'jenis' => $row[12] ?? null,
+                    'thickness' => $row[13] ?? null,
+                    'inner_diameter' => $row[14] ?? null,
+                    'outer_diameter' => $row[15] ?? null,
+                    'weight' => $row[16] ?? null,
+                    'length' => $row[17] ?? null,
+                    'qty' => $row[18] ?? null,
+                    'm1' => $row[19] ?? null,
+                    'm2' => $row[20] ?? null,
+                    'm3' => $row[21] ?? null,
+                    'so' => $row[22] ?? null,
+                    'ship' => $row[23] ?? null,
+                    'note' => $row[24] ?? null,
                     'customer' => json_encode($customerIds),
                     'create_by' => $partnerId,
                     'updated_at' => $now,
-                    'nopo' => $row[33] ?? null,
-                    'supplier' => $row[34] ?? null,
-                    'progress' => $row[32] ?? null,
+                    'nopo' => $row[29] ?? null,
+                    'supplier' => $row[30] ?? null,
+                    'progress' => $row[28] ?? null,
                 ];
 
                 $logs[] = [
-                    'inquiry_id' => $row[30] ?? null,
+                    'inquiry_id' => $row[26] ?? null,
                     'description' => 'Updated purchase oleh ' . $userName . ' via Excel Import',
                     'user_id' => $userId,
                     'created_at' => $now,
@@ -1813,7 +1809,7 @@ public function updateProgressImport(Request $request, $id)
 
             $inquiry = InquirySales::find($id);
 
-            if(!$inquiry || $inquiry->status != 8) {
+            if(!$inquiry || $inquiry->status != 9) {
                 continue; // Skip if inquiry not found
             }
 

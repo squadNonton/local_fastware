@@ -44,8 +44,8 @@ class InquiryImportInventoryExport implements FromCollection, WithHeadings, With
             'detail_inquiry_import.id AS detail_id',
             // 'customers.name_customer',
             'inquiry_sales.kode_inquiry', 'inquiry_sales.type_order',
-            'inquiry_sales.jenis_inquiry', 'inquiry_sales.loc_imp', 'inquiry_sales.est_date',
-            'inquiry_sales.supplier', 'inquiry_sales.create_by AS sales_person', 'inquiry_sales.progress',
+            'inquiry_sales.jenis_inquiry', 'inquiry_sales.loc_imp', 'detail_inquiry_import.est_date',
+            'inquiry_sales.supplier', 'inquiry_sales.create_by AS sales_person', 'detail_inquiry_import.progress',
             'inquiry_sales.refnopo AS ref_po', 'inquiry_sales.attach_file AS files', 'inquiry_sales.status',
             'inquiry_sales.created_at', 'inquiry_sales.updated_at', 'inquiry_sales.modified_by',
             'type_materials.type_name AS raw_material', 'detail_inquiry_import.jenis AS shapes',
@@ -72,10 +72,10 @@ class InquiryImportInventoryExport implements FromCollection, WithHeadings, With
 {
     return [
         'No', 'Bulan', 'Region', 'Customer Name', 'Inquiry Code', 'Order Type', 'Inquiry Type', 'Category', 
-        'Est. Date', 'Supplier', 'Sales Person', 'Files', 'Status', 'Raw Material', 'Shapes', 'Thickness', 
+        'Est. Date', 'Sales Person', 'Status', 'Raw Material', 'Shapes', 'Thickness', 
         'Inner Diameter', 'Outer Diameter', 'Weight', 'Length', 'Qty *Unit', 
         'Forecast Month 1', 'Forecast Month 2', 'Forecast Month 3', 
-        'Ref. SO', 'Ship-To', 'Remark', 'File', 'Partner', 'ID Inquiry', 'ID Detail', 'Progress'
+        'Ref. SO', 'Ship-To', 'Remark', 'Partner', 'ID Inquiry', 'ID Detail', 'Progress'
     ];
 }
 
@@ -127,9 +127,7 @@ class InquiryImportInventoryExport implements FromCollection, WithHeadings, With
          $inquiry->jenis_inquiry,
          $inquiry->loc_imp,
          $inquiry->est_date,
-         $inquiry->supplier,
          $inquiry->sales_person,
-         $inquiry->files,
          $inquiry->status,
          $inquiry->raw_material,
          $inquiry->shapes,
@@ -145,7 +143,6 @@ class InquiryImportInventoryExport implements FromCollection, WithHeadings, With
          $inquiry->ref_so,
          $inquiry->ship_to,
          $inquiry->remark,
-         $inquiry->file,
          $inquiry->partner,
          $inquiry->inquiry_id,
          $inquiry->detail_id,

@@ -166,6 +166,8 @@
                                         <tr>
                                             <td>{{ $index + 1 }}</td>
                                             <td contenteditable="false" class="editable">
+                                                <input type="hidden" name="materials[{{ $index }}][id]" value="{{ $material->id }}">
+
                                                 <select name="id_type" class="material-dropdown" style="width: 180px;"
                                                     disabled>
                                                     <option value="" disabled selected>Cari Material...</option>
@@ -520,6 +522,7 @@
                 const data = Array.from(rows).map(row => {
                     const cells = row.querySelectorAll('.editable');
                     return {
+                        id: row.querySelector('input[type="hidden"]').value,
                         id_type: cells[0].querySelector('select').value,
                         jenis: cells[1].querySelector('select').value,
                         thickness: cells[2].querySelector('input').value,

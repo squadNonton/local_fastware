@@ -478,6 +478,7 @@
 
                                                                         $idsToConfirm = $inquiriesForMonth->whereIn('status', 8)->pluck('id')->values();
                                                                         $idsToFinish = $inquiriesForMonth->whereIn('status', 9)->pluck('id')->values();
+                                                                        $idsToDescription = $inquiriesForMonth->pluck('id')->values(); // Ambil semua ID
                                                                     @endphp
 
                                                                     <!-- Tombol View -->
@@ -490,7 +491,7 @@
                                                                     <!-- Tombol Confirm -->
                                                                     @if ($idsToConfirm->isNotEmpty())
                                                                         <a href="#" class="btn btn-primary btn-sm"
-                                                                        onclick='confirmPurchasing({!! json_encode($idsToConfirm) !!}, "Daido"); return false;'>
+                                                                        onclick="confirmPurchasing({!! json_encode($idsToConfirm) !!}, 'Daido'); return false;">
                                                                             <i class="bi bi-check-square-fill"></i>
                                                                         </a>
                                                                         
@@ -502,10 +503,10 @@
                                                                         onclick='finishInquiry({!! json_encode($idsToFinish) !!}, "Daido"); return false;'>
                                                                             <i class="bi bi-check-square-fill"></i>
                                                                         </a>
-                                                                        <a href="#" class="btn btn-primary btn-sm"
-                                                                        onclick="showEditDataModal({{ $inquiry->id }}); return false;" 
-                                                                        title="Add Inquiry Description">
-                                                                        <i class="bi bi-pencil"></i>
+                                                                        <a href="#" class="btn btn-primary btn-sm" 
+                                                                        onclick="showEditDataModal({!! json_encode($idsToDescription, JSON_HEX_TAG) !!}); return false;" 
+                                                                        title="Edit Description for All">
+                                                                            <i class="bi bi-pencil"></i>
                                                                         </a>
                                                                     @endif
 
@@ -645,6 +646,7 @@
 
                                                                                 $idsToConfirm = $inquiriesForMonth->whereIn('status', 8)->pluck('id')->values();
                                                                                 $idsToFinish = $inquiriesForMonth->whereIn('status', 9)->pluck('id')->values();
+                                                                                $idsToDescription = $inquiriesForMonth->pluck('id')->values(); // Ambil semua ID
                                                                             @endphp
 
                                                                     <!-- Tombol View -->
@@ -667,9 +669,9 @@
                                                                         onclick="finishInquiry({{ $idsToFinish->toJson() }}, 'NonDaido'); return false;">
                                                                             <i class="bi bi-check-square-fill"></i>
                                                                         </a>
-                                                                        <a href="#" class="btn btn-primary btn-sm"
-                                                                        onclick="showEditDataModal({{ $inquiry->id }}); return false;" 
-                                                                        title="Add Inquiry Description">
+                                                                        <a href="#" class="btn btn-primary btn-sm" 
+                                                                        onclick="showEditDataModal({!! json_encode($idsToDescription, JSON_HEX_TAG) !!}); return false;" 
+                                                                        title="Edit Description for All">
                                                                             <i class="bi bi-pencil"></i>
                                                                         </a>
                                                                     @endif
@@ -688,82 +690,23 @@
                         </div>
                     </div>
                     <!-- Modal for Edit Supplier, Last Update, and Est. Date -->
-                    <div class="modal fade" id="editDataModal" tabindex="-1" aria-labelledby="editDataModalLabel"
-                        aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal fade" id="editDataModal">
+                        <div class="modal-dialog">
                             <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title testfont" id="editDataModalLabel">Edit Inquiry Details</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <form id="editDataForm">
-                                        @csrf
-                                        <input type="hidden" id="inquiryId" name="inquiry_id">
-
-                                        <!-- Field Supplier (Dropdown List) -->
-                                        {{-- <div class="mb-3">
-                                            <label for="supplier" class="form-label">Supplier</label>
-                                            <select class="form-select" id="supplier" name="supplier" required>
-                                                <option value="">Select Supplier</option>
-                                                <option value="PT. SINAR PUTRA METALINDO">
-                                                    PT. SINAR PUTRA METALINDO</option>
-                                                <option value="PT. TRUST STEEL INDO">
-                                                    PT. TRUST STEEL INDO</option>
-                                                <option value="PT. LUKWINDO NUSA DWIPA">
-                                                    PT. LUKWINDO NUSA DWIPA</option>
-                                                <option value="CV. BAJA MAKMUR">
-                                                    CV. BAJA MAKMUR</option>
-                                                <option value="CV. REIHAI ABADI METAL INDONESIA">
-                                                    CV. REIHAI ABADI METAL INDONESIA</option>
-                                                <option value="PT. SAMUDRA BAJA NUSANTARA">
-                                                    PT. SAMUDRA BAJA NUSANTARA</option>
-                                                <option value="PT. SURYA SEJAHTERA METALINDO LESTARI">
-                                                    PT. SURYA SEJAHTERA METALINDO LESTARI</option>
-                                                <option value="CV. DIMA RAMA SAKTI">
-                                                    CV. DIMA RAMA SAKTI</option>
-                                                <option value="CV. DWI PUTRA TEKNINDO">
-                                                    CV. DWI PUTRA TEKNINDO</option>
-                                                <option value="CV. DWI PUTRA TEKNINDO">
-                                                    PT INTI ATLAS INDONESIA</option>
-                                                <option value="CV. DWI PUTRA TEKNINDO">
-                                                    PT GAYA STEEL</option>
-                                                <option value="CV. GLOBAL METAL INDONESIA">
-                                                    CV. GLOBAL METAL INDONESIA</option>
-                                                <!-- Tambahkan opsi lain jika diperlukan -->
-                                            </select>
-                                        </div> --}}
-
-                                        <!-- Field Last Update (Free Text) -->
-                                        <!-- Field Description (Free Text) -->
-                                            <div class="mb-3">
-                                                <label for="description" class="form-label">Description</label>
-                                                <input type="text" class="form-control" id="description" name="description" required>
-                                            </div>  
-
-
-                                        {{-- <div class="mb-3">
-                                            <label for="refnopo" class="form-label">Ref PO Number</label>
-                                            <input type="text" class="form-control" id="refnopo" name="refnopo"
-                                                required>
-                                        </div> --}}
-
-                                        <!-- Field Est. Date (Date Picker) -->
-                                        {{-- <div class="mb-3">
-                                            <label for="estDate" class="form-label">Est. Date <span>
-                                                    (Incoming Shipment)</span></label>
-                                            <input type="date" class="form-control" id="estDate" name="est_date"
-                                                required>
-                                        </div> --}}
-                                    </form>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary btn-sm"
-                                        data-bs-dismiss="modal">Close</button>
-                                    <button type="button" class="btn btn-primary btn-sm"
-                                        onclick="submitEditDataForm()">Submit</button>
-                                </div>
+                                <form id="editDataForm">
+                                    @csrf
+                                    <!-- Simpan array ID sebagai JSON string -->
+                                    <input type="hidden" id="inquiryIds" name="ids">
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label>Description untuk Semua Inquiry Bulan Ini</label>
+                                            <textarea name="description" class="form-control" required></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" onclick="submitEditDataForm()" class="btn btn-primary">Save</button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -771,7 +714,10 @@
             </div>
         </section>
 
+        
 
+        <!-- excel -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
         <!-- jQuery -->
         <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
         <!-- SimpleDataTables JS -->
@@ -852,79 +798,90 @@
 
         <script>
             function confirmPurchasing(ids, klasifikasi) {
-            if (!Array.isArray(ids)) {
-                console.error('Invalid IDs format:', ids);
-                Swal.fire('Error!', 'Invalid inquiry IDs format.', 'error');
-                return;
-            }
-
-            Swal.fire({
-                title: 'Confirm',
-                text: `Are you sure you want to confirm inquiries with klasifikasi: ${klasifikasi}?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes!',
-                cancelButtonText: 'No!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: '{{ route("confirmPurchaseimport") }}',
-                        method: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}',
-                            ids: ids,
-                            klasifikasi: klasifikasi
-                        },
-                        success: function(response) {
-                            Swal.fire('Success!', response.success || 'Inquiries confirmed successfully!', 'success').then(() => {
-                                location.reload();
-                            });
-                        },
-                        error: function(xhr) {
-                            console.error('AJAX Error:', xhr.responseText);
-                            const errorMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'An unknown error occurred.';
-                            Swal.fire('Error!', errorMsg, 'error');
-                        }
-                    });
-                } else {
-                    Swal.fire('Canceled', 'Confirmation canceled', 'info');
+                if (!Array.isArray(ids)) {
+                    console.error('Invalid IDs format:', ids);
+                    Swal.fire('Error!', 'Invalid inquiry IDs format.', 'error');
+                    return;
                 }
-            });
-        }
 
-
-                        function showEditDataModal(inquiryId) {
-                        // Set inquiry_id pada form hidden
-                        document.getElementById('inquiryId').value = inquiryId;
-
-                        // Tampilkan modal
-                        var myModal = new bootstrap.Modal(document.getElementById('editDataModal'), {});
-                        myModal.show();
-                    }
-
-            function submitEditDataForm() {
-                const form = document.getElementById('editDataForm');
-                const formData = new FormData(form);
-
-                $.ajax({
-                    url: '{{ route('updateInquiryImport') }}', // Route untuk update inquiry
-                    method: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        Swal.fire('Success!', response.message, 'success').then(() => {
-                            location.reload();
+                Swal.fire({
+                    title: 'Confirm',
+                    text: `Are you sure you want to confirm inquiries with klasifikasi: ${klasifikasi}?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes!',
+                    cancelButtonText: 'No!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '{{ route("confirmPurchaseimport") }}',
+                            method: 'POST',
+                            data: {
+                                _token: '{{ csrf_token() }}',
+                                ids: ids,
+                                klasifikasi: klasifikasi
+                            },
+                            success: function(response) {
+                                Swal.fire('Success!', response.success || 'Inquiries confirmed successfully!', 'success').then(() => {
+                                    location.reload();
+                                });
+                            },
+                            error: function(xhr) {
+                                console.error('AJAX Error:', xhr.responseText);
+                                const errorMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'An unknown error occurred.';
+                                Swal.fire('Error!', errorMsg, 'error');
+                            }
                         });
-                    },
-                    error: function(xhr) {
-                        console.error(xhr.responseText);
-                        Swal.fire('Error!', 'An error occurred while updating.', 'error');
+                    } else {
+                        Swal.fire('Canceled', 'Confirmation canceled', 'info');
                     }
                 });
             }
+
+
+            function showEditDataModal(ids) {
+    // Simpan array ID ke input hidden sebagai JSON string
+    document.getElementById('inquiryIds').value = JSON.stringify(ids);
+    
+    // Tampilkan modal
+    new bootstrap.Modal(document.getElementById('editDataModal')).show();
+}
+
+function submitEditDataForm() {
+    const form = document.getElementById('editDataForm');
+    const formData = new FormData(form);
+    
+    // Ambil array ID dari JSON string
+    const ids = JSON.parse(formData.get('ids'));
+    
+    // Validasi client-side
+    if (!Array.isArray(ids) || ids.length === 0) {
+        Swal.fire('Error!', 'No inquiries selected.', 'error');
+        return;
+    }
+
+    // Kirim ke server
+    $.ajax({
+        url: '{{ route('updateInquiryImport') }}',
+        method: 'POST',
+        data: {
+            _token: '{{ csrf_token() }}',
+            ids: ids, // Kirim sebagai array
+            description: formData.get('description')
+        },
+        success: function(response) {
+            Swal.fire('Success!', response.message, 'success').then(() => {
+                location.reload();
+            });
+        },
+        error: function(xhr) {
+            const errorMsg = xhr.responseJSON?.error || 'Update failed.';
+            Swal.fire('Error!', errorMsg, 'error');
+        }
+    });
+}
 
 
             function finishInquiry(ids, klasifikasi) {
@@ -941,7 +898,7 @@
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, finish them!'
+                    confirmButtonText: 'Yes, finish them!',
                     cancelButtonText: 'No, cancel!'
                 }).then((result) => {
                     if (result.isConfirmed) {
