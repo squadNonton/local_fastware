@@ -465,7 +465,7 @@
                                         <td style="text-align: center;">{{ $material->nama_project }}</td>
                                         <td style="text-align: center;">{{ $material->progress }}</td>
                                         <td style="text-align: center;">{{ $material->tgl_update }}</td>
-                                        <td style="text-align: center;">{{ $material->so }}</td>
+                                        <td style="text-align: center;">{{ $material->ref_so }}</td>
                                         <td style="text-align: center;">{{ $material->remark }}</td>
                                         <td style="text-align: center;">{{ $material->marketing }}</td>
                                         <td style="text-align: center;">{{ $material->finance }}</td>
@@ -474,10 +474,10 @@
                                                 1 => 'Draft',
                                                 2 => 'Open',
                                                 3 => 'Open',
-                                                4 => 'Open',
-                                                5 => 'Open',
-                                                6 => 'Approve Marketing',
-                                                7 => 'Approve Finance',
+                                                4 => 'Approve Marketing',
+                                                5 => 'Approve Finance',
+                                                6 => 'Open',
+                                                7 => 'Open',
                                                 8 => 'Rejected',
                                                 9 => 'finished',
                                             ];
@@ -554,18 +554,17 @@
                     </div>
           
                     <!-- Customer Dropdown Search -->
-                    <div class="mb-3">
-                      <label for="customer" class="form-label fw-bold">Order From</label>
-                      <div class="searchable-dropdown">
-                        <input type="text" id="search_customer" class="form-control" placeholder="Cari customer...">
-                        <div class="dropdown-items border rounded p-2" id="customer_list" style="display: none; max-height: 200px; overflow-y: auto;">
-                          @foreach ($customers as $customer)
-                            <div data-value="{{ $customer->id }}">{{ $customer->name_customer }}</div>
-                          @endforeach
+                    {{-- Pada modal tambah --}}
+                    <div class="searchable-dropdown" data-modal-type="create">
+                        <label class="form-label fw-bold">Customer</label>
+                        <input type="text" id="search_customer_create" class="form-control" placeholder="Cari customer...">
+                        <div class="dropdown-items border rounded p-2" id="customer_list_create" style="display: none; max-height: 200px; overflow-y: auto;">
+                            @foreach ($customers as $customer)
+                                <div data-value="{{ $customer->id }}">{{ $customer->name_customer }}</div>
+                            @endforeach
                         </div>
-                      </div>
-                      <input type="hidden" id="customer" name="customer" required>
-                      <div id="selected_customers_list" class="mt-2"></div>
+                        <input type="hidden" id="customer_create" name="customer" required>
+                        <div id="selected_customers_list_create" class="mt-2"></div>
                     </div>
           
                     <!-- Keterangan Drawing -->
@@ -639,6 +638,84 @@
                         <label class="form-label">Sales</label>
                         <input type="text" name="sales" class="form-control" value="{{ $material->sales }}" required>
                     </div>
+                    <div class="searchable-dropdown" data-modal-type="edit-{{ $material->id }}">
+                        <label class="form-label">Customer</label>
+                    
+                        @php
+                            $selectedCustomer = $customers->firstWhere('id', $material->customer);
+                        @endphp
+                    
+                        <input
+                            type="text"
+                            id="search_customer_edit_{{ $material->id }}"
+                            class="form-control"
+                            placeholder="Cari customer..."
+                            value="{{ $selectedCustomer ? $selectedCustomer->name_customer : '' }}">
+                    
+                        <div class="dropdown-items border rounded p-2"
+                             id="customer_list_edit_{{ $material->id }}"
+                             style="display: none; max-height: 200px; overflow-y: auto;">
+                            @foreach ($customers as $customer)
+                                <div data-value="{{ $customer->id }}">{{ $customer->name_customer }}</div>
+                            @endforeach
+                        </div>
+                    
+                        <input type="hidden"
+                               id="customer_edit_{{ $material->id }}"
+                               name="customer"
+                               value="{{ $selectedCustomer ? $selectedCustomer->id : '' }}"
+                               required>
+                    
+                        <div id="selected_customers_list_edit_{{ $material->id }}" class="mt-2">
+                            @if ($selectedCustomer)
+                                <div class="selected-customer badge bg-primary p-2">
+                                    {{ $selectedCustomer->name_customer }}
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    
+
+                    <!-- Keterangan Drawing -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Keterangan Drawing</label>
+                        <select name="ket_drawing" class="form-control" required>
+                        <option value="via email" {{ $material->ket_drawing == 'via email' ? 'selected' : '' }}>Via Email</option>
+                        <option value="via whatsapp" {{ $material->ket_drawing == 'via whatsapp' ? 'selected' : '' }}>Via Whatsapp</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Nama Project -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nama Project</label>
+                        <input type="text" name="nama_project" class="form-control" value="{{ $material->nama_project }}" required>
+                    </div>
+                    
+                    <!-- Progress -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Update Progress</label>
+                        <input type="text" name="progress" class="form-control" value="{{ $material->progress }}" required>
+                    </div>
+                    
+                    <!-- Tanggal Update -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tanggal Update</label>
+                        <input type="text" name="tgl_update" class="form-control" value="{{ $material->tgl_update }}" required>
+                    </div>
+                    
+                    <!-- SO -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">SO</label>
+                        <input type="text" name="so" id="so_{{ $material->id }}" class="form-control" value="{{ $material->so }}" required>
+                        <div class="text-danger mt-1" style="display:none;" id="so-error-{{ $material->id }}">Field SO harus terdiri dari tepat 4 angka.</div>
+                    </div>
+                    
+                    <!-- Remark -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Remark</label>
+                        <textarea name="remark" class="form-control" rows="3">{{ $material->remark }}</textarea>
+                    </div>
+  
                     <!-- Tambah field lainnya sesuai struktur -->
                     </div>
                     <div class="modal-footer">
@@ -650,48 +727,75 @@
             </div>
             </div>
         @endforeach
+
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const searchInput = document.getElementById('search_customer');
-                const customerList = document.getElementById('customer_list');
-                const hiddenInput = document.getElementById('customer');
-                const selectedCustomersList = document.getElementById('selected_customers_list');
-            
-                customerList.style.display = 'block'; // default tampilkan
-                customerList.style.display = 'none';  // kecuali saat input aktif
-            
-                searchInput.addEventListener('input', function() {
-                    const filter = searchInput.value.toLowerCase();
-                    const items = customerList.getElementsByTagName('div');
-            
-                    for (let i = 0; i < items.length; i++) {
-                        const txtValue = items[i].textContent || items[i].innerText;
-                        items[i].style.display = txtValue.toLowerCase().includes(filter) ? '' : 'none';
-                    }
-                });
-            
-                customerList.addEventListener('click', function(e) {
-                    if (e.target && e.target.matches('div[data-value]')) {
-                        const selectedValue = e.target.getAttribute('data-value');
-                        const selectedText = e.target.textContent;
-            
-                        searchInput.value = selectedText;
-                        hiddenInput.value = selectedValue;
-                        customerList.style.display = 'none';
-                        selectedCustomersList.innerHTML = '<span class="selected-customer badge bg-success p-2">' + selectedText + '</span>';
-                    }
-                });
-            
-                searchInput.addEventListener('focus', function() {
-                    customerList.style.display = 'block';
-                });
-            
-                document.addEventListener('click', function(e) {
-                    if (!e.target.closest('.searchable-dropdown')) {
-                        customerList.style.display = 'none';
-                    }
+            $(document).ready(function() {
+                // Hover function for dropdowns
+                $('.nav-item.dropdown').hover(function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+                }, function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
                 });
             });
+        </script>
+        <script>
+            function initSearchableDropdown(searchInputId, listId, hiddenInputId, selectedListId) {
+            const searchInput = document.getElementById(searchInputId);
+            const customerList = document.getElementById(listId);
+            const hiddenInput = document.getElementById(hiddenInputId);
+            const selectedCustomersList = document.getElementById(selectedListId);
+
+            if (!searchInput || !customerList || !hiddenInput) return;
+
+            searchInput.addEventListener('input', function () {
+                const filter = searchInput.value.toLowerCase();
+                const items = customerList.getElementsByTagName('div');
+
+                for (let i = 0; i < items.length; i++) {
+                    const txtValue = items[i].textContent || items[i].innerText;
+                    items[i].style.display = txtValue.toLowerCase().includes(filter) ? '' : 'none';
+                }
+            });
+
+            customerList.addEventListener('click', function (e) {
+                if (e.target && e.target.matches('div[data-value]')) {
+                    const selectedValue = e.target.getAttribute('data-value');
+                    const selectedText = e.target.textContent;
+
+                    searchInput.value = selectedText;
+                    hiddenInput.value = selectedValue;
+                    customerList.style.display = 'none';
+                    selectedCustomersList.innerHTML = '<span class="selected-customer badge bg-success p-2">' + selectedText + '</span>';
+                }
+            });
+
+            searchInput.addEventListener('focus', function () {
+                customerList.style.display = 'block';
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('#' + searchInputId) && !e.target.closest('#' + listId)) {
+                    customerList.style.display = 'none';
+                }
+            });
+        }
+
+        // Inisialisasi untuk modal tambah
+        document.addEventListener('DOMContentLoaded', function () {
+            initSearchableDropdown('search_customer_create', 'customer_list_create', 'customer_create', 'selected_customers_list_create');
+
+            @foreach ($materials as $material)
+                initSearchableDropdown(
+                    'search_customer_edit_{{ $material->id }}',
+                    'customer_list_edit_{{ $material->id }}',
+                    'customer_edit_{{ $material->id }}',
+                    'selected_customers_list_edit_{{ $material->id }}'
+                );
+            @endforeach
+        });
             </script>
 
             <script>

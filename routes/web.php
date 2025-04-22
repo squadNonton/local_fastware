@@ -545,7 +545,9 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/custom-request', [CustomRequestController::class, 'showCstmReq'])->name('showCustomRequest');
     Route::post('/materials/store', [CustomRequestController::class, 'createCstmReq'])->name('CustomRequest.store');
     Route::post('/materials/delete', [CustomRequestController::class, 'deleteCstmReq'])->name('CustomRequest.delete');
-    Route::post('/materials/update', [CustomRequestController::class, 'updateCstmReq'])->name('CustomRequest.update');
-    Route::get('/custom-request/approve-marketing-cstmreq', [CustomRequestController::class, 'showApproveMarketing'])->name('showApproveMarketing');
-    Route::post('/custom-request/approve', [CustomRequestController::class, 'approveMarketing'])->name('approveMarketing');
+    Route::put('/materials/update/{id}', [CustomRequestController::class, 'updateCstmReq'])->name('CustomRequest.update');
+    Route::get('/custom-request/approve-marketing-cstmreq', [CustomRequestController::class, 'showApprovalMarketing'])->name('showApproveMarketing');
+    Route::post('/custom-request/marketing-approved/{id}', [CustomRequestController::class, 'approveMarketing'])->name('approveMarketing');
+    Route::get('/custom-request/approve-finance-cstmreq', [CustomRequestController::class, 'showApprovalFinance'])->name('showApproveFinance');
+    Route::post('/custom-request/finance-approved/{id}', [CustomRequestController::class, 'approveFinance'])->name('approveFinance');
 });

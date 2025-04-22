@@ -573,7 +573,17 @@
                                         </ul>
                                     </li>
                                 @endif
-                                <li><a class="dropdown-item" href="{{ route('showCustomRequest') }}">Custom Request</a></li>
+                                <li>
+                                    <a class="dropdown-item dropdown-toggle" href="#" id="childDropdown"
+                                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Custom Request
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="childDropdown">
+                                        <li><a class="dropdown-item" href="{{ route('showCustomRequest') }}">Custom Request</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('showApproveMarketing') }}">Persetujuan Marketing</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('showApproveFinance') }}">Persetujuan Finance</a></li>
+                                    </ul>
+                                </li>
 
                             </ul>
                         </li>
@@ -1030,8 +1040,8 @@
                                             <li><a class="dropdown-item"
                                                     href="{{ route('overviewPurchase') }}">Overview Purchase</a></li>
                                         @endif
-                                        <li><a class="dropdown-item" href="{{ route('overviewInquiry') }}">Overview
-                                                Inquiry Order Local</a></li>
+                                        {{-- <li><a class="dropdown-item" href="{{ route('overviewInquiry') }}">Overview
+                                                Inquiry Order Local</a></li> --}}
                                     </ul>
                                 </li>
 

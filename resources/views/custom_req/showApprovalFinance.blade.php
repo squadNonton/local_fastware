@@ -465,7 +465,7 @@
                                         <td style="text-align: center;">{{ $material->nama_project }}</td>
                                         <td style="text-align: center;">{{ $material->progress }}</td>
                                         <td style="text-align: center;">{{ $material->tgl_update }}</td>
-                                        <td style="text-align: center;">{{ $material->so }}</td>
+                                        <td style="text-align: center;">{{ $material->ref_so }}</td>
                                         <td style="text-align: center;">{{ $material->remark }}</td>
                                         <td style="text-align: center;">{{ $material->marketing }}</td>
                                         <td style="text-align: center;">{{ $material->finance }}</td>
@@ -511,7 +511,7 @@
                                             </button>
                                         </td>
                                         <td style="text-align: center;">
-                                            <button class="btn btn-sm btn-warning" 
+                                            {{-- <button class="btn btn-sm btn-warning" 
                                                     data-bs-toggle="modal" 
                                                     data-bs-target="#editMaterialModal{{ $material->id }}">
                                                 <i class="bi bi-pencil-square"></i>
@@ -523,7 +523,12 @@
                                                 <button class="btn btn-sm btn-danger">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
-                                            </form>
+                                            </form> --}}
+
+                                            <a href="#" class="btn btn-primary btn-sm m-1"
+                                                onclick="approveFinance({{ $material->id }}); return false;">
+                                                <i class="bi bi-check-square-fill"></i>
+                                            </a>
                                         </td>                                        
                                     </tr>
                                     @endforeach
@@ -536,7 +541,7 @@
         </section>
 
 
-        <!-- Modal Tambah Material -->
+        {{-- <!-- Modal Tambah Material -->
         <div class="modal fade" id="addMaterialModal" tabindex="-1" aria-labelledby="addMaterialModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
               <form action="{{ route('CustomRequest.store') }}" method="POST">
@@ -649,7 +654,21 @@
                 </form>
             </div>
             </div>
-        @endforeach
+        @endforeach --}}
+
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
+        <script>
+            $(document).ready(function() {
+                // Hover function for dropdowns
+                $('.nav-item.dropdown').hover(function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+                }, function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(150);
+                });
+            });
+        </script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const searchInput = document.getElementById('search_customer');
@@ -711,6 +730,23 @@
                     soError.style.display = 'block';
                 }
                 });
+                function approveFinance(id) {
+                $.ajax({
+                    url: '{{ route('approveFinance', '') }}/' + id,
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}' // Sertakan token CSRF
+                    },
+                    success: function(response) {
+                        Swal.fire('Success!', 'Finance approved successfully.', 'success');
+                        location.reload(); // Reload halaman untuk melihat update
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        Swal.fire('Error!', 'An error occurred while approving the Custom Request.', 'error');
+                    }
+                });
+            }
             </script>
   
   
