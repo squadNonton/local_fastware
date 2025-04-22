@@ -26,43 +26,105 @@ class CrpController extends Controller
         return view('crp.create'); // Buat view ini
     }
 
+    // public function store(Request $request)
+    // {
+    //     // Validasi data yang diterima
+    //     $validatedData = $request->validate([
+    //         'plan_values' => 'required|array',
+    //         'actual_values' => 'required|array',
+    //         'plan_ytd' => 'required|numeric',
+    //         'actual_ytd' => 'required|numeric',
+    //     ]);
+
+    //     // Simpan data summary
+    //     foreach ($validatedData['summary'] as $summary) {
+    //         $mstCrp = MstDboCrp::create([
+    //             'nm_category' => $summary['nm_category'],
+    //             'month_1' => $summary['plan_values'][0],
+    //             'month_2' => $summary['plan_values'][1],
+    //             'month_3' => $summary['plan_values'][2],
+    //             'month_4' => $summary['plan_values'][3],
+    //             'month_5' => $summary['plan_values'][4],
+    //             'month_6' => $summary['plan_values'][5],
+    //             'month_7' => $summary['plan_values'][6],
+    //             'month_8' => $summary['plan_values'][7],
+    //             'month_9' => $summary['plan_values'][8],
+    //             'month_10' => $summary['plan_values'][9],
+    //             'month_11' => $summary['plan_values'][10],
+    //             'month_12' => $summary['plan_values'][11],
+    //             'grand_tot' => $summary['ytd'], // Total YTD yang dihitung
+    //             'plan_actual' => 'Plan', // Sesuaikan jika perlu
+    //         ]);
+
+    //         // Simpan data detail yang berkaitan dengan summary
+    //         foreach ($validatedData['details'] as $detail) {
+    //             TrsDboCrp::create([
+    //                 'mst_id' => $mstCrp->id, // Menghubungkan ke summary yang baru dibuat
+    //                 'nm_category' => $detail['category'],
+    //                 'detail_activity' => $detail['detail_activity'],
+    //                 'no_po' => $detail['no_PO'],
+    //                 'date' => $detail['date'],
+    //                 'qty' => $detail['qty'],
+    //                 // Tambahkan data harga jika diperlukan
+    //                 'price_before' => $detail['price_before'] ?? null, // tambahkan jika ada
+    //                 'price_after' => $detail['price_after'] ?? null, // tambahkan jika ada
+    //                 'price_sell' => $detail['price_sell'] ?? null, // tambahkan jika ada
+    //                 'total_cost_before' => $detail['total_cost_before'] ?? null, // tambahkan jika ada
+    //                 'total_cost_after' => $detail['total_cost_after'] ?? null, // tambahkan jika ada
+    //                 'total_cost_crp' => $detail['total_cost_crp'] ?? null, // tambahkan jika ada
+    //             ]);
+    //         }
+    //         return response()->json(['success' => true]);
+    //     }
+    // }
+
+
+
     public function store(Request $request)
     {
+        // Validasi data yang diterima
         $validatedData = $request->validate([
-            'nm_category' => 'required|string|max:255',
-            'month_1' => 'required|numeric',
-            'month_2' => 'required|numeric',
-            'month_3' => 'required|numeric',
-            'month_4' => 'required|numeric',
-            'month_5' => 'required|numeric',
-            'month_6' => 'required|numeric',
-            'month_7' => 'required|numeric',
-            'month_8' => 'required|numeric',
-            'month_9' => 'required|numeric',
-            'month_10' => 'required|numeric',
-            'month_11' => 'required|numeric',
-            'month_12' => 'required|numeric',
-            'grand_tot' => 'required|numeric',
+            'summary' => 'required|array',
+            'details' => 'required|array',
         ]);
 
-        // Simpan data ke database
-        MstDboCrp::create([
-            'category' => $request->category,
-            'month_1' => $request->month_1,
-            'month_2' => $request->month_2,
-            'month_3' => $$request->month_3,
-            'month_4' => $request->month_4,
-            'month_5' => $request->month_5,
-            'month_6' => $request->month_6,
-            'month_7' => $request->month_7,
-            'month_8' => $request->month_8,
-            'month_9' => $request->month_9,
-            'month_10' => $request->month_10,
-            'month_11' => $request->month_11,
-            'month_12' => $request->month_12,
-            'grand_tot' => $request->ytd, // Total bisa disesuaikan jika butuh perhitungan lain
-            'plan_actual' => 'Plan', // Sesuaikan jika perlu
-        ]);
+        // Simpan data summary (Plan)
+        foreach ($validatedData['summary'] as $summary) {
+            $mstCrp = MstDboCrp::create([
+                'nm_category' => $summary['nm_category'],
+                'month_1' => $summary['plan_values'][0],
+                'month_2' => $summary['plan_values'][1],
+                'month_3' => $summary['plan_values'][2],
+                'month_4' => $summary['plan_values'][3],
+                'month_5' => $summary['plan_values'][4],
+                'month_6' => $summary['plan_values'][5],
+                'month_7' => $summary['plan_values'][6],
+                'month_8' => $summary['plan_values'][7],
+                'month_9' => $summary['plan_values'][8],
+                'month_10' => $summary['plan_values'][9],
+                'month_11' => $summary['plan_values'][10],
+                'month_12' => $summary['plan_values'][11],
+                'grand_tot' => $summary['plan_ytd'], // Mengambil nilai YTD dari input
+                'plan_actual' => 'Plan', // Menandai ini sebagai data Plan
+            ]);
+        }
+
+        // Simpan data detail (Actual)
+        foreach ($validatedData['details'] as $detail) {
+            TrsDboCrp::create([
+                'mst_id' => $mstCrp->id, // Menghubungkan dengan summary yang baru dibuat
+                'nm_category' => $detail['category'],
+                'detail_activity' => $detail['detail_activity'],
+                'no_po' => $detail['no_PO'],
+                'date' => $detail['date'],
+                'qty' => $detail['qty'],
+                'price_before' => $detail['price_before'] ?? null,
+                'price_after' => $detail['price_after'] ?? null,
+                'total_cost_before' => $detail['total_cost_before'] ?? null,
+                'total_cost_after' => $detail['total_cost_after'] ?? null,
+                'total_cost_crp' => $detail['total_cost_crp'] ?? null,
+            ]);
+        }
 
         return response()->json(['success' => true]);
     }
