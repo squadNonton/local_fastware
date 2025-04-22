@@ -409,7 +409,7 @@
                                                             <th scope="col">Status</th>
                                                             <th scope="col">Last Update</th>
                                                             <th scope="col">Update Time</th>
-                                                            <th scope="col">Est. Date</th>
+                                                            {{-- <th scope="col">Est. Date</th> --}}
                                                             <th scope="col">Actions</th>
                                                         </tr>
                                                     </thead>
@@ -495,7 +495,7 @@
                                                                     {{ $lastUpdateMessage }}
                                                                 </td>
                                                                 <td>{{ $inquiry->updated_at }}</td>
-                                                                <td>{{ $inquiry->est_date }}</td>
+                                                                {{-- <td>{{ $inquiry->est_date }}</td> --}}
                                                                 <td>
                                                                     @if ($inquiry->status == 1)
                                                                         <a class="btn btn-custom-edit m-1 btn-sm"
@@ -564,7 +564,7 @@
                                                             <th scope="col">Status</th>
                                                             <th scope="col">Last Update</th>
                                                             <th scope="col">Update Time</th>
-                                                            <th scope="col">Est. Date</th>
+                                                            {{-- <th scope="col">Est. Date</th> --}}
                                                             <th scope="col">Actions</th>
                                                         </tr>
                                                     </thead>
@@ -650,7 +650,7 @@
                                                                     {{ $lastUpdateMessage }}
                                                                 </td>
                                                                 <td>{{ $inquiry->updated_at }}</td>
-                                                                <td>{{ $inquiry->est_date }}</td>
+                                                                {{-- <td>{{ $inquiry->est_date }}</td> --}}
                                                                 <td>
                                                                     @if ($inquiry->status == 1)
                                                                         <a class="btn btn-custom-edit m-1 btn-sm"
@@ -719,7 +719,7 @@
                                                             <th scope="col">Status</th>
                                                             <th scope="col">Last Update</th>
                                                             <th scope="col">Update Time</th>
-                                                            <th scope="col">Est. Date</th>
+                                                            {{-- <th scope="col">Est. Date</th> --}}
                                                             <th scope="col">Actions</th>
                                                         </tr>
                                                     </thead>
@@ -805,7 +805,7 @@
                                                                     {{ $lastUpdateMessage }}
                                                                 </td>
                                                                 <td>{{ $inquiry->updated_at }}</td>
-                                                                <td>{{ $inquiry->est_date }}</td>
+                                                                {{-- <td>{{ $inquiry->est_date }}</td> --}}
                                                                 <td>
                                                                     @if ($inquiry->status == 1)
                                                                         <a class="btn btn-custom-edit m-1 btn-sm"
@@ -874,7 +874,7 @@
                                                             <th scope="col">Status</th>
                                                             <th scope="col">Last Update</th>
                                                             <th scope="col">Update Time</th>
-                                                            <th scope="col">Est. Date</th>
+                                                            {{-- <th scope="col">Est. Date</th> --}}
                                                             <th scope="col">Actions</th>
                                                         </tr>
                                                     </thead>
@@ -960,7 +960,7 @@
                                                                     {{ $lastUpdateMessage }}
                                                                 </td>
                                                                 <td>{{ $inquiry->updated_at }}</td>
-                                                                <td>{{ $inquiry->est_date }}</td>
+                                                                {{-- <td>{{ $inquiry->est_date }}</td> --}}
                                                                 <td>
                                                                     @if ($inquiry->status == 1)
                                                                         <a class="btn btn-custom-edit m-1 btn-sm"
