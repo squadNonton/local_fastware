@@ -142,7 +142,9 @@
 
     <main id="main" class="main">
         <section class="section">
-
+            <head>
+                <meta name="csrf-token" content="{{ csrf_token() }}">
+            </head>
             <div class="card shadow-lg rounded">
                 <div class="card-body">
                     <p></p>
@@ -197,21 +199,9 @@
                                 <tr>
                                     <td></td>
                                     <td class="font-weight-bold text-success">Actual</td>
-                                    {{-- <td><input type="text" class="form-control text-center"></td>
-                                        <td><input type="text" class="form-control text-center"></td>
-                                        <td><input type="text" class="form-control text-center"></td>
-                                        <td><input type="text" class="form-control text-center"></td>
-                                        <td><input type="text" class="form-control text-center"></td>
-                                        <td><input type="text" class="form-control text-center"></td>
-                                        <td><input type="text" class="form-control text-center"></td>
-                                        <td><input type="text" class="form-control text-center"></td>
-                                        <td><input type="text" class="form-control text-center"></td>
-                                        <td><input type="text" class="form-control text-center"></td>
-                                        <td><input type="text" class="form-control text-center"></td>
-                                        <td><input type="text" class="form-control text-center"></td>
-                                        <td><input type="text" class="form-control text-center font-weight-bold"></td> --}}
                                     @for ($i = 0; $i < 12; $i++)
-                                        <td><input type="text" class="form-control text-center" name="actual_values[]" />
+                                        <td><input type="text" class="form-control text-center" name="actual_values[]" 
+                                            oninput="calculateYTD()"/>
                                         </td>
                                     @endfor
                                     <td><input type="text" class="form-control text-center font-weight-bold"
@@ -316,29 +306,7 @@
                 //     row.querySelector('.crp').value = crp.toFixed(2); // Modifikasi menyesuaikan hasil
                 // }
 
-                function calculateYTD() {
-                    const planRows = document.querySelectorAll('#tabelsummary tbody tr');
 
-                    planRows.forEach(row => {
-                        const months = [];
-
-                        // Hitung YTD untuk baris Plan
-                        // Jika row memiliki lebih dari 15 sel
-                        if (row.cells.length > 15) {
-                            for (let i = 3; i < 15; i++) { // Index bulan Jan (3) hingga Des (14)
-                                const monthValue = row.cells[i].querySelector('input');
-                                if (monthValue) { // Pastikan monthValue tidak undefined
-                                    months.push(parseFloat(monthValue.value) || 0);
-                                }
-                            }
-                            const totalYTD = months.reduce((acc, value) => acc + value, 0);
-                            const ytdInput = row.cells[15].querySelector('input');
-                            if (ytdInput) { // Pastikan YTD input ada
-                                ytdInput.value = totalYTD;
-                            }
-                        }
-                    });
-                }
             </script>
             <script>
                 function addRow() {
@@ -346,31 +314,31 @@
                     const newRow = table.insertRow();
 
                     newRow.innerHTML = `
-                <td><input type="checkbox" name="record"></td>
-                <td>
-                    <select>
-                        <option value="Consumable">Consumable</option>
-                        <option value="Subcont">Subcont</option>
-                        <option value="Repair Maintenance">Repair Maintenance</option>
-                        <option value="Utility">Utility</option>
-                        <option value="General Afffair">General Afffair</option>
-                        <option value="IT">IT</option>
-                        <option value="Material Cost">Material Cost</option>
-                        <option value="Indirect Material">Indirect Material</option>
-                        <option value="Others">Others</option>
-                    </select>
-                </td>
-                <td><input type="text" value=""></td>
-                <td class="red-text"><input type="text" value=""></td>
-                <td><input type="date" value=""></td>
-                <td><input type="number" value=""></td>
-                <td><input type="text" value=""></td>
-                <td><input type="text" value=""></td>
-                <td><input type="text" value=""></td>
-                <td><input type="text" value=""></td>
-                <td><input type="text" value=""></td>
-                <td><input type="text" value=""></td>
-            `;
+                        <td><input type="checkbox" name="record"></td>
+                        <td>
+                            <select>
+                                <option value="Consumable">Consumable</option>
+                                <option value="Subcont">Subcont</option>
+                                <option value="Repair Maintenance">Repair Maintenance</option>
+                                <option value="Utility">Utility</option>
+                                <option value="General Afffair">General Afffair</option>
+                                <option value="IT">IT</option>
+                                <option value="Material Cost">Material Cost</option>
+                                <option value="Indirect Material">Indirect Material</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </td>
+                        <td><input type="text" value=""></td>
+                        <td class="red-text"><input type="text" value=""></td>
+                        <td><input type="date" value=""></td>
+                        <td><input type="number" value=""></td>
+                        <td><input type="text" value=""></td>
+                        <td><input type="text" value=""></td>
+                        <td><input type="text" value=""></td>
+                        <td><input type="text" value=""></td>
+                        <td><input type="text" value=""></td>
+                        <td><input type="text" value=""></td>
+                    `;
                 }
 
                 function deleteRows() {
@@ -391,79 +359,81 @@
                         }
                     });
                 }
+
+                function saveData() {
+    const summaryData = [];
+    const summaryRows = document.querySelectorAll('#tabelsummary tbody tr');
+
+    for (let i = 0; i < summaryRows.length; i++) {
+        const planRow = summaryRows[i];
+        const categorySelect = planRow.querySelector('select');
+
+        if (!categorySelect) {
+            i++; // skip actual row
+            continue;
+        }
+
+        const category = categorySelect.value;
+        if (!category) continue;
+
+        // Only process Plan row
+        processRow(planRow, category, 'Plan', summaryData);
+
+        i++; // skip Actual row
+    }
+
+    const formData = new FormData();
+    formData.append('summary', JSON.stringify(summaryData));
+
+    fetch('{{ route('crp.store') }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Data berhasil disimpan!');
+            resetInputs();
+        } else {
+            throw new Error(data.error || 'Data gagal disimpan');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error: ' + error.message);
+    });
+}
+
+
+function processRow(row, category, type, summaryData) {
+    const inputs = row.querySelectorAll('input[type="text"]');
+    const monthValues = Array.from(inputs).slice(0, 12).map(input => parseInt(input.value) || 0);
+    const ytd = parseInt(inputs[12]?.value) || 0;
+
+    const dataEntry = {
+        nm_category: category,
+        plan_actual: type,
+        grand_tot: ytd
+    };
+
+    for (let i = 0; i < 12; i++) {
+        dataEntry[`month_${i + 1}`] = monthValues[i] || 0;
+    }
+
+    summaryData.push(dataEntry);
+}
             </script>
 
         </section>
 
-        {{-- <script>
-            function saveData() {
-                const summaryData = [];
-                const detailData = [];
+        <script>
+            
 
-                // Ambil data dari tabel summary
-                const summaryRows = document.querySelectorAll('#tabelsummary tbody tr');
-                summaryRows.forEach(row => {
-                    const category = row.querySelector('select').value;
-                    const planValues = Array.from(row.querySelectorAll('input[type="text"]')).map(input => parseFloat(
-                        input.value) || 0);
-                    const ytd = row.querySelector('td:last-child input').value;
 
-                    if (category) {
-                        summaryData.push({
-                            nm_category: category,
-                            plan_values: planValues,
-                            ytd: ytd
-                        });
-                    }
-                });
-
-                // Ambil data dari tabel detail
-                const detailRows = document.querySelectorAll('#actualTable tbody tr');
-                detailRows.forEach(row => {
-                    const category = row.querySelector('select').value;
-                    const detailActivity = row.querySelector('input[type="text"]').value;
-                    const noPO = row.querySelectorAll('input[type="text"]')[1].value;
-                    const date = row.querySelector('input[type="date"]').value;
-                    const qty = row.querySelector('input[type="number"]').value;
-
-                    if (category) {
-                        detailData.push({
-                            category: category,
-                            detail_activity: detailActivity,
-                            no_PO: noPO,
-                            date: date,
-                            qty: qty,
-                            // Kirim harga dan total cost jika diperlukan
-                        });
-                    }
-                });
-
-                // Kirim semua data ke backend
-                fetch('{{ route('crp.store') }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({
-                            summary: summaryData,
-                            details: detailData
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Data berhasil disimpan!');
-                            resetInputs(); // Atur ulang input
-                        } else {
-                            alert('Data gagal disimpan.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-            }
-        </script> --}}
+        </script> 
 
 
         {{-- Tabel SummaryJSQ --}}
@@ -486,13 +456,19 @@
             function addRow1() {
                 const table = document.getElementById('tabelsummary').getElementsByTagName('tbody')[0];
 
+                // Membuat baris Plan
                 const newRowPlan = table.insertRow();
-                const newRowActual = table.insertRow();
+                
+                // Checkbox
+                const cellCheckbox = newRowPlan.insertCell();
+                cellCheckbox.innerHTML = '<input type="checkbox" name="record1">';
 
-                newRowPlan.innerHTML = `
-                <td><input type="checkbox" name="record1"></td>
-                <td rowspan="2">
-                    <select>
+                // Kategori (rowspan 2)
+                const cellCategory = newRowPlan.insertCell();
+                cellCategory.rowSpan = 2;
+                cellCategory.innerHTML = `
+                    <select class="form-control">
+                        <option value="" disabled selected>Pilih Kategori</option>
                         <option value="Consumable">Consumable</option>
                         <option value="Subcont">Subcont</option>
                         <option value="Repair Maintenance">Repair Maintenance</option>
@@ -503,41 +479,45 @@
                         <option value="Indirect Material">Indirect Material</option>
                         <option value="Others">Others</option>
                     </select>
-                </td>
-                <td>Plan</td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-            `;
+                `;
 
-                newRowActual.innerHTML = `
-                <td></td>
-                <td>Actual</td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-            `;
+                // Tipe Plan
+                const cellTypePlan = newRowPlan.insertCell();
+                cellTypePlan.className = 'font-weight-bold text-primary';
+                cellTypePlan.textContent = 'Plan';
+
+                // Input bulan Jan-Dec untuk Plan
+                for (let i = 0; i < 12; i++) {
+                    const cell = newRowPlan.insertCell();
+                    cell.innerHTML = `<input type="text" class="form-control text-center" name="plan_values[]" oninput="calculateYTD()">`;
+                }
+
+                // YTD Plan
+                const cellYTDPlan = newRowPlan.insertCell();
+                cellYTDPlan.innerHTML = '<input type="text" class="form-control text-center font-weight-bold" readonly>';
+
+                // Membuat baris Actual
+                const newRowActual = table.insertRow();
+
+                // Cell kosong untuk checkbox (karena rowspan kategori)
+                newRowActual.insertCell();
+
+                // Tipe Actual
+                const cellTypeActual = newRowActual.insertCell();
+                cellTypeActual.className = 'font-weight-bold text-success';
+                cellTypeActual.textContent = 'Actual';
+
+                // Input bulan Jan-Dec untuk Actual
+                for (let i = 0; i < 12; i++) {
+                    const cell = newRowActual.insertCell();
+                    cell.innerHTML = `<input type="text" class="form-control text-center" name="actual_values[]" oninput="calculateYTD()">`;
+                }
+
+                // YTD Actual
+                const cellYTDActual = newRowActual.insertCell();
+                cellYTDActual.innerHTML = '<input type="text" class="form-control text-center font-weight-bold" name="actual_ytd" readonly>';
             }
+
 
             function deleteRows1() {
                 const checkboxes = document.querySelectorAll('input[name="record1"]:checked');
@@ -556,102 +536,43 @@
                 });
             }
 
-            function saveData() {
-                const summaryData = [];
-                const detailData = [];
-
-                // Ambil data dari tabel summary
-                const summaryRows = document.querySelectorAll('#tabelsummary tbody tr:first-child');
-
-                summaryRows.forEach(row => {
-                    const category = row.querySelector('select').value || ''; // Jika null, isi dengan string kosong
-                    const planValues = Array.from(row.querySelectorAll('input[name="plan_values[]"]')).map(input => {
-                        return parseFloat(input.value) || 0; // Jika input tidak valid, isi dengan 0
-                    });
-                    const ytd = parseFloat(row.querySelector('input[name="plan_ytd"]').value) ||
-                        0; // Menambahkan penanganan null
-
-                    summaryData.push({
-                        nm_category: category,
-                        plan_values: planValues,
-                        ytd: ytd
-                    });
-                });
-
-                // Ambil data dari tabel detail
-                const detailRows = document.querySelectorAll('#actualTable tbody tr');
-                detailRows.forEach(row => {
-                    const category = row.querySelector('select[name="actual_category[]"]');
-                    const detailActivity = row.querySelector('input[name="detail_activity[]"]');
-                    const noPO = row.querySelector('input[name="no_po[]"]');
-                    const date = row.querySelector('input[name="date[]"]');
-                    const qty = row.querySelector('input[name="qty[]"]');
-                    const priceBefore = row.querySelector('input[name="price_before[]"]');
-                    const priceAfter = row.querySelector('input[name="price_after[]"]');
-
-                    // Mengambil nilai dan memastikan tidak ada yang null
-                    const categoryValue = category ? category.value : ''; // Kategori
-                    const detailActivityValue = detailActivity ? detailActivity.value : ''; // Detail Activity
-                    const noPOValue = noPO ? noPO.value : ''; // No PO
-                    const dateValue = date ? date.value : ''; // Date
-                    const qtyValue = qty ? parseFloat(qty.value) : 0; // Qty, default 0
-                    const priceBeforeValue = priceBefore ? parseFloat(priceBefore.value) : 0; // Price Before
-                    const priceAfterValue = priceAfter ? parseFloat(priceAfter.value) : 0; // Price After
-
-                    detailData.push({
-                        category: categoryValue,
-                        detail_activity: detailActivityValue,
-                        no_PO: noPOValue,
-                        date: dateValue,
-                        qty: qtyValue,
-                        price_before: priceBeforeValue,
-                        price_after: priceAfterValue,
-                        // Tambahkan total cost atau CRP jika perlu
-                    });
-                });
-
-                // Kirim data ke backend
-                fetch('{{ route('crp.store') }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({
-                            summary: summaryData,
-                            details: detailData
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Data berhasil disimpan!');
-                            resetInputs(); // Atur ulang input setelah simpan
-                        } else {
-                            alert('Data gagal disimpan.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-            }
+            
         </script>
 
 
         <script>
             // Fungsi untuk menghitung YTD
             function calculateYTD() {
-                const planRows = document.querySelectorAll('#tabelsummary tbody tr');
-                planRows.forEach(row => {
-                    const months = [];
-                    for (let i = 3; i < 15; i++) { // Indeks 3 hingga 14 untuk bulan Jan-Dec
-                        const monthValue = row.cells[i].querySelector('input').value;
-                        months.push(parseFloat(monthValue) || 0);
-                    }
-                    const totalYTD = months.reduce((acc, value) => acc + value, 0);
-                    row.cells[15].querySelector('input').value = totalYTD; // Cell index 14 untuk YTD
-                });
+    const rows = document.querySelectorAll('#tabelsummary tbody tr');
+
+    for (let i = 0; i < rows.length; i += 2) {
+        const planRow = rows[i];
+        const actualRow = rows[i + 1];
+
+        // --- Hitung YTD PLAN ---
+        let totalPlan = 0;
+        for (let col = 3; col < 15; col++) {
+            const input = planRow.cells[col].querySelector('input');
+            if (input) {
+                totalPlan += parseFloat(input.value) || 0;
             }
+        }
+        const ytdPlanInput = planRow.cells[15]?.querySelector('input');
+        if (ytdPlanInput) ytdPlanInput.value = Math.round(totalPlan);
+
+        // --- Hitung YTD ACTUAL ---
+        let totalActual = 0;
+        for (let col = 2; col < 14; col++) {
+            const input = actualRow.cells[col]?.querySelector('input');
+            if (input) {
+                totalActual += parseFloat(input.value) || 0;
+            }
+        }
+        const ytdActualInput = actualRow.cells[14]?.querySelector('input[name="actual_ytd"]');
+        if (ytdActualInput) ytdActualInput.value = Math.round(totalActual);
+    }
+}
+
 
 
             document.addEventListener('DOMContentLoaded', function() {
@@ -660,55 +581,7 @@
                 });
             });
 
-            // Fungsi untuk menyimpan data
-            // function saveData() {
-            //     const category = document.getElementById('categorySelect').value;
-            //     const monthInputs = document.querySelectorAll('#tabelsummary tbody tr:first-child input[type="text"]');
-
-            //     const planValues = Array.from(monthInputs).map(input => input.value);
-
-            //     const ytd = document.querySelector('#tabelsummary tbody tr:first-child td:last-child input').value;
-
-            //     // Kirim data ke backend menggunakan Fetch API
-            //     fetch('{{ route('crp.store') }}', {
-            //             method: 'POST',
-            //             headers: {
-            //                 'Content-Type': 'application/json',
-            //                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            //             },
-            //             body: JSON.stringify({
-            //                 nm_category: nm_category,
-            //                 plan_actual: plan_actual,
-            //                 jan: planValues[0],
-            //                 feb: planValues[1],
-            //                 mar: planValues[2],
-            //                 apr: planValues[3],
-            //                 may: planValues[4],
-            //                 jun: planValues[5],
-            //                 jul: planValues[6],
-            //                 aug: planValues[7],
-            //                 sep: planValues[8],
-            //                 oct: planValues[9],
-            //                 nov: planValues[10],
-            //                 dec: planValues[11],
-            //                 ytd: ytd
-            //             })
-            //         })
-            //         .then(response => response.json())
-            //         .then(data => {
-            //             if (data.success) {
-            //                 alert('Data berhasil disimpan!');
-            //                 resetInputs(); // Atur ulang inputs setelah simpan
-            //             } else {
-            //                 alert('Data gagal disimpan.');
-            //             }
-            //         })
-            //         .catch(error => {
-            //             console.error('Error:', error);
-            //         });
-            // }
-
-            //
+            
         </script>
     </main>
 @endsection

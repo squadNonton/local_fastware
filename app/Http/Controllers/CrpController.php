@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Customer;
 use App\Models\MstDboCrp;
+use App\Models\TrsDboCrp;
 
 class CrpController extends Controller
 {
@@ -81,53 +82,43 @@ class CrpController extends Controller
 
 
     public function store(Request $request)
-    {
-        // Validasi data yang diterima
-        $validatedData = $request->validate([
-            'summary' => 'required|array',
-            'details' => 'required|array',
-        ]);
+{
+    $validated = $request->validate([
+        'summary' => 'required|string', // Validasi sebagai string JSON
+    ]);
 
-        // Simpan data summary (Plan)
-        foreach ($validatedData['summary'] as $summary) {
-            $mstCrp = MstDboCrp::create([
-                'nm_category' => $summary['nm_category'],
-                'month_1' => $summary['plan_values'][0],
-                'month_2' => $summary['plan_values'][1],
-                'month_3' => $summary['plan_values'][2],
-                'month_4' => $summary['plan_values'][3],
-                'month_5' => $summary['plan_values'][4],
-                'month_6' => $summary['plan_values'][5],
-                'month_7' => $summary['plan_values'][6],
-                'month_8' => $summary['plan_values'][7],
-                'month_9' => $summary['plan_values'][8],
-                'month_10' => $summary['plan_values'][9],
-                'month_11' => $summary['plan_values'][10],
-                'month_12' => $summary['plan_values'][11],
-                'grand_tot' => $summary['plan_ytd'], // Mengambil nilai YTD dari input
-                'plan_actual' => 'Plan', // Menandai ini sebagai data Plan
-            ]);
-        }
+    $summaryData = json_decode($request->summary, true);
 
-        // Simpan data detail (Actual)
-        foreach ($validatedData['details'] as $detail) {
-            TrsDboCrp::create([
-                'mst_id' => $mstCrp->id, // Menghubungkan dengan summary yang baru dibuat
-                'nm_category' => $detail['category'],
-                'detail_activity' => $detail['detail_activity'],
-                'no_po' => $detail['no_PO'],
-                'date' => $detail['date'],
-                'qty' => $detail['qty'],
-                'price_before' => $detail['price_before'] ?? null,
-                'price_after' => $detail['price_after'] ?? null,
-                'total_cost_before' => $detail['total_cost_before'] ?? null,
-                'total_cost_after' => $detail['total_cost_after'] ?? null,
-                'total_cost_crp' => $detail['total_cost_crp'] ?? null,
-            ]);
-        }
-
-        return response()->json(['success' => true]);
+    if (!is_array($summaryData)) {
+        return response()->json([
+            'success' => false,
+            'error' => 'Data summary tidak valid.'
+        ], 400);
     }
+
+    foreach ($summaryData as $entry) {
+        MstDboCrp::create([
+            'nm_category' => $entry['nm_category'],
+            'month_1'     => $entry['month_1'] ?? 0,
+            'month_2'     => $entry['month_2'] ?? 0,
+            'month_3'     => $entry['month_3'] ?? 0,
+            'month_4'     => $entry['month_4'] ?? 0,
+            'month_5'     => $entry['month_5'] ?? 0,
+            'month_6'     => $entry['month_6'] ?? 0,
+            'month_7'     => $entry['month_7'] ?? 0,
+            'month_8'     => $entry['month_8'] ?? 0,
+            'month_9'     => $entry['month_9'] ?? 0,
+            'month_10'    => $entry['month_10'] ?? 0,
+            'month_11'    => $entry['month_11'] ?? 0,
+            'month_12'    => $entry['month_12'] ?? 0,
+            'plan_actual' => $entry['plan_actual'], // Pastikan nilai Plan/Actual
+            'grand_tot'   => $entry['grand_tot'] ?? 0,
+        ]);
+    }
+
+    return response()->json(['success' => true]);
+}
+
 
     public function edit($id)
     {
