@@ -13,12 +13,12 @@ class CrpController extends Controller
 {
     public function index()
     {
-        $userId = Auth::user()->id;
+        $userName = Auth::user()->name;
 
         // Mengambil data dari model
         $mstDboCrps = MstDboCrp::all();
 
-        return view('crp.crp', compact('mstDboCrps'));
+        return view('crp.crp', compact('mstDboCrps', 'userName')); // Buat view ini
     }
 
     public function create()
@@ -113,6 +113,7 @@ class CrpController extends Controller
             'month_12'    => $entry['month_12'] ?? 0,
             'plan_actual' => $entry['plan_actual'], // Pastikan nilai Plan/Actual
             'grand_tot'   => $entry['grand_tot'] ?? 0,
+            'partner_user' => Auth::user()->id,
         ]);
     }
 

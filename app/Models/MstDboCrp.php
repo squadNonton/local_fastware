@@ -23,5 +23,6 @@ class MstDboCrp extends Model
         'month_12',
         'plan_actual',
         'grand_tot',
+        'partner_user',
     ];
 }

@@ -149,6 +149,9 @@
                 <div class="card-body">
                     <p></p>
                     <h4 class="title text-center font-weight-bold text-primary">Tabel Summary</h4>
+                    <h6 class="text-left font-weight-bold text-primary">
+                        Partner user: {{ $userName }}
+                    </h6>
                     <div class="table-responsive">
                         <table id="tabelsummary" class="table table-striped table-bordered table-hover text-center">
                             <thead class="thead-dark">
@@ -361,70 +364,70 @@
                 }
 
                 function saveData() {
-    const summaryData = [];
-    const summaryRows = document.querySelectorAll('#tabelsummary tbody tr');
+                    const summaryData = [];
+                    const summaryRows = document.querySelectorAll('#tabelsummary tbody tr');
 
-    for (let i = 0; i < summaryRows.length; i++) {
-        const planRow = summaryRows[i];
-        const categorySelect = planRow.querySelector('select');
+                    for (let i = 0; i < summaryRows.length; i++) {
+                        const planRow = summaryRows[i];
+                        const categorySelect = planRow.querySelector('select');
 
-        if (!categorySelect) {
-            i++; // skip actual row
-            continue;
-        }
+                        if (!categorySelect) {
+                            i++; // skip actual row
+                            continue;
+                        }
 
-        const category = categorySelect.value;
-        if (!category) continue;
+                        const category = categorySelect.value;
+                        if (!category) continue;
 
-        // Only process Plan row
-        processRow(planRow, category, 'Plan', summaryData);
+                        // Only process Plan row
+                        processRow(planRow, category, 'Plan', summaryData);
 
-        i++; // skip Actual row
-    }
+                        i++; // skip Actual row
+                    }
 
-    const formData = new FormData();
-    formData.append('summary', JSON.stringify(summaryData));
+                    const formData = new FormData();
+                    formData.append('summary', JSON.stringify(summaryData));
 
-    fetch('{{ route('crp.store') }}', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Data berhasil disimpan!');
-            resetInputs();
-        } else {
-            throw new Error(data.error || 'Data gagal disimpan');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error: ' + error.message);
-    });
-}
+                    fetch('{{ route('crp.store') }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Data berhasil disimpan!');
+                            resetInputs();
+                        } else {
+                            throw new Error(data.error || 'Data gagal disimpan');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error: ' + error.message);
+                    });
+                }
 
 
-function processRow(row, category, type, summaryData) {
-    const inputs = row.querySelectorAll('input[type="text"]');
-    const monthValues = Array.from(inputs).slice(0, 12).map(input => parseInt(input.value) || 0);
-    const ytd = parseInt(inputs[12]?.value) || 0;
+                function processRow(row, category, type, summaryData) {
+                    const inputs = row.querySelectorAll('input[type="text"]');
+                    const monthValues = Array.from(inputs).slice(0, 12).map(input => parseInt(input.value) || 0);
+                    const ytd = parseInt(inputs[12]?.value) || 0;
 
-    const dataEntry = {
-        nm_category: category,
-        plan_actual: type,
-        grand_tot: ytd
-    };
+                    const dataEntry = {
+                        nm_category: category,
+                        plan_actual: type,
+                        grand_tot: ytd
+                    };
 
-    for (let i = 0; i < 12; i++) {
-        dataEntry[`month_${i + 1}`] = monthValues[i] || 0;
-    }
+                    for (let i = 0; i < 12; i++) {
+                        dataEntry[`month_${i + 1}`] = monthValues[i] || 0;
+                    }
 
-    summaryData.push(dataEntry);
-}
+                    summaryData.push(dataEntry);
+                }
             </script>
 
         </section>
@@ -543,35 +546,35 @@ function processRow(row, category, type, summaryData) {
         <script>
             // Fungsi untuk menghitung YTD
             function calculateYTD() {
-    const rows = document.querySelectorAll('#tabelsummary tbody tr');
+                const rows = document.querySelectorAll('#tabelsummary tbody tr');
 
-    for (let i = 0; i < rows.length; i += 2) {
-        const planRow = rows[i];
-        const actualRow = rows[i + 1];
+                for (let i = 0; i < rows.length; i += 2) {
+                    const planRow = rows[i];
+                    const actualRow = rows[i + 1];
 
-        // --- Hitung YTD PLAN ---
-        let totalPlan = 0;
-        for (let col = 3; col < 15; col++) {
-            const input = planRow.cells[col].querySelector('input');
-            if (input) {
-                totalPlan += parseFloat(input.value) || 0;
+                    // --- Hitung YTD PLAN ---
+                    let totalPlan = 0;
+                    for (let col = 3; col < 15; col++) {
+                        const input = planRow.cells[col].querySelector('input');
+                        if (input) {
+                            totalPlan += parseFloat(input.value) || 0;
+                        }
+                    }
+                    const ytdPlanInput = planRow.cells[15]?.querySelector('input');
+                    if (ytdPlanInput) ytdPlanInput.value = Math.round(totalPlan);
+
+                    // --- Hitung YTD ACTUAL ---
+                    let totalActual = 0;
+                    for (let col = 2; col < 14; col++) {
+                        const input = actualRow.cells[col]?.querySelector('input');
+                        if (input) {
+                            totalActual += parseFloat(input.value) || 0;
+                        }
+                    }
+                    const ytdActualInput = actualRow.cells[14]?.querySelector('input[name="actual_ytd"]');
+                    if (ytdActualInput) ytdActualInput.value = Math.round(totalActual);
+                }
             }
-        }
-        const ytdPlanInput = planRow.cells[15]?.querySelector('input');
-        if (ytdPlanInput) ytdPlanInput.value = Math.round(totalPlan);
-
-        // --- Hitung YTD ACTUAL ---
-        let totalActual = 0;
-        for (let col = 2; col < 14; col++) {
-            const input = actualRow.cells[col]?.querySelector('input');
-            if (input) {
-                totalActual += parseFloat(input.value) || 0;
-            }
-        }
-        const ytdActualInput = actualRow.cells[14]?.querySelector('input[name="actual_ytd"]');
-        if (ytdActualInput) ytdActualInput.value = Math.round(totalActual);
-    }
-}
 
 
 
