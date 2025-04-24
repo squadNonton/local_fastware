@@ -176,7 +176,6 @@
                             </thead>
                             <tbody id="summaryBody">
                                 @php
-                                    // Group data by nm_category
                                     $categories = $mstDboCrps->groupBy('nm_category');
                                 @endphp
                                 @foreach ($categories as $category => $records)
@@ -194,29 +193,26 @@
                                             <input type="checkbox" name="record[]" value="{{ $value }}">
                                         </td> 
                                         <td rowspan="2">
-                                            <select id="categorySelect" class="form-control" name="category[]">
+                                            <select class="form-control" name="category[]">
                                                 <option value="" disabled>Pilih Kategori</option>
-                                                <option value="Consumable" {{ $category == 'Consumable' ? 'selected' : '' }}>Consumable</option>
-                                                <option value="Subcont" {{ $category == 'Subcont' ? 'selected' : '' }}>Subcont</option>
-                                                <option value="Repair Maintenance" {{ $category == 'Repair Maintenance' ? 'selected' : '' }}>Repair Maintenance</option>
-                                                <option value="Utility" {{ $category == 'Utility' ? 'selected' : '' }}>Utility</option>
-                                                <option value="General Afffair" {{ $category == 'General Afffair' ? 'selected' : '' }}>General Afffair</option>
-                                                <option value="IT" {{ $category == 'IT' ? 'selected' : '' }}>IT</option>
-                                                <option value="Material Cost" {{ $category == 'Material Cost' ? 'selected' : '' }}>Material Cost</option>
-                                                <option value="Indirect Material" {{ $category == 'Indirect Material' ? 'selected' : '' }}>Indirect Material</option>
-                                                <option value="Others" {{ $category == 'Others' ? 'selected' : '' }}>Others</option>
+                                                @foreach (['Consumable', 'Subcont', 'Repair Maintenance', 'Utility', 'General Afffair', 'IT', 'Material Cost', 'Indirect Material', 'Others'] as $opt)
+                                                    <option value="{{ $opt }}" {{ $category == $opt ? 'selected' : '' }}>{{ $opt }}</option>
+                                                @endforeach
                                             </select>
                                         </td>
                                         <td class="font-weight-bold text-primary">Plan</td>
                                         @for ($i = 1; $i <= 12; $i++)
                                             <td>
-                                                <input type="text" class="form-control text-center" name="plan_values[{{$category}}][]"
-                                                    value="{{ $plan ? $plan->{'month_' . $i} : '' }}" oninput="calculateYTD(this)" />
+                                                <input type="text" class="form-control text-center"
+                                                       name="plan_values[{{ $category }}][]"
+                                                       value="{{ $plan ? $plan->{'month_' . $i} : '' }}"
+                                                       oninput="calculateYTD(this)" />
                                             </td>
                                         @endfor
                                         <td>
                                             <input type="text" class="form-control text-center font-weight-bold"
-                                                name="plan_ytd[{{$category}}]" value="{{ $plan ? $plan->grand_tot : '' }}" readonly />
+                                                   name="plan_ytd[{{ $category }}]"
+                                                   value="{{ $plan ? $plan->grand_tot : '' }}" readonly />
                                         </td>
                                     </tr>
                                     <!-- Actual Row -->
@@ -225,17 +221,20 @@
                                         <td class="font-weight-bold text-success">Actual</td>
                                         @for ($i = 1; $i <= 12; $i++)
                                             <td>
-                                                <input type="text" class="form-control text-center" name="actual_values[{{$category}}][]"
-                                                    value="{{ $actual ? $actual->{'month_' . $i} : '' }}" oninput="calculateYTD(this)" />
+                                                <input type="text" class="form-control text-center"
+                                                       name="actual_values[{{ $category }}][]"
+                                                       value="{{ $actual ? $actual->{'month_' . $i} : '' }}" disabled/>
                                             </td>
                                         @endfor
                                         <td>
-                                            <input type="text" class="form-control text-center font-weight-bold"
-                                                name="actual_ytd[{{$category}}]" value="{{ $actual ? $actual->grand_tot : '' }}" readonly />
+                                            <input type="text" class="form-control text-center font-weight-bold" disabled
+                                                   name="actual_ytd[{{ $category }}]"
+                                                   value="{{ $actual ? $actual->grand_tot : '' }}" readonly />
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
+                            
                         </table>
                     </div>
 
@@ -300,7 +299,7 @@
                                     <td><input type="number" class="form-control" name="qty[]" oninput="calculateCRP(this)" value="{{ $row->qty }}"></td>
                                     <td><input type="number" class="form-control" name="price_before[]" oninput="calculateCRP(this)" value="{{ $row->price_before }}"></td>
                                     <td><input type="number" class="form-control" name="price_after[]" oninput="calculateCRP(this)" value="{{ $row->price_after }}"></td>
-                                    <td><input type="number" class="form-control" name="selisih[]" value="{{ $row->selisih }}" readonly></td>
+                                    <td><input type="number" class="form-control" name="selisih[]" value="{{ $row->price_sell }}" readonly></td>
                                     <td><input type="number" class="form-control" name="total_cost_before[]" value="{{ $row->total_cost_before }}" readonly></td>
                                     <td><input type="number" class="form-control" name="total_cost_after[]" value="{{ $row->total_cost_after }}" readonly></td>
                                     <td><input type="number" class="form-control crp" name="total_cost_crp[]" value="{{ $row->total_cost_crp }}" readonly></td>
@@ -345,9 +344,9 @@
 
             </script>
 
-<script>
-    window.mstCategories = @json($mstDboCrps->pluck('nm_category')->unique()->values());
-</script>
+        <script>
+            window.mstCategories = @json($mstDboCrps->pluck('nm_category')->unique()->values());
+        </script>
             <script>
                 function addRow() { 
                     const table = document.getElementById('detailTable').getElementsByTagName('tbody')[0];
@@ -602,7 +601,8 @@
 
                 // Membuat baris Plan
                 const newRowPlan = table.insertRow();
-                
+                newRowPlan.classList.add('plan-row');
+
                 // Checkbox
                 const cellCheckbox = newRowPlan.insertCell();
                 cellCheckbox.innerHTML = '<input type="checkbox" name="record1">';
@@ -611,7 +611,7 @@
                 const cellCategory = newRowPlan.insertCell();
                 cellCategory.rowSpan = 2;
                 cellCategory.innerHTML = `
-                    <select class="form-control">
+                    <select class="form-control" name="category[]">
                         <option value="" disabled selected>Pilih Kategori</option>
                         <option value="Consumable">Consumable</option>
                         <option value="Subcont">Subcont</option>
@@ -638,10 +638,11 @@
 
                 // YTD Plan
                 const cellYTDPlan = newRowPlan.insertCell();
-                cellYTDPlan.innerHTML = '<input type="text" class="form-control text-center font-weight-bold" readonly>';
+                cellYTDPlan.innerHTML = '<input type="text" class="form-control text-center font-weight-bold" name="plan_ytd" readonly>';
 
                 // Membuat baris Actual
                 const newRowActual = table.insertRow();
+                newRowActual.classList.add('actual-row');
 
                 // Cell kosong untuk checkbox (karena rowspan kategori)
                 newRowActual.insertCell();
@@ -662,50 +663,97 @@
                 cellYTDActual.innerHTML = '<input type="text" class="form-control text-center font-weight-bold" name="actual_ytd" readonly>';
             }
 
+            function processRow(row, category, type, summaryData) {
+                const inputs = row.querySelectorAll(`input[name="${type.toLowerCase()}_values[]"]`);
+                const ytdInput = row.querySelector(`input[name="${type.toLowerCase()}_ytd"]`);
+                
+                const monthlyValues = Array.from(inputs).map(input => {
+                    const value = input.value.trim();
+                    return value === '' ? 0 : parseFloat(value) || 0;
+                });
+
+                const ytdValue = ytdInput ? (parseFloat(ytdInput.value) || 0) : 0;
+
+                summaryData.push({
+                    category: category,
+                    type: type,
+                    month_1: monthlyValues[0] || 0,
+                    month_2: monthlyValues[1] || 0,
+                    month_3: monthlyValues[2] || 0,
+                    month_4: monthlyValues[3] || 0,
+                    month_5: monthlyValues[4] || 0,
+                    month_6: monthlyValues[5] || 0,
+                    month_7: monthlyValues[6] || 0,
+                    month_8: monthlyValues[7] || 0,
+                    month_9: monthlyValues[8] || 0,
+                    month_10: monthlyValues[9] || 0,
+                    month_11: monthlyValues[10] || 0,
+                    month_12: monthlyValues[11] || 0,
+                    ytd: ytdValue
+                });
+            }
+
+
             function saveData() {
-                const summaryData = [];
-                const summaryRows = document.querySelectorAll('#tabelsummary tbody tr');
+                const tableRows = document.querySelectorAll('#summaryBody tr');
+                const summaryData = {};
 
-                for (let i = 0; i < summaryRows.length; i++) {
-                    const planRow = summaryRows[i];
-                    const categorySelect = planRow.querySelector('select');
+                let currentCategory = '';
+                tableRows.forEach((row) => {
+                    const planActual = row.querySelector('td:nth-child(3)')?.textContent?.trim();
 
-                    if (!categorySelect) {
-                        i++; // skip actual row
-                        continue;
+                    if (planActual === 'Plan') {
+                        const categorySelect = row.querySelector('select[name="category[]"]');
+                        currentCategory = categorySelect?.value;
+
+                        if (!currentCategory) return;
+
+                        const planInputs = row.querySelectorAll(`input[name^="plan_values"]`);
+                        const ytdInput = row.querySelector(`input[name^="plan_ytd"]`);
+                        
+                        const actualInputs = row.querySelectorAll(`input[name^="actual_values"]`);
+                        const actualYTDInput = row.querySelector(`input[name^="actual_ytd"]`);
+
+                        const monthlyPlan = Array.from(planInputs).map(input => {
+                            const val = parseFloat(input.value);
+                            return isNaN(val) ? 0 : val;
+                        });
+
+                        const monthlyActual = Array.from(actualInputs).map(input => {
+                            const val = parseFloat(input.value);
+                            return isNaN(val) ? 0 : val;
+                        });
+
+                        const planYTD = parseFloat(ytdInput?.value) || 0;
+                        const actualYTD = parseFloat(actualYTDInput?.value) || 0;
+
+                        summaryData[currentCategory] = {
+                            plan_values: monthlyPlan,
+                            plan_ytd: planYTD,
+                            actual_values: monthlyActual,
+                            actual_ytd: actualYTD
+                        };
                     }
+                });
 
-                    const category = categorySelect.value;
-                    if (!category) continue;
+                console.log("Summary data to send:", summaryData);
 
-                    // Only process Plan row
-                    processRow(planRow, category, 'Plan', summaryData);
-
-                    i++; // skip Actual row
-                }
-
-                const formData = new FormData();
-                formData.append('summary', JSON.stringify(summaryData));
-
-                fetch('{{ route('crp.store') }}', {
+                fetch('{{ route("crp.store") }}', {
                     method: 'POST',
                     headers: {
+                        'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                     },
-                    body: formData
+                    body: JSON.stringify({ summaryData })
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success) {
-                        alert('Data berhasil disimpan!');
-                        location.reload(); // ⬅️ Tambahkan ini untuk reload halaman
-                    } else {
-                        throw new Error(data.error || 'Data gagal disimpan');
-                    }
+                    alert('Data berhasil disimpan!');
+                    location.reload();
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error: ' + error.message);
+                    console.error('Terjadi kesalahan:', error);
+                    alert('Gagal menyimpan data.');
                 });
             }
 
