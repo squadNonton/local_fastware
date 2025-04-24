@@ -145,7 +145,9 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/crp/store', [CrpController::class, 'store'])->name('crp.store');
     Route::get('/crp/edit/{id}', [CrpController::class, 'edit'])->name('crp.edit');
     Route::put('/crp/update/{id}', [CrpController::class, 'update'])->name('crp.update');
-    Route::delete('/crp/delete/{id}', [CrpController::class, 'destroy'])->name('crp.destroy');
+    Route::post('/crp/delete', [CrpController::class, 'delete'])->name('crp.deletePermanen');
+    Route::post('/crp/delete-detail', [CrpController::class, 'deleteDetail'])->name('crp.deletePermanenDetail');
+    Route::post('/crp/save-detail', [CrpController::class, 'savedetail'])->name('crp.savedetail');
 
     // Download File
     Route::get('download-excel/{tindaklanjut}', [FormFPPController::class, 'downloadAttachment'])->name('download.attachment');
