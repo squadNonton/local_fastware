@@ -123,24 +123,6 @@ class CrpController extends Controller
             'partner_user' => Auth::id(),
         ];
 
-        // Data untuk Actual
-        $actualData = [
-            'month_1'     => $entry['actual_values'][0] ?? 0,
-            'month_2'     => $entry['actual_values'][1] ?? 0,
-            'month_3'     => $entry['actual_values'][2] ?? 0,
-            'month_4'     => $entry['actual_values'][3] ?? 0,
-            'month_5'     => $entry['actual_values'][4] ?? 0,
-            'month_6'     => $entry['actual_values'][5] ?? 0,
-            'month_7'     => $entry['actual_values'][6] ?? 0,
-            'month_8'     => $entry['actual_values'][7] ?? 0,
-            'month_9'     => $entry['actual_values'][8] ?? 0,
-            'month_10'    => $entry['actual_values'][9] ?? 0,
-            'month_11'    => $entry['actual_values'][10] ?? 0,
-            'month_12'    => $entry['actual_values'][11] ?? 0,
-            'grand_tot'   => $entry['actual_ytd'] ?? 0,
-            'partner_user' => Auth::id(),
-        ];
-
         // Update or Create for Plan
         MstDboCrp::updateOrCreate(
             [
@@ -152,14 +134,6 @@ class CrpController extends Controller
         );
 
         // Update or Create for Actual
-        MstDboCrp::updateOrCreate(
-            [
-                'nm_category'  => $nm_category,
-                'plan_actual'  => 'Actual',
-                'partner_user' => Auth::id(),
-            ],
-            $actualData
-        );
     }
 
     return response()->json([
