@@ -2,10 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Testing\Fluent\Concerns\Has;
 
 class TrsDboCrp extends Model
 {
+    use SoftDeletes;
+    protected $dates = ['deleted_at'];
+    use HasFactory;
     protected $table = 'trs_dbo_crp';
     protected $fillable = [
         'mst_id',

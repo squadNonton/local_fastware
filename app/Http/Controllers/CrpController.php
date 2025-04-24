@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Customer;
 use App\Models\MstDboCrp;
 use App\Models\TrsDboCrp;
+use Illuminate\Support\Facades\DB;
 
 class CrpController extends Controller
 {
@@ -15,10 +16,18 @@ class CrpController extends Controller
     {
         $userName = Auth::user()->name;
 
-        // Mengambil data dari model
-        $mstDboCrps = MstDboCrp::all();
+        // Mengambil data dari model MstDboCrp
+        $mstDboCrps = MstDboCrp::where('partner_user', Auth::user()->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        return view('crp.crp', compact('mstDboCrps', 'userName')); // Buat view ini
+        // Mengambil data dari model TrsDboCrp berdasarkan mst_id
+        $mstIds = $mstDboCrps->pluck('id')->toArray();
+        $trsDboCrps = TrsDboCrp::whereIn('mst_id', $mstIds)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('crp.crp', compact('mstDboCrps', 'trsDboCrps', 'userName'));
     }
 
     public function create()
@@ -82,43 +91,146 @@ class CrpController extends Controller
 
 
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'summary' => 'required|string', // Validasi sebagai string JSON
-    ]);
+    {
+        // Validasi input
+        $validated = $request->validate([
+            'summary' => 'required|string', // Validasi sebagai string JSON
+        ]);
 
-    $summaryData = json_decode($request->summary, true);
+        // Decode JSON
+        $summaryData = json_decode($request->summary, true);
 
-    if (!is_array($summaryData)) {
+        // Periksa apakah data valid
+        if (!is_array($summaryData)) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Data summary tidak valid.'
+            ], 400);
+        }
+
+        // Loop melalui setiap entri
+        foreach ($summaryData as $entry) {
+            // Pastikan nm_category dan plan_actual ada
+            if (!isset($entry['nm_category']) || !isset($entry['plan_actual'])) {
+                continue; // Lewati entri yang tidak valid
+            }
+
+            // Siapkan data untuk update atau create
+            $data = [
+                'month_1'     => $entry['month_1'] ?? 0,
+                'month_2'     => $entry['month_2'] ?? 0,
+                'month_3'     => $entry['month_3'] ?? 0,
+                'month_4'     => $entry['month_4'] ?? 0,
+                'month_5'     => $entry['month_5'] ?? 0,
+                'month_6'     => $entry['month_6'] ?? 0,
+                'month_7'     => $entry['month_7'] ?? 0,
+                'month_8'     => $entry['month_8'] ?? 0,
+                'month_9'     => $entry['month_9'] ?? 0,
+                'month_10'    => $entry['month_10'] ?? 0,
+                'month_11'    => $entry['month_11'] ?? 0,
+                'month_12'    => $entry['month_12'] ?? 0,
+                'grand_tot'   => $entry['grand_tot'] ?? 0,
+                'partner_user' => Auth::user()->id,
+            ];
+
+            // Update atau create record berdasarkan nm_category, plan_actual, dan partner_user
+            MstDboCrp::updateOrCreate(
+                [
+                    'nm_category'  => $entry['nm_category'],
+                    'plan_actual'  => $entry['plan_actual'],
+                    'partner_user' => Auth::user()->id,
+                ],
+                $data
+            );
+        }
+
         return response()->json([
-            'success' => false,
-            'error' => 'Data summary tidak valid.'
-        ], 400);
-    }
-
-    foreach ($summaryData as $entry) {
-        MstDboCrp::create([
-            'nm_category' => $entry['nm_category'],
-            'month_1'     => $entry['month_1'] ?? 0,
-            'month_2'     => $entry['month_2'] ?? 0,
-            'month_3'     => $entry['month_3'] ?? 0,
-            'month_4'     => $entry['month_4'] ?? 0,
-            'month_5'     => $entry['month_5'] ?? 0,
-            'month_6'     => $entry['month_6'] ?? 0,
-            'month_7'     => $entry['month_7'] ?? 0,
-            'month_8'     => $entry['month_8'] ?? 0,
-            'month_9'     => $entry['month_9'] ?? 0,
-            'month_10'    => $entry['month_10'] ?? 0,
-            'month_11'    => $entry['month_11'] ?? 0,
-            'month_12'    => $entry['month_12'] ?? 0,
-            'plan_actual' => $entry['plan_actual'], // Pastikan nilai Plan/Actual
-            'grand_tot'   => $entry['grand_tot'] ?? 0,
-            'partner_user' => Auth::user()->id,
+            'success' => true,
+            'message' => 'Data berhasil disimpan.'
         ]);
     }
 
-    return response()->json(['success' => true]);
-}
+    public function savedetail(Request $request)
+    {
+        try {
+            $rows = $request->input('rows');
+            $userId = Auth::id();
+
+            if (empty($rows)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No data provided to save.'
+                ], 400);
+            }
+
+            DB::beginTransaction();
+
+            foreach ($rows as $index => $row) {
+                if (empty($row['actual_category'])) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Category is required for row " . ($index + 1)
+                    ], 400);
+                }
+
+                $mstDboCrp = MstDboCrp::where('partner_user', $userId)
+                    ->where('nm_category', $row['actual_category'])
+                    ->first();
+
+                if (!$mstDboCrp) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => "No matching MstDboCrp record found for category: {$row['actual_category']} in row " . ($index + 1)
+                    ], 400);
+                }
+
+                $data = [
+                    'mst_id' => $mstDboCrp->id,
+                    'nm_category' => $row['actual_category'],
+                    'detail_activity' => $row['detail_activity'] ?? null,
+                    'no_po' => $row['no_po'] ?? null,
+                    'date' => $row['date'] ?? null,
+                    'qty' => $row['qty'] ?? 0,
+                    'price_before' => $row['price_before'] ?? 0,
+                    'price_after' => $row['price_after'] ?? 0,
+                    'selisih' => $row['selisih'] ?? 0,
+                    'price_sell' => 0,
+                    'total_cost_before' => $row['total_cost_before'] ?? 0,
+                    'total_cost_after' => $row['total_cost_after'] ?? 0,
+                    'total_cost_crp' => $row['total_cost_crp'] ?? 0,
+                ];
+
+                if (!empty($row['id'])) {
+                    // Update existing record
+                    $trsDboCrp = TrsDboCrp::find($row['id']);
+                    if ($trsDboCrp) {
+                        $trsDboCrp->update($data);
+                    } else {
+                        DB::rollBack();
+                        return response()->json([
+                            'success' => false,
+                            'message' => "TrsDboCrp record with ID {$row['id']} not found in row " . ($index + 1)
+                        ], 404);
+                    }
+                } else {
+                    // Create new record
+                    TrsDboCrp::create($data);
+                }
+            }
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Data saved successfully']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error saving TrsDboCrp: ' . $e->getMessage(), ['exception' => $e]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
 
     public function edit($id)
@@ -143,11 +255,58 @@ class CrpController extends Controller
         return redirect()->route('crp')->with('success', 'Data berhasil diperbarui!');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        $mstDboCrp = MstDboCrp::findOrFail($id);
-        $mstDboCrp->delete();
+        $validated = $request->validate([
+            'categories' => 'required|array',
+            'categories.*' => 'string',
+        ]);
 
-        return redirect()->route('crp')->with('success', 'Data berhasil dihapus!');
+        $userId = Auth::user()->id;
+        $categories = $request->categories;
+
+        // Hapus record Plan dan Actual untuk kategori yang diberikan
+        $deleted = MstDboCrp::where('partner_user', $userId)
+            ->whereIn('nm_category', $categories)
+            ->delete();
+
+        if ($deleted) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil dihapus.'
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'error' => 'Tidak ada data yang dihapus.'
+            ], 400);
+        }
     }
+
+    public function delete(Request $request)
+    {
+        $ids = $request->input('ids'); // array berisi id plan dan actual
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['success' => false, 'message' => 'ID tidak valid.']);
+        }
+    
+        // Soft delete
+        MstDboCrp::whereIn('id', $ids)->update(['deleted_at' => now()]);
+    
+        return response()->json(['success' => true]);
+    }
+
+    public function deleteDetail(Request $request)
+    {
+        $ids = $request->input('ids'); // array berisi id plan dan actual
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['success' => false, 'message' => 'ID tidak valid.']);
+        }
+    
+        // Soft delete
+        TrsDboCrp::whereIn('id', $ids)->update(['deleted_at' => now()]);
+    
+        return response()->json(['success' => true]);
+    }
+
 }

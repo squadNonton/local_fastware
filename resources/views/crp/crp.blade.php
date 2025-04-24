@@ -175,41 +175,66 @@
                                 </tr>
                             </thead>
                             <tbody id="summaryBody">
-                                <tr>
-                                    <td><input type="checkbox" name="record1"></td>
-                                    <td rowspan="2">
-                                        <select id="categorySelect" class="form-control">
-                                            <option value="" disabled selected>Pilih Kategori</option>
-                                            <option value="Consumable">Consumable</option>
-                                            <option value="Subcont">Subcont</option>
-                                            <option value="Repair Maintenance">Repair Maintenance</option>
-                                            <option value="Utility">Utility</option>
-                                            <option value="General Afffair">General Afffair</option>
-                                            <option value="IT">IT</option>
-                                            <option value="Material Cost">Material Cost</option>
-                                            <option value="Indirect Material">Indirect Material</option>
-                                            <option value="Others">Others</option>
-                                        </select>
-                                    </td>
-                                    <td class="font-weight-bold text-primary">Plan</td>
-                                    @for ($i = 0; $i < 12; $i++)
-                                        <td><input type="text" class="form-control text-center" name="plan_values[]"
-                                                oninput="calculateYTD()" /></td>
-                                    @endfor
-
-                                    <td><input type="text" class="form-control text-center font-weight-bold"></td>
-                                </tr>
-                                <tr>
-                                    <td></td>
-                                    <td class="font-weight-bold text-success">Actual</td>
-                                    @for ($i = 0; $i < 12; $i++)
-                                        <td><input type="text" class="form-control text-center" name="actual_values[]" 
-                                            oninput="calculateYTD()"/>
+                                @php
+                                    // Group data by nm_category
+                                    $categories = $mstDboCrps->groupBy('nm_category');
+                                @endphp
+                                @foreach ($categories as $category => $records)
+                                    @php
+                                        $plan = $records->firstWhere('plan_actual', 'Plan');
+                                        $actual = $records->firstWhere('plan_actual', 'Actual');
+                                    @endphp
+                                    <!-- Plan Row -->
+                                    <tr>
+                                        <td>
+                                            @php
+                                                $value = $plan->id ?? '';
+                                                $value .= $actual ? ',' . $actual->id : '';
+                                            @endphp
+                                            <input type="checkbox" name="record[]" value="{{ $value }}">
+                                        </td> 
+                                        <td rowspan="2">
+                                            <select id="categorySelect" class="form-control" name="category[]">
+                                                <option value="" disabled>Pilih Kategori</option>
+                                                <option value="Consumable" {{ $category == 'Consumable' ? 'selected' : '' }}>Consumable</option>
+                                                <option value="Subcont" {{ $category == 'Subcont' ? 'selected' : '' }}>Subcont</option>
+                                                <option value="Repair Maintenance" {{ $category == 'Repair Maintenance' ? 'selected' : '' }}>Repair Maintenance</option>
+                                                <option value="Utility" {{ $category == 'Utility' ? 'selected' : '' }}>Utility</option>
+                                                <option value="General Afffair" {{ $category == 'General Afffair' ? 'selected' : '' }}>General Afffair</option>
+                                                <option value="IT" {{ $category == 'IT' ? 'selected' : '' }}>IT</option>
+                                                <option value="Material Cost" {{ $category == 'Material Cost' ? 'selected' : '' }}>Material Cost</option>
+                                                <option value="Indirect Material" {{ $category == 'Indirect Material' ? 'selected' : '' }}>Indirect Material</option>
+                                                <option value="Others" {{ $category == 'Others' ? 'selected' : '' }}>Others</option>
+                                            </select>
                                         </td>
-                                    @endfor
-                                    <td><input type="text" class="form-control text-center font-weight-bold"
-                                            name="actual_ytd" readonly /></td>
-                                </tr>
+                                        <td class="font-weight-bold text-primary">Plan</td>
+                                        @for ($i = 1; $i <= 12; $i++)
+                                            <td>
+                                                <input type="text" class="form-control text-center" name="plan_values[{{$category}}][]"
+                                                    value="{{ $plan ? $plan->{'month_' . $i} : '' }}" oninput="calculateYTD(this)" />
+                                            </td>
+                                        @endfor
+                                        <td>
+                                            <input type="text" class="form-control text-center font-weight-bold"
+                                                name="plan_ytd[{{$category}}]" value="{{ $plan ? $plan->grand_tot : '' }}" readonly />
+                                        </td>
+                                    </tr>
+                                    <!-- Actual Row -->
+                                    <tr>
+                                        <td></td>
+                                        <td class="font-weight-bold text-success">Actual</td>
+                                        @for ($i = 1; $i <= 12; $i++)
+                                            <td>
+                                                <input type="text" class="form-control text-center" name="actual_values[{{$category}}][]"
+                                                    value="{{ $actual ? $actual->{'month_' . $i} : '' }}" oninput="calculateYTD(this)" />
+                                            </td>
+                                        @endfor
+                                        <td>
+                                            <input type="text" class="form-control text-center font-weight-bold"
+                                                name="actual_ytd[{{$category}}]" value="{{ $actual ? $actual->grand_tot : '' }}" readonly />
+                                        </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -227,57 +252,62 @@
                         <button class="btn btn-primary" onclick="saveData()">
                             Simpan
                         </button>
+                        <button class="btn btn-primary" onclick="deletePermanen()">
+                            Hapus
+                        </button>
                     </div>
                 </div>
             </div>
             <br> </br>
 
 
-            {{-- <div class="card shadow-lg">
+            <div class="card shadow-lg">
                 <div class="card-body">
                     <p></p>
                     <div class="title text-center font-weight-bold text-primary">Detail Pencatatan Actual</div>
                     <div class="table-responsive">
-                        <table class="table table-hover table-bordered text-center align-middle" id="actualTable">
-                            <thead class="table-primary">
+                        <table id="detailTable" class="table table-bordered">
+                            <thead>
                                 <tr>
-                                    <th>
-                                    </th>
+                                    <th>Select</th>
                                     <th>Category</th>
                                     <th>Detail Activity</th>
-                                    <th>No PO (optional)</th>
+                                    <th>No PO</th>
                                     <th>Date</th>
                                     <th>Qty</th>
                                     <th>Price Before</th>
                                     <th>Price After</th>
+                                    <th>Selisih</th>
                                     <th>Total Cost Before</th>
                                     <th>Total Cost After</th>
-                                    <th>CRP</th>
+                                    <th>Total Cost CRP</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td><input type="checkbox" name="record"></td>
+                                @foreach ($trsDboCrps as $row)
+                                <tr data-id="{{ $row->id }}">
+                                    <td><input type="checkbox" name="record[]" value="{{ $row->id }}"></td>
                                     <td>
                                         <select class="form-select" name="actual_category[]">
-                                            <option value="Consumable">Consumable</option>
-                                            <option value="Subcont">Subcont</option>
-                                            <!-- Tambahkan opsi lain sesuai kebutuhan -->
+                                            @foreach ($mstDboCrps->pluck('nm_category')->unique() as $category)
+                                                <option value="{{ $category }}" {{ $row->nm_category == $category ? 'selected' : '' }}>{{ $category }}</option>
+                                            @endforeach
                                         </select>
                                     </td>
-                                    <td><input type="text" class="form-control" name="detail_activity[]"></td>
-                                    <td><input type="text" class="form-control" name="no_po[]"></td>
-                                    <td><input type="date" class="form-control" name="date[]"></td>
-                                    <td><input type="number" class="form-control" name="qty[]"
-                                            oninput="calculateCRP(this)"></td>
-                                    <td><input type="number" class="form-control" name="price_before[]"></td>
-                                    <td><input type="number" class="form-control" name="price_after[]"></td>
-                                    <td><input type="number" class="form-control" name="total_cost_before[]"></td>
-                                    <td><input type="number" class="form-control" name="total_cost_after[]"></td>
-                                    <td><input type="text" class="form-control crp" readonly></td>
+                                    <td><input type="text" class="form-control" name="detail_activity[]" value="{{ $row->detail_activity }}"></td>
+                                    <td><input type="text" class="form-control" name="no_po[]" value="{{ $row->no_po }}"></td>
+                                    <td><input type="date" class="form-control" name="date[]" value="{{ $row->date }}"></td>
+                                    <td><input type="number" class="form-control" name="qty[]" oninput="calculateCRP(this)" value="{{ $row->qty }}"></td>
+                                    <td><input type="number" class="form-control" name="price_before[]" oninput="calculateCRP(this)" value="{{ $row->price_before }}"></td>
+                                    <td><input type="number" class="form-control" name="price_after[]" oninput="calculateCRP(this)" value="{{ $row->price_after }}"></td>
+                                    <td><input type="number" class="form-control" name="selisih[]" value="{{ $row->selisih }}" readonly></td>
+                                    <td><input type="number" class="form-control" name="total_cost_before[]" value="{{ $row->total_cost_before }}" readonly></td>
+                                    <td><input type="number" class="form-control" name="total_cost_after[]" value="{{ $row->total_cost_after }}" readonly></td>
+                                    <td><input type="number" class="form-control crp" name="total_cost_crp[]" value="{{ $row->total_cost_crp }}" readonly></td>
                                 </tr>
-                                <!-- Tambahkan lebih banyak baris sesuai dengan kebutuhan -->
+                                @endforeach
                             </tbody>
+                            
                         </table>
                     </div>
                     <div class="d-flex justify-content-center mt-3 gap-2">
@@ -290,12 +320,15 @@
                         <button class="btn btn-warning text-white" onclick="resetInputs1()">
                             Reset
                         </button>
-                        <button class="btn btn-primary" onclick="saveTable()">
+                        <button class="btn btn-primary" onclick="saveDetail()">
                             Submit
+                        </button>
+                        <button class="btn btn-primary" onclick="hapusPermanenDetail()">
+                            Hapus
                         </button>
                     </div>
                 </div>
-            </div> --}}
+            </div>
 
             <script>
                 // function calculateCRP(input) {
@@ -311,104 +344,172 @@
 
 
             </script>
+
+<script>
+    window.mstCategories = @json($mstDboCrps->pluck('nm_category')->unique()->values());
+</script>
             <script>
-                function addRow() {
-                    const table = document.getElementById('actualTable').getElementsByTagName('tbody')[0];
+                function addRow() { 
+                    const table = document.getElementById('detailTable').getElementsByTagName('tbody')[0];
                     const newRow = table.insertRow();
+                    newRow.classList.add('new-row'); // ← Tambahkan di sini, setelah insertRow()
 
                     newRow.innerHTML = `
                         <td><input type="checkbox" name="record"></td>
                         <td>
-                            <select>
-                                <option value="Consumable">Consumable</option>
-                                <option value="Subcont">Subcont</option>
-                                <option value="Repair Maintenance">Repair Maintenance</option>
-                                <option value="Utility">Utility</option>
-                                <option value="General Afffair">General Afffair</option>
-                                <option value="IT">IT</option>
-                                <option value="Material Cost">Material Cost</option>
-                                <option value="Indirect Material">Indirect Material</option>
-                                <option value="Others">Others</option>
+                            <select class="form-select" name="actual_category[]">
+                                @foreach ($mstDboCrps->pluck('nm_category')->unique() as $category)
+                                    <option value="{{ $category }}">{{ $category }}</option>
+                                @endforeach
                             </select>
                         </td>
-                        <td><input type="text" value=""></td>
-                        <td class="red-text"><input type="text" value=""></td>
-                        <td><input type="date" value=""></td>
-                        <td><input type="number" value=""></td>
-                        <td><input type="text" value=""></td>
-                        <td><input type="text" value=""></td>
-                        <td><input type="text" value=""></td>
-                        <td><input type="text" value=""></td>
-                        <td><input type="text" value=""></td>
-                        <td><input type="text" value=""></td>
+                        <td><input type="text" class="form-control" name="detail_activity[]"></td>
+                        <td><input type="text" class="form-control" name="no_po[]"></td>
+                        <td><input type="date" class="form-control" name="date[]"></td>
+                        <td><input type="number" class="form-control" name="qty[]" oninput="calculateCRP(this)"></td>
+                        <td><input type="number" class="form-control" name="price_before[]" oninput="calculateCRP(this)"></td>
+                        <td><input type="number" class="form-control" name="price_after[]" oninput="calculateCRP(this)"></td>
+                        <td><input type="text" class="form-control" name="selisih[]" readonly></td>
+                        <td><input type="number" class="form-control" name="total_cost_before[]" readonly></td>
+                        <td><input type="number" class="form-control" name="total_cost_after[]" readonly></td>
+                        <td><input type="text" class="form-control crp" name="total_cost_crp[]" readonly></td>
                     `;
                 }
 
-                function deleteRows() {
-                    const table = document.getElementById('actualTable');
-                    const checkboxes = table.querySelectorAll('input[name="record"]:checked');
-                    checkboxes.forEach(checkbox => {
-                        const row = checkbox.closest('tr');
-                        if (row) {
-                            row.remove();
-                        }
-                    });
+
+        function deleteRows() {
+            const table = document.getElementById('detailTable');
+            const checkboxes = table.querySelectorAll('input[name="record"]:checked');
+            checkboxes.forEach(checkbox => {
+                const row = checkbox.closest('tr');
+                if (row) {
+                    row.remove();
                 }
+            });
+        }
+
+        function calculateCRP(input) {
+            const row = input.closest('tr');
+            const qty = parseFloat(row.querySelector('input[name="qty[]"]').value) || 0;
+            const priceBefore = parseFloat(row.querySelector('input[name="price_before[]"]').value) || 0;
+            const priceAfter = parseFloat(row.querySelector('input[name="price_after[]"]').value) || 0;
+            
+            // Calculate selisih as the absolute difference between price_after and price_before
+            const selisih = Math.abs(priceAfter - priceBefore);
+            row.querySelector('input[name="selisih[]"]').value = selisih.toFixed(2);
+
+            // Calculate total costs
+            const totalCostBefore = qty * priceBefore;
+            const totalCostAfter = qty * priceAfter;
+            
+            // Calculate total_cost_crp as the absolute difference between total_cost_after and total_cost_before
+            const totalCostCrp = Math.abs(totalCostAfter - totalCostBefore);
+
+            row.querySelector('input[name="total_cost_before[]"]').value = totalCostBefore.toFixed(2);
+            row.querySelector('input[name="total_cost_after[]"]').value = totalCostAfter.toFixed(2);
+            row.querySelector('input[name="total_cost_crp[]"]').value = totalCostCrp.toFixed(2);
+        }
 
                 function resetInputs1() {
-                    document.querySelectorAll("#actualTable tbody input").forEach(input => {
+                    document.querySelectorAll("#detailTable tbody input").forEach(input => {
                         if (input.type === "text" || input.type === "number" || input.type === "date") {
                             input.value = "";
                         }
                     });
                 }
 
-                function saveData() {
-                    const summaryData = [];
-                    const summaryRows = document.querySelectorAll('#tabelsummary tbody tr');
-
-                    for (let i = 0; i < summaryRows.length; i++) {
-                        const planRow = summaryRows[i];
-                        const categorySelect = planRow.querySelector('select');
-
-                        if (!categorySelect) {
-                            i++; // skip actual row
-                            continue;
-                        }
-
-                        const category = categorySelect.value;
-                        if (!category) continue;
-
-                        // Only process Plan row
-                        processRow(planRow, category, 'Plan', summaryData);
-
-                        i++; // skip Actual row
+                function saveDetail() {
+                    const table = document.getElementById('detailTable');
+                    if (!table) {
+                        console.error('Table with ID "detailTable" not found');
+                        alert('Error: Table not found. Please check the table ID.');
+                        return;
                     }
 
-                    const formData = new FormData();
-                    formData.append('summary', JSON.stringify(summaryData));
+                    const tbody = table.getElementsByTagName('tbody')[0];
+                    const rows = tbody.querySelectorAll('tr.modified-row, tr.new-row');
+                    const data = [];
 
-                    fetch('{{ route('crp.store') }}', {
+                    for (let row of rows) {
+                        try {
+                            const actualCategory = row.querySelector('select[name="actual_category[]"]')?.value || '';
+                            if (!actualCategory) {
+                                alert('Error: Category is required for all rows.');
+                                return;
+                            }
+
+                            const rowData = {
+                                id: row.dataset.id || null,
+                                actual_category: actualCategory,
+                                detail_activity: row.querySelector('input[name="detail_activity[]"]')?.value || '',
+                                no_po: row.querySelector('input[name="no_po[]"]')?.value || '',
+                                date: row.querySelector('input[name="date[]"]')?.value || '',
+                                qty: parseFloat(row.querySelector('input[name="qty[]"]')?.value) || 0,
+                                selisih: parseFloat(row.querySelector('input[name="selisih[]"]')?.value) || 0,
+                                price_before: parseFloat(row.querySelector('input[name="price_before[]"]')?.value) || 0,
+                                price_after: parseFloat(row.querySelector('input[name="price_after[]"]')?.value) || 0,
+                                total_cost_before: parseFloat(row.querySelector('input[name="total_cost_before[]"]')?.value) || 0,
+                                total_cost_after: parseFloat(row.querySelector('input[name="total_cost_after[]"]')?.value) || 0,
+                                total_cost_crp: parseFloat(row.querySelector('input[name="total_cost_crp[]"]')?.value) || 0
+                            };
+                            data.push(rowData);
+                        } catch (error) {
+                            console.error('Error processing row:', error);
+                            alert('Error: Invalid data in table row. Please check all fields.');
+                            return;
+                        }
+                    }
+
+                    if (data.length === 0) {
+                        alert('No changes detected. Please modify or add at least one row.');
+                        return;
+                    }
+
+                    console.log('Sending data:', data);
+
+                    fetch('{{ route("crp.savedetail") }}', {
                         method: 'POST',
                         headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
                         },
-                        body: formData
+                        body: JSON.stringify({ rows: data })
                     })
-                    .then(response => response.json())
+                    .then(async response => {
+                        const text = await response.text();
+                        console.log('Raw response:', text);
+
+                        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            throw new Error('Invalid JSON response from server: ' + text);
+                        }
+                    })
                     .then(data => {
                         if (data.success) {
-                            alert('Data berhasil disimpan!');
-                            resetInputs();
+                            alert('Data saved successfully!');
+                            location.reload();
                         } else {
-                            throw new Error(data.error || 'Data gagal disimpan');
+                            alert('Error saving data: ' + data.message);
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
-                        alert('Error: ' + error.message);
+                        console.error('Fetch error:', error);
+                        alert('An error occurred while saving data: ' + error.message);
                     });
                 }
+
+                document.addEventListener('input', function (e) {
+                    const row = e.target.closest('tr');
+                    if (row && row.dataset.id) {
+                        row.classList.add('modified-row');
+                    }
+                });
+
+
+
 
 
                 function processRow(row, category, type, summaryData) {
@@ -427,6 +528,46 @@
                     }
 
                     summaryData.push(dataEntry);
+                }
+
+                function hapusPermanenDetail() {
+                    let checked = document.querySelectorAll('input[name="record[]"]:checked');
+                    let ids = [];
+
+                    checked.forEach((checkbox) => {
+                        // Pisahkan ID Plan dan Actual
+                        let values = checkbox.value.split(',');
+                        ids.push(...values);
+                    });
+
+                    if (ids.length === 0) {
+                        alert("Pilih minimal satu data untuk dihapus.");
+                        return;
+                    }
+
+                    if (confirm("Yakin ingin menghapus data terpilih?")) {
+                        // Kirim ke endpoint Laravel pakai AJAX / fetch / form tersembunyi
+                        fetch('{{ route('crp.deletePermanenDetail') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({ ids: ids })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert("Data berhasil dihapus.");
+                                location.reload();
+                            } else {
+                                alert("Gagal menghapus data.");
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                    }
                 }
             </script>
 
@@ -521,16 +662,94 @@
                 cellYTDActual.innerHTML = '<input type="text" class="form-control text-center font-weight-bold" name="actual_ytd" readonly>';
             }
 
+            function saveData() {
+                const summaryData = [];
+                const summaryRows = document.querySelectorAll('#tabelsummary tbody tr');
 
-            function deleteRows1() {
-                const checkboxes = document.querySelectorAll('input[name="record1"]:checked');
-                checkboxes.forEach(checkbox => {
-                    const row = checkbox.closest('tr');
-                    if (row) {
-                        row.nextElementSibling?.remove(); // Hapus baris Actual jika ada
-                        row.remove();
+                for (let i = 0; i < summaryRows.length; i++) {
+                    const planRow = summaryRows[i];
+                    const categorySelect = planRow.querySelector('select');
+
+                    if (!categorySelect) {
+                        i++; // skip actual row
+                        continue;
                     }
+
+                    const category = categorySelect.value;
+                    if (!category) continue;
+
+                    // Only process Plan row
+                    processRow(planRow, category, 'Plan', summaryData);
+
+                    i++; // skip Actual row
+                }
+
+                const formData = new FormData();
+                formData.append('summary', JSON.stringify(summaryData));
+
+                fetch('{{ route('crp.store') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Data berhasil disimpan!');
+                        location.reload(); // ⬅️ Tambahkan ini untuk reload halaman
+                    } else {
+                        throw new Error(data.error || 'Data gagal disimpan');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error: ' + error.message);
                 });
+            }
+
+
+
+
+            function deletePermanen() {
+                let checked = document.querySelectorAll('input[name="record[]"]:checked');
+                let ids = [];
+
+                checked.forEach((checkbox) => {
+                    // Pisahkan ID Plan dan Actual
+                    let values = checkbox.value.split(',');
+                    ids.push(...values);
+                });
+
+                if (ids.length === 0) {
+                    alert("Pilih minimal satu data untuk dihapus.");
+                    return;
+                }
+
+                if (confirm("Yakin ingin menghapus data terpilih?")) {
+                    // Kirim ke endpoint Laravel pakai AJAX / fetch / form tersembunyi
+                    fetch('{{ route('crp.deletePermanen') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ ids: ids })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Data berhasil dihapus.");
+                            location.reload();
+                        } else {
+                            alert("Gagal menghapus data.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                }
             }
 
             function resetInputs() {
@@ -546,44 +765,42 @@
         <script>
             // Fungsi untuk menghitung YTD
             function calculateYTD() {
-                const rows = document.querySelectorAll('#tabelsummary tbody tr');
+    const rows = document.querySelectorAll('#tabelsummary tbody tr');
+    console.log('Jumlah baris:', rows.length);
 
-                for (let i = 0; i < rows.length; i += 2) {
-                    const planRow = rows[i];
-                    const actualRow = rows[i + 1];
+    for (let i = 0; i < rows.length; i += 2) {
+        const planRow = rows[i];
+        const actualRow = rows[i + 1]; // Mungkin ada atau tidak
 
-                    // --- Hitung YTD PLAN ---
-                    let totalPlan = 0;
-                    for (let col = 3; col < 15; col++) {
-                        const input = planRow.cells[col].querySelector('input');
-                        if (input) {
-                            totalPlan += parseFloat(input.value) || 0;
-                        }
-                    }
-                    const ytdPlanInput = planRow.cells[15]?.querySelector('input');
-                    if (ytdPlanInput) ytdPlanInput.value = Math.round(totalPlan);
-
-                    // --- Hitung YTD ACTUAL ---
-                    let totalActual = 0;
-                    for (let col = 2; col < 14; col++) {
-                        const input = actualRow.cells[col]?.querySelector('input');
-                        if (input) {
-                            totalActual += parseFloat(input.value) || 0;
-                        }
-                    }
-                    const ytdActualInput = actualRow.cells[14]?.querySelector('input[name="actual_ytd"]');
-                    if (ytdActualInput) ytdActualInput.value = Math.round(totalActual);
+        // --- Hitung YTD PLAN ---
+        let totalPlan = 0;
+        if (planRow) {
+            for (let col = 3; col < 15; col++) {
+                const input = planRow.cells[col]?.querySelector('input');
+                if (input) {
+                    totalPlan += parseFloat(input.value) || 0;
                 }
             }
+            const ytdPlanInput = planRow.cells[15]?.querySelector('input');
+            console.log('Plan YTD:', totalPlan, 'Input:', ytdPlanInput);
+            if (ytdPlanInput) ytdPlanInput.value = Math.round(totalPlan);
+        }
 
-
-
-            document.addEventListener('DOMContentLoaded', function() {
-                document.querySelectorAll('#tabelsummary tbody input[type="text"]').forEach(input => {
-                    input.addEventListener('input', calculateYTD);
-                });
-            });
-
+        // --- Hitung YTD ACTUAL ---
+        let totalActual = 0;
+        if (actualRow) {
+            for (let col = 2; col < 14; col++) {
+                const input = actualRow.cells[col]?.querySelector('input');
+                if (input) {
+                    totalActual += parseFloat(input.value) || 0;
+                }
+            }
+            const ytdActualInput = actualRow.cells[14]?.querySelector('input[name*="actual_ytd"]');
+            console.log('Actual YTD:', totalActual, 'Input:', ytdActualInput);
+            if (ytdActualInput) ytdActualInput.value = Math.round(totalActual);
+        }
+    }
+}
             
         </script>
     </main>
