@@ -707,6 +707,7 @@ class InquirySalesController extends Controller
         $inquiries = InquirySales::with(['customer', 'details'])
             ->where('status', 3) // Hanya ambil yang berstatus Approve Ka.Dept
             ->where('is_active', 1) // Hanya yang aktif
+            ->where('loc_imp', 'Local')
             ->get();
 
         return view('inquiry.approvalInventory', compact('inquiries'));
@@ -803,12 +804,14 @@ class InquirySalesController extends Controller
         $inquiries = InquirySales::with('customer')
             ->whereIn('status', [5, 6, 8, 9]) // Mengambil status On Progress, Finished, etc.
             ->where('is_active', 1)
+            ->where('loc_imp', 'Local')
             ->orderBy('created_at', 'desc')
             ->get();
 
         $draftInquiries = InquirySales::with('customer')
             ->whereIn('status', [1, 2, 3, 4]) // Draft dan Open
             ->where('is_active', 1)
+            ->where('loc_imp', 'Local')
             ->get();
 
         return view('inquiry.overviewPurchase', compact('inquiries', 'draftInquiries'));
