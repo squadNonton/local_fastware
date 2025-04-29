@@ -270,7 +270,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="15" style="text-align: center;">Data tidak ditemukan</td>
+                                            <td colspan="16" style="text-align: center;">Data tidak ditemukan</td>
                                         </tr>
                                     @endforelse
                                 @endif
