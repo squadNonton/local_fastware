@@ -105,8 +105,8 @@ class CrpController extends Controller
             continue;
         }
 
-        // Data untuk Plan
-        $planData = [
+        // Data umum
+        $commonData = [
             'month_1'     => $entry['plan_values'][0] ?? 0,
             'month_2'     => $entry['plan_values'][1] ?? 0,
             'month_3'     => $entry['plan_values'][2] ?? 0,
@@ -120,20 +120,43 @@ class CrpController extends Controller
             'month_11'    => $entry['plan_values'][10] ?? 0,
             'month_12'    => $entry['plan_values'][11] ?? 0,
             'grand_tot'   => $entry['plan_ytd'] ?? 0,
-            'partner_user' => Auth::id(),
+            'partner_user'=> Auth::id(),
         ];
 
-        // Update or Create for Plan
+        // Update or Create untuk Plan
         MstDboCrp::updateOrCreate(
             [
                 'nm_category'  => $nm_category,
                 'plan_actual'  => 'Plan',
                 'partner_user' => Auth::id(),
             ],
-            $planData
+            $commonData
         );
 
-        // Update or Create for Actual
+        // Create sekali untuk Actual jika belum ada
+        MstDboCrp::firstOrCreate(
+            [
+                'nm_category'  => $nm_category,
+                'plan_actual'  => 'Actual',
+                'partner_user' => Auth::id(),
+            ],
+            // Default value saat dibuat (kosong semua)
+            [
+                'month_1'     => 0,
+                'month_2'     => 0,
+                'month_3'     => 0,
+                'month_4'     => 0,
+                'month_5'     => 0,
+                'month_6'     => 0,
+                'month_7'     => 0,
+                'month_8'     => 0,
+                'month_9'     => 0,
+                'month_10'    => 0,
+                'month_11'    => 0,
+                'month_12'    => 0,
+                'grand_tot'   => 0,
+            ]
+        );
     }
 
     return response()->json([
@@ -141,6 +164,7 @@ class CrpController extends Controller
         'message' => 'Data berhasil disimpan.'
     ]);
 }
+
 
 
 public function saveDetail(Request $request)
