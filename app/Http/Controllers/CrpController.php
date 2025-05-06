@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\CrpDetailExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use App\Exports\MstDboCrpActualExport;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Support\Facades\Log;
 
 class CrpController extends Controller
 {
@@ -95,83 +98,93 @@ class CrpController extends Controller
 
 
     public function store(Request $request)
-{
-    // Validasi input
-    $validated = $request->validate([
-        'summaryData' => 'required|array',
-    ]);
+    {
+        // Validasi input
+        $validated = $request->validate([
+            'summaryData' => 'required|array',
+        ]);
 
-    $summaryData = $request->input('summaryData');
+        $summaryData = $request->input('summaryData');
 
-    foreach ($summaryData as $nm_category => $entry) {
-        if (!isset($entry['plan_values']) || !is_array($entry['plan_values'])) {
-            continue;
+        foreach ($summaryData as $nm_category => $entry) {
+            if (!isset($entry['plan_values']) || !is_array($entry['plan_values'])) {
+                continue;
+            }
+
+            // Data umum
+            $commonData = [
+                'month_1'     => $entry['plan_values'][0] ?? 0,
+                'month_2'     => $entry['plan_values'][1] ?? 0,
+                'month_3'     => $entry['plan_values'][2] ?? 0,
+                'month_4'     => $entry['plan_values'][3] ?? 0,
+                'month_5'     => $entry['plan_values'][4] ?? 0,
+                'month_6'     => $entry['plan_values'][5] ?? 0,
+                'month_7'     => $entry['plan_values'][6] ?? 0,
+                'month_8'     => $entry['plan_values'][7] ?? 0,
+                'month_9'     => $entry['plan_values'][8] ?? 0,
+                'month_10'    => $entry['plan_values'][9] ?? 0,
+                'month_11'    => $entry['plan_values'][10] ?? 0,
+                'month_12'    => $entry['plan_values'][11] ?? 0,
+                'grand_tot'   => $entry['plan_ytd'] ?? 0,
+                'partner_user'=> Auth::id(),
+            ];
+
+            // Update or Create untuk Plan
+            MstDboCrp::updateOrCreate(
+                [
+                    'nm_category'  => $nm_category,
+                    'plan_actual'  => 'Plan',
+                    'partner_user' => Auth::id(),
+                ],
+                $commonData
+            );
+
+            // Create sekali untuk Actual jika belum ada
+            MstDboCrp::firstOrCreate(
+                [
+                    'nm_category'  => $nm_category,
+                    'plan_actual'  => 'Actual',
+                    'partner_user' => Auth::id(),
+                ],
+                // Default value saat dibuat (kosong semua)
+                [
+                    'month_1'     => 0,
+                    'month_2'     => 0,
+                    'month_3'     => 0,
+                    'month_4'     => 0,
+                    'month_5'     => 0,
+                    'month_6'     => 0,
+                    'month_7'     => 0,
+                    'month_8'     => 0,
+                    'month_9'     => 0,
+                    'month_10'    => 0,
+                    'month_11'    => 0,
+                    'month_12'    => 0,
+                    'grand_tot'   => 0,
+                ]
+            );
         }
 
-        // Data umum
-        $commonData = [
-            'month_1'     => $entry['plan_values'][0] ?? 0,
-            'month_2'     => $entry['plan_values'][1] ?? 0,
-            'month_3'     => $entry['plan_values'][2] ?? 0,
-            'month_4'     => $entry['plan_values'][3] ?? 0,
-            'month_5'     => $entry['plan_values'][4] ?? 0,
-            'month_6'     => $entry['plan_values'][5] ?? 0,
-            'month_7'     => $entry['plan_values'][6] ?? 0,
-            'month_8'     => $entry['plan_values'][7] ?? 0,
-            'month_9'     => $entry['plan_values'][8] ?? 0,
-            'month_10'    => $entry['plan_values'][9] ?? 0,
-            'month_11'    => $entry['plan_values'][10] ?? 0,
-            'month_12'    => $entry['plan_values'][11] ?? 0,
-            'grand_tot'   => $entry['plan_ytd'] ?? 0,
-            'partner_user'=> Auth::id(),
-        ];
-
-        // Update or Create untuk Plan
-        MstDboCrp::updateOrCreate(
-            [
-                'nm_category'  => $nm_category,
-                'plan_actual'  => 'Plan',
-                'partner_user' => Auth::id(),
-            ],
-            $commonData
-        );
-
-        // Create sekali untuk Actual jika belum ada
-        MstDboCrp::firstOrCreate(
-            [
-                'nm_category'  => $nm_category,
-                'plan_actual'  => 'Actual',
-                'partner_user' => Auth::id(),
-            ],
-            // Default value saat dibuat (kosong semua)
-            [
-                'month_1'     => 0,
-                'month_2'     => 0,
-                'month_3'     => 0,
-                'month_4'     => 0,
-                'month_5'     => 0,
-                'month_6'     => 0,
-                'month_7'     => 0,
-                'month_8'     => 0,
-                'month_9'     => 0,
-                'month_10'    => 0,
-                'month_11'    => 0,
-                'month_12'    => 0,
-                'grand_tot'   => 0,
-            ]
-        );
+        return response()->json([
+            'success' => true,
+            'message' => 'Data berhasil disimpan.'
+        ]);
     }
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Data berhasil disimpan.'
-    ]);
-}
 
     public function exportMstActual()
     {
-        return Excel::download(new MstDboCrpActualExport, 'MstDboCrp_Actual.xlsx');
+        $date = date('Y-m-d');
+        $filename = "MstDboCrp_Actual_{$date}.xlsx";
+        return Excel::download(new MstDboCrpActualExport, $filename);
     }
+
+    public function exportdetailcrp()
+    {
+        $date = date('Y-m-d');
+        $filename = "DetailCRP_{$date}.xlsx";
+        return Excel::download(new CrpDetailExport, $filename);
+    }
+
 
     public function saveDetail(Request $request)
     {
@@ -308,7 +321,7 @@ class CrpController extends Controller
             return response()->json(['success' => true, 'message' => 'Data saved successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Error: ' . $e->getMessage());
+            Log::error('Error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Server error: ' . $e->getMessage()
@@ -414,7 +427,7 @@ class CrpController extends Controller
             return response()->json(['success' => true, 'message' => 'Data berhasil dihapus dan YTD diperbarui.']);
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Delete Error: ' . $e->getMessage());
+            Log::error('Delete Error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat menghapus: ' . $e->getMessage()
@@ -422,5 +435,66 @@ class CrpController extends Controller
         }
     }
 
+    public function importCrpDetail(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls',
+        ]);
+
+        try {
+            $file = $request->file('file');
+            $spreadsheet = IOFactory::load($file->getPathname());
+            $worksheet = $spreadsheet->getActiveSheet();
+            $rows = $worksheet->toArray();
+
+            $now = Carbon::now();
+            $userId = Auth::id();
+
+            $detailUpdates = [];
+            $logs = [];
+
+            foreach ($rows as $index => $row) {
+                if ($index < 1 || empty(array_filter($row)) || count($row) < 13) {
+                    continue;
+                }
+
+                $CrpId = $row[13] ?? null;
+                $detailId = $row[12] ?? null;
+
+                $oldCrp = DB::table('mst_dbo_crp')->where('id', $CrpId)->first();
+                $oldDetail = DB::table('trs_dbo_crp')->where('id', $detailId)->first();
+
+                $newDetailData = [
+                    'mst_id' => $CrpId,
+                    'id' => $detailId,
+                    'nm_category' => $row[1] ?? null,
+                    'detail_activity' => $row[2] ?? null,
+                    'no_po' => $row[3] ?? null,
+                    'date' => $row[4] ?? null,
+                    'qty' => $row[5] ?? null,
+                    'price_before' => $row[6] ?? null,
+                    'price_after' => $row[7] ?? null,
+                    'price_sell' => $row[8] ?? null,
+                    'total_cost_before' => $row[9] ?? null,
+                    'total_cost_after' => $row[10] ?? null,
+                    'total_cost_crp' => $row[11] ?? null
+                ];
+
+                $detailUpdates[] = $newDetailData;
+            }
+
+            if (!empty($detailUpdates)) {
+                DB::table('trs_dbo_crp')->upsert($detailUpdates, ['id'], array_keys($detailUpdates[0]));
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Import berhasil',
+                'redirect' => route('crp')
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
 
 }

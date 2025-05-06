@@ -352,6 +352,14 @@
             <div class="card shadow-lg">
                 <div class="card-body">
                     <p></p>
+                    <div class="d-flex gap-2 mb-3">
+                        <a href="{{ route('export.detailcrp') }}" class="btn btn-success">
+                            Export to Excel
+                        </a>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importModal">
+                            <i class="bi bi-file-earmark-excel"></i> Import Data
+                        </button>
+                    </div>                    
                     <div class="title text-center font-weight-bold text-primary">Detail Pencatatan Actual</div>
                     <div class="table-responsive">
                         <table id="detailTable" class="table table-bordered">
@@ -418,6 +426,50 @@
                 </div>
             </div>
 
+            <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form action="#" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="importModalLabel">Import Detail Data</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                @if(session('import_success'))
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        {{ session('import_success') }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                @endif
+            
+                                @if(session('import_error'))
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        {{ session('import_error') }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                @endif
+            
+                                <div class="mb-3">
+                                    <label for="file" class="form-label">Excel File</label>
+                                    <input type="file" name="file" id="file" 
+                                           class="form-control @error('file') is-invalid @enderror" 
+                                           accept=".xlsx,.xls" required>
+                                    @error('file')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text">Upload the Excel file that was previously exported from the system.</div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" onclick="uploadexcel()">Import</button> <!-- Ubah type menjadi button -->
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
             <script>
                 // function calculateCRP(input) {
                 //     const row = input.closest('tr');
@@ -437,6 +489,37 @@
             window.mstCategories = @json($mstDboCrps->pluck('nm_category')->unique()->values());
         </script>
             <script>
+
+                function uploadexcel() {
+                    let fileInput = document.getElementById('file'); // Perbaiki ID di sini
+                    
+                    if (fileInput.files.length === 0) {
+                        alert("Pilih file terlebih dahulu!");
+                        return;
+                    }
+                    
+                    let formData = new FormData();
+                    formData.append("file", fileInput.files[0]);
+                    
+                    $.ajax({
+                        url: "{{ route('import.detailcrp') }}", // Pastikan rute ini benar
+                        type: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        headers: {
+                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        },
+                        success: function(response) {
+                            alert(response.message);
+                            window.location.href = response.redirect; // Redirect ke halaman tujuan
+                        },
+                        error: function(xhr) {
+                            alert("Terjadi kesalahan: " + xhr.responseText);
+                        }
+                    });
+                }
+
                 function addRow() { 
                     const table = document.getElementById('detailTable').getElementsByTagName('tbody')[0];
                     const newRow = table.insertRow();
