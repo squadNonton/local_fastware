@@ -476,50 +476,50 @@
             });
         }
 
-        function calculateCRP(input) {
-            const row = input.closest('tr');
-            const qty = parseFloat(row.querySelector('input[name="qty[]"]').value) || 0;
-            const priceBefore = parseFloat(row.querySelector('input[name="price_before[]"]').value) || 0;
-            const priceAfter = parseFloat(row.querySelector('input[name="price_after[]"]').value) || 0;
-
-            // Calculate selisih as the difference between price_after and price_before (can be negative)
-            const selisih = priceAfter - priceBefore;
-            row.querySelector('input[name="selisih[]"]').value = selisih.toFixed(2);
-
-            // Calculate total costs
-            const totalCostBefore = qty * priceBefore;
-            const totalCostAfter = qty * priceAfter;
-
-            // Calculate total_cost_crp as the difference between total_cost_after and total_cost_before (can be negative)
-            const totalCostCrp = totalCostAfter - totalCostBefore;
-
-            row.querySelector('input[name="total_cost_before[]"]').value = totalCostBefore.toFixed(2);
-            row.querySelector('input[name="total_cost_after[]"]').value = totalCostAfter.toFixed(2);
-            row.querySelector('input[name="total_cost_crp[]"]').value = totalCostCrp.toFixed(2);
-        }
-
-
         // function calculateCRP(input) {
         //     const row = input.closest('tr');
         //     const qty = parseFloat(row.querySelector('input[name="qty[]"]').value) || 0;
         //     const priceBefore = parseFloat(row.querySelector('input[name="price_before[]"]').value) || 0;
         //     const priceAfter = parseFloat(row.querySelector('input[name="price_after[]"]').value) || 0;
-            
-        //     // Calculate selisih as the absolute difference between price_after and price_before
-        //     const selisih = Math.abs(priceAfter - priceBefore);
+
+        //     // Calculate selisih as the difference between price_after and price_before (can be negative)
+        //     const selisih = priceAfter - priceBefore;
         //     row.querySelector('input[name="selisih[]"]').value = selisih.toFixed(2);
 
         //     // Calculate total costs
         //     const totalCostBefore = qty * priceBefore;
         //     const totalCostAfter = qty * priceAfter;
-            
-        //     // Calculate total_cost_crp as the absolute difference between total_cost_after and total_cost_before
-        //     const totalCostCrp = Math.abs(totalCostAfter - totalCostBefore);
+
+        //     // Calculate total_cost_crp as the difference between total_cost_after and total_cost_before (can be negative)
+        //     const totalCostCrp = totalCostAfter - totalCostBefore;
 
         //     row.querySelector('input[name="total_cost_before[]"]').value = totalCostBefore.toFixed(2);
         //     row.querySelector('input[name="total_cost_after[]"]').value = totalCostAfter.toFixed(2);
         //     row.querySelector('input[name="total_cost_crp[]"]').value = totalCostCrp.toFixed(2);
         // }
+
+
+        function calculateCRP(input) {
+            const row = input.closest('tr');
+            const qty = parseFloat(row.querySelector('input[name="qty[]"]').value) || 0;
+            const priceBefore = parseFloat(row.querySelector('input[name="price_before[]"]').value) || 0;
+            const priceAfter = parseFloat(row.querySelector('input[name="price_after[]"]').value) || 0;
+            
+            // Calculate selisih as the absolute difference between price_after and price_before
+            const selisih = Math.abs(priceAfter - priceBefore);
+            row.querySelector('input[name="selisih[]"]').value = selisih.toFixed(2);
+
+            // Calculate total costs
+            const totalCostBefore = qty * priceBefore;
+            const totalCostAfter = qty * priceAfter;
+            
+            // Calculate total_cost_crp as the absolute difference between total_cost_after and total_cost_before
+            const totalCostCrp = Math.abs(totalCostAfter - totalCostBefore);
+
+            row.querySelector('input[name="total_cost_before[]"]').value = totalCostBefore.toFixed(2);
+            row.querySelector('input[name="total_cost_after[]"]').value = totalCostAfter.toFixed(2);
+            row.querySelector('input[name="total_cost_crp[]"]').value = totalCostCrp.toFixed(2);
+        }
 
                 function resetInputs1() {
                     document.querySelectorAll("#detailTable tbody input").forEach(input => {
