@@ -10,6 +10,9 @@ use App\Models\MstDboCrp;
 use App\Models\TrsDboCrp;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use App\Exports\MstDboCrpActualExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CrpController extends Controller
 {
@@ -165,150 +168,153 @@ class CrpController extends Controller
     ]);
 }
 
+    public function exportMstActual()
+    {
+        return Excel::download(new MstDboCrpActualExport, 'MstDboCrp_Actual.xlsx');
+    }
 
+    public function saveDetail(Request $request)
+    {
 
-public function saveDetail(Request $request)
-{
+        try {
+            $rows = $request->input('rows');
+            $userId = Auth::id();
 
-    try {
-        $rows = $request->input('rows');
-        $userId = Auth::id();
-
-        if (empty($rows)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No data provided to save.'
-            ], 400);
-        }
-
-        DB::beginTransaction();
-
-        foreach ($rows as $index => $row) {
-            if (empty($row['actual_category'])) {
-                DB::rollBack();
+            if (empty($rows)) {
                 return response()->json([
                     'success' => false,
-                    'message' => "Category is required for row " . ($index + 1)
+                    'message' => 'No data provided to save.'
                 ], 400);
             }
 
-            $mstDboCrp = null;
-            $oldTotalCostCrp = 0;
-            $oldMstId = null;
+            DB::beginTransaction();
 
-            // Handle existing TrsDboCrp updates
-            if (!empty($row['id'])) {
-                $existingTrs = TrsDboCrp::find($row['id']);
-                if (!$existingTrs) {
+            foreach ($rows as $index => $row) {
+                if (empty($row['actual_category'])) {
                     DB::rollBack();
                     return response()->json([
                         'success' => false,
-                        'message' => "TrsDboCrp record not found for row " . ($index + 1)
-                    ], 404);
+                        'message' => "Category is required for row " . ($index + 1)
+                    ], 400);
                 }
 
-                $oldTotalCostCrp = $existingTrs->total_cost_crp;
-                $oldMstId = $existingTrs->mst_id;
+                $mstDboCrp = null;
+                $oldTotalCostCrp = 0;
+                $oldMstId = null;
 
-                // Check if category changed
-                if ($existingTrs->nm_category != $row['actual_category']) {
-                    // Decrement old Mst
-                    $oldMst = MstDboCrp::find($oldMstId);
-                    if ($oldMst) {
-                        $oldDate = $existingTrs->date ? Carbon::parse($existingTrs->date) : null;
-                        if ($oldDate) {
-                            $oldMonth = $oldDate->format('n');
-                            $oldMonthColumn = 'month_' . $oldMonth;
-                            $oldMst->decrement($oldMonthColumn, $oldTotalCostCrp);
-                            $oldMst->decrement('grand_tot', $oldTotalCostCrp);
-                        }
+                // Handle existing TrsDboCrp updates
+                if (!empty($row['id'])) {
+                    $existingTrs = TrsDboCrp::find($row['id']);
+                    if (!$existingTrs) {
+                        DB::rollBack();
+                        return response()->json([
+                            'success' => false,
+                            'message' => "TrsDboCrp record not found for row " . ($index + 1)
+                        ], 404);
                     }
 
-                    // Find new Mst based on new category
+                    $oldTotalCostCrp = $existingTrs->total_cost_crp;
+                    $oldMstId = $existingTrs->mst_id;
+
+                    // Check if category changed
+                    if ($existingTrs->nm_category != $row['actual_category']) {
+                        // Decrement old Mst
+                        $oldMst = MstDboCrp::find($oldMstId);
+                        if ($oldMst) {
+                            $oldDate = $existingTrs->date ? Carbon::parse($existingTrs->date) : null;
+                            if ($oldDate) {
+                                $oldMonth = $oldDate->format('n');
+                                $oldMonthColumn = 'month_' . $oldMonth;
+                                $oldMst->decrement($oldMonthColumn, $oldTotalCostCrp);
+                                $oldMst->decrement('grand_tot', $oldTotalCostCrp);
+                            }
+                        }
+
+                        // Find new Mst based on new category
+                        $mstDboCrp = MstDboCrp::where('partner_user', $userId)
+                            ->where('nm_category', $row['actual_category'])
+                            ->where('plan_actual', 'Actual')
+                            ->first();
+                    } else {
+                        // Use existing Mst
+                        $mstDboCrp = MstDboCrp::find($oldMstId);
+                    }
+                } else {
+                    // New entry: find Mst by category and user
                     $mstDboCrp = MstDboCrp::where('partner_user', $userId)
                         ->where('nm_category', $row['actual_category'])
                         ->where('plan_actual', 'Actual')
                         ->first();
-                } else {
-                    // Use existing Mst
-                    $mstDboCrp = MstDboCrp::find($oldMstId);
                 }
-            } else {
-                // New entry: find Mst by category and user
-                $mstDboCrp = MstDboCrp::where('partner_user', $userId)
-                    ->where('nm_category', $row['actual_category'])
-                    ->where('plan_actual', 'Actual')
-                    ->first();
+
+                if (!$mstDboCrp) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Category not found for row " . ($index + 1)
+                    ], 400);
+                }
+
+                // Validate date and month
+                $date = $row['date'] ?? null;
+                $month = $date ? Carbon::parse($date)->format('n') : null;
+                if (!$month || $month < 1 || $month > 12) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Invalid date/month for row " . ($index + 1)
+                    ], 400);
+                }
+
+                $monthColumn = 'month_' . $month;
+                $newTotalCostCrp = $row['total_cost_crp'] ?? 0;
+                $difference = $newTotalCostCrp - $oldTotalCostCrp;
+
+                // Update MstDboCrp
+                if (!empty($row['id']) && $mstDboCrp->id == $oldMstId) {
+                    // Adjust existing Mst by difference
+                    $mstDboCrp->increment($monthColumn, $difference);
+                    $mstDboCrp->increment('grand_tot', $difference);
+                } else {
+                    // New entry or changed category: increment new Mst
+                    $mstDboCrp->increment($monthColumn, $newTotalCostCrp);
+                    $mstDboCrp->increment('grand_tot', $newTotalCostCrp);
+                }
+
+                // Update or create TrsDboCrp
+                $trsData = [
+                    'mst_id' => $mstDboCrp->id,
+                    'nm_category' => $row['actual_category'],
+                    'detail_activity' => $row['detail_activity'] ?? null,
+                    'no_po' => $row['no_po'] ?? null,
+                    'date' => $date,
+                    'qty' => $row['qty'] ?? 0,
+                    'price_before' => $row['price_before'] ?? 0,
+                    'price_after' => $row['price_after'] ?? 0,
+                    'price_sell' => $row['selisih'] ?? 0,
+                    'total_cost_before' => $row['total_cost_before'] ?? 0,
+                    'total_cost_after' => $row['total_cost_after'] ?? 0,
+                    'total_cost_crp' => $newTotalCostCrp,
+                ];
+
+                if (!empty($row['id'])) {
+                    $existingTrs->update($trsData);
+                } else {
+                    TrsDboCrp::create($trsData);
+                }
             }
 
-            if (!$mstDboCrp) {
-                DB::rollBack();
-                return response()->json([
-                    'success' => false,
-                    'message' => "Category not found for row " . ($index + 1)
-                ], 400);
-            }
-
-            // Validate date and month
-            $date = $row['date'] ?? null;
-            $month = $date ? Carbon::parse($date)->format('n') : null;
-            if (!$month || $month < 1 || $month > 12) {
-                DB::rollBack();
-                return response()->json([
-                    'success' => false,
-                    'message' => "Invalid date/month for row " . ($index + 1)
-                ], 400);
-            }
-
-            $monthColumn = 'month_' . $month;
-            $newTotalCostCrp = $row['total_cost_crp'] ?? 0;
-            $difference = $newTotalCostCrp - $oldTotalCostCrp;
-
-            // Update MstDboCrp
-            if (!empty($row['id']) && $mstDboCrp->id == $oldMstId) {
-                // Adjust existing Mst by difference
-                $mstDboCrp->increment($monthColumn, $difference);
-                $mstDboCrp->increment('grand_tot', $difference);
-            } else {
-                // New entry or changed category: increment new Mst
-                $mstDboCrp->increment($monthColumn, $newTotalCostCrp);
-                $mstDboCrp->increment('grand_tot', $newTotalCostCrp);
-            }
-
-            // Update or create TrsDboCrp
-            $trsData = [
-                'mst_id' => $mstDboCrp->id,
-                'nm_category' => $row['actual_category'],
-                'detail_activity' => $row['detail_activity'] ?? null,
-                'no_po' => $row['no_po'] ?? null,
-                'date' => $date,
-                'qty' => $row['qty'] ?? 0,
-                'price_before' => $row['price_before'] ?? 0,
-                'price_after' => $row['price_after'] ?? 0,
-                'price_sell' => $row['selisih'] ?? 0,
-                'total_cost_before' => $row['total_cost_before'] ?? 0,
-                'total_cost_after' => $row['total_cost_after'] ?? 0,
-                'total_cost_crp' => $newTotalCostCrp,
-            ];
-
-            if (!empty($row['id'])) {
-                $existingTrs->update($trsData);
-            } else {
-                TrsDboCrp::create($trsData);
-            }
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Data saved successfully']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error: ' . $e->getMessage()
+            ], 500);
         }
-
-        DB::commit();
-        return response()->json(['success' => true, 'message' => 'Data saved successfully']);
-    } catch (\Exception $e) {
-        DB::rollBack();
-        \Log::error('Error: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Server error: ' . $e->getMessage()
-        ], 500);
     }
-}
 
 
 
@@ -377,15 +383,44 @@ public function saveDetail(Request $request)
 
     public function deleteDetail(Request $request)
     {
-        $ids = $request->input('ids'); // array berisi id plan dan actual
+        $ids = $request->input('ids'); // array berisi id detail
         if (!$ids || !is_array($ids)) {
             return response()->json(['success' => false, 'message' => 'ID tidak valid.']);
         }
-    
-        // Soft delete
-        TrsDboCrp::whereIn('id', $ids)->update(['deleted_at' => now()]);
-    
-        return response()->json(['success' => true]);
+
+        DB::beginTransaction();
+        try {
+            $details = TrsDboCrp::whereIn('id', $ids)->get();
+
+            foreach ($details as $detail) {
+                if (!$detail->date || !$detail->total_cost_crp || !$detail->mst_id) {
+                    continue; // skip if any key data is missing
+                }
+
+                $month = Carbon::parse($detail->date)->format('n');
+                $monthColumn = 'month_' . $month;
+
+                $mst = MstDboCrp::find($detail->mst_id);
+                if ($mst && Schema::hasColumn('mst_dbo_crp', $monthColumn)) {
+                    $mst->decrement($monthColumn, $detail->total_cost_crp);
+                    $mst->decrement('grand_tot', $detail->total_cost_crp);
+                }
+            }
+
+            // Soft delete
+            TrsDboCrp::whereIn('id', $ids)->update(['deleted_at' => now()]);
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Data berhasil dihapus dan YTD diperbarui.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Delete Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menghapus: ' . $e->getMessage()
+            ], 500);
+        }
     }
+
 
 }

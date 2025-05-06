@@ -152,7 +152,96 @@
                     <h6 class="text-left font-weight-bold text-primary">
                         Partner user: {{ $userName }}
                     </h6>
+                    <a href="{{ route('export.mst.actual') }}" class="btn btn-success mb-3">
+                        Export to Excel
+                    </a>
+                    
                     <div class="table-responsive">
+                        <table id="tabelsummary" class="table table-striped table-bordered table-hover text-center">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th style="width: 25px;"></th>
+                                    <th style="width: 200px;">Category</th>
+                                    <th>Type</th>
+                                    <th>Jan</th>
+                                    <th>Feb</th>
+                                    <th>Mar</th>
+                                    <th>Apr</th>
+                                    <th>May</th>
+                                    <th>Jun</th>
+                                    <th>Jul</th>
+                                    <th>Aug</th>
+                                    <th>Sep</th>
+                                    <th>Oct</th>
+                                    <th>Nov</th>
+                                    <th>Dec</th>
+                                    <th>FY</th>
+                                    <th>YTD</th>
+                                    
+                                </tr>
+                            </thead>
+                            <tbody id="summaryBody">
+                                @php
+                                    $allCategories = ['IT', 'Subcont', 'Consumable', 'Repair Maintenance', 'Utility', 'General Affair', 'Material Cost', 'Indirect Material', 'Others'];
+                                @endphp
+                                @foreach ($allCategories as $category)
+                                    @php
+                                        $records = $mstDboCrps->where('nm_category', $category);
+                                        $plan = $records->firstWhere('plan_actual', 'Plan');
+                                        $actual = $records->firstWhere('plan_actual', 'Actual');
+                                        $value = ($plan->id ?? '') . ($actual ? ',' . $actual->id : '');
+                                    @endphp
+                                    <!-- Plan Row -->
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" name="record[]" value="{{ $value }}">
+                                        </td>
+                                        <td rowspan="2" class="align-middle font-weight-bold text-dark">{{ $category }}</td>
+                                        <td class="font-weight-bold text-primary">Plan</td>
+                                        @for ($i = 1; $i <= 12; $i++)
+                                            <td>
+                                                <input type="text" class="form-control text-center"
+                                                       name="plan_values[{{ $category }}][]"
+                                                       value="{{ $plan ? $plan->{'month_' . $i} : '' }}"
+                                                       oninput="calculateYTD()" /> <!-- Memanggil calculateYTD untuk menghitung FY dan Existing -->
+                                            </td>
+                                        @endfor
+                                        <td>
+                                            <input type="text" class="form-control text-center font-weight-bold"
+                                                   name="plan_ytd[{{ $category }}]"
+                                                   value="{{ $plan ? $plan->grand_tot : '' }}" readonly />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control text-center font-weight-bold"
+                                                   readonly />
+                                        </td>
+                                    </tr>
+                                    <!-- Actual Row -->
+                                    <tr>
+                                        <td></td>
+                                        <td class="font-weight-bold text-success">Actual</td>
+                                        @for ($i = 1; $i <= 12; $i++)
+                                            <td>
+                                                <input type="text" class="form-control text-center"
+                                                       name="actual_values[{{ $category }}][]"
+                                                       value="{{ $actual ? $actual->{'month_' . $i} : '' }}" disabled />
+                                            </td>
+                                        @endfor
+                                        <td><input type="text" class="form-control text-center font-weight-bold" disabled
+                                            name="actual_ytd[{{ $category }}]"
+                                            value="{{ $actual ? $actual->grand_tot : '' }}" readonly /></td>
+                                        <td>
+                                            <input type="text" class="form-control text-center font-weight-bold" disabled
+
+                                                   value="{{ $actual ? $actual->grand_tot : '' }}" readonly />
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    {{-- <div class="table-responsive">
                         <table id="tabelsummary" class="table table-striped table-bordered table-hover text-center">
                             <thead class="thead-dark">
                                 <tr>
@@ -236,15 +325,15 @@
                             </tbody>
                             
                         </table>
-                    </div>
+                    </div> --}}
 
                     <div class="d-flex justify-content-center mt-3 gap-2">
-                        <a href="#" class="btn btn-success font-weight-bold px-4" onclick="addRow1()">
+                        {{-- <a href="#" class="btn btn-success font-weight-bold px-4" onclick="addRow1()">
                             Tambah Baris
-                        </a>
-                        <a href="#" class="btn btn-danger font-weight-bold px-4" onclick="deleteRows1()">
+                        </a> --}}
+                        {{-- <a href="#" class="btn btn-danger font-weight-bold px-4" onclick="deleteRows1()">
                             Hapus Baris
-                        </a>
+                        </a> --}}
                         <button class="btn btn-warning font-weight-bold px-4 text-white" onclick="resetInputs()">
                             Reset
                         </button>
@@ -392,22 +481,45 @@
             const qty = parseFloat(row.querySelector('input[name="qty[]"]').value) || 0;
             const priceBefore = parseFloat(row.querySelector('input[name="price_before[]"]').value) || 0;
             const priceAfter = parseFloat(row.querySelector('input[name="price_after[]"]').value) || 0;
-            
-            // Calculate selisih as the absolute difference between price_after and price_before
-            const selisih = Math.abs(priceAfter - priceBefore);
+
+            // Calculate selisih as the difference between price_after and price_before (can be negative)
+            const selisih = priceAfter - priceBefore;
             row.querySelector('input[name="selisih[]"]').value = selisih.toFixed(2);
 
             // Calculate total costs
             const totalCostBefore = qty * priceBefore;
             const totalCostAfter = qty * priceAfter;
-            
-            // Calculate total_cost_crp as the absolute difference between total_cost_after and total_cost_before
-            const totalCostCrp = Math.abs(totalCostAfter - totalCostBefore);
+
+            // Calculate total_cost_crp as the difference between total_cost_after and total_cost_before (can be negative)
+            const totalCostCrp = totalCostAfter - totalCostBefore;
 
             row.querySelector('input[name="total_cost_before[]"]').value = totalCostBefore.toFixed(2);
             row.querySelector('input[name="total_cost_after[]"]').value = totalCostAfter.toFixed(2);
             row.querySelector('input[name="total_cost_crp[]"]').value = totalCostCrp.toFixed(2);
         }
+
+
+        // function calculateCRP(input) {
+        //     const row = input.closest('tr');
+        //     const qty = parseFloat(row.querySelector('input[name="qty[]"]').value) || 0;
+        //     const priceBefore = parseFloat(row.querySelector('input[name="price_before[]"]').value) || 0;
+        //     const priceAfter = parseFloat(row.querySelector('input[name="price_after[]"]').value) || 0;
+            
+        //     // Calculate selisih as the absolute difference between price_after and price_before
+        //     const selisih = Math.abs(priceAfter - priceBefore);
+        //     row.querySelector('input[name="selisih[]"]').value = selisih.toFixed(2);
+
+        //     // Calculate total costs
+        //     const totalCostBefore = qty * priceBefore;
+        //     const totalCostAfter = qty * priceAfter;
+            
+        //     // Calculate total_cost_crp as the absolute difference between total_cost_after and total_cost_before
+        //     const totalCostCrp = Math.abs(totalCostAfter - totalCostBefore);
+
+        //     row.querySelector('input[name="total_cost_before[]"]').value = totalCostBefore.toFixed(2);
+        //     row.querySelector('input[name="total_cost_after[]"]').value = totalCostAfter.toFixed(2);
+        //     row.querySelector('input[name="total_cost_crp[]"]').value = totalCostCrp.toFixed(2);
+        // }
 
                 function resetInputs1() {
                     document.querySelectorAll("#detailTable tbody input").forEach(input => {
@@ -693,48 +805,49 @@
                 });
             }
 
-
             function saveData() {
                 const tableRows = document.querySelectorAll('#summaryBody tr');
                 const summaryData = {};
 
                 let currentCategory = '';
-                tableRows.forEach((row) => {
-                    const planActual = row.querySelector('td:nth-child(3)')?.textContent?.trim();
 
-                    if (planActual === 'Plan') {
-                        const categorySelect = row.querySelector('select[name="category[]"]');
-                        currentCategory = categorySelect?.value;
+                for (let i = 0; i < tableRows.length; i += 2) {
+                    const planRow = tableRows[i];
+                    const actualRow = tableRows[i + 1];
 
-                        if (!currentCategory) return;
+                    const categoryCell = planRow.querySelector('td:nth-child(2)');
+                    if (!categoryCell) continue;
 
-                        const planInputs = row.querySelectorAll(`input[name^="plan_values"]`);
-                        const ytdInput = row.querySelector(`input[name^="plan_ytd"]`);
-                        
-                        const actualInputs = row.querySelectorAll(`input[name^="actual_values"]`);
-                        const actualYTDInput = row.querySelector(`input[name^="actual_ytd"]`);
+                    currentCategory = categoryCell.textContent.trim();
 
-                        const monthlyPlan = Array.from(planInputs).map(input => {
-                            const val = parseFloat(input.value);
-                            return isNaN(val) ? 0 : val;
-                        });
+                    // Plan inputs
+                    const planInputs = planRow.querySelectorAll('input[name^="plan_values"]');
+                    const ytdPlanInput = planRow.querySelector('input[name^="plan_ytd"]');
 
-                        const monthlyActual = Array.from(actualInputs).map(input => {
-                            const val = parseFloat(input.value);
-                            return isNaN(val) ? 0 : val;
-                        });
+                    // Actual inputs
+                    const actualInputs = actualRow.querySelectorAll('input[name^="actual_values"]');
+                    const ytdActualInput = actualRow.querySelector('input[name^="actual_ytd"]');
 
-                        const planYTD = parseFloat(ytdInput?.value) || 0;
-                        const actualYTD = parseFloat(actualYTDInput?.value) || 0;
+                    const monthlyPlan = Array.from(planInputs).map(input => {
+                        const val = parseFloat(input.value);
+                        return isNaN(val) ? 0 : val;
+                    });
 
-                        summaryData[currentCategory] = {
-                            plan_values: monthlyPlan,
-                            plan_ytd: planYTD,
-                            actual_values: monthlyActual,
-                            actual_ytd: actualYTD
-                        };
-                    }
-                });
+                    const monthlyActual = Array.from(actualInputs).map(input => {
+                        const val = parseFloat(input.value);
+                        return isNaN(val) ? 0 : val;
+                    });
+
+                    const planYTD = parseFloat(ytdPlanInput?.value) || 0;
+                    const actualYTD = parseFloat(ytdActualInput?.value) || 0;
+
+                    summaryData[currentCategory] = {
+                        plan_values: monthlyPlan,
+                        plan_ytd: planYTD,
+                        actual_values: monthlyActual,
+                        actual_ytd: actualYTD
+                    };
+                }
 
                 console.log("Summary data to send:", summaryData);
 
@@ -756,6 +869,71 @@
                     alert('Gagal menyimpan data.');
                 });
             }
+
+
+
+            // function saveData() {
+            //     const tableRows = document.querySelectorAll('#summaryBody tr');
+            //     const summaryData = {};
+
+            //     let currentCategory = '';
+            //     tableRows.forEach((row) => {
+            //         const planActual = row.querySelector('td:nth-child(3)')?.textContent?.trim();
+
+            //         if (planActual === 'Plan') {
+            //             const categorySelect = row.querySelector('select[name="category[]"]');
+            //             currentCategory = categorySelect?.value;
+
+            //             if (!currentCategory) return;
+
+            //             const planInputs = row.querySelectorAll(`input[name^="plan_values"]`);
+            //             const ytdInput = row.querySelector(`input[name^="plan_ytd"]`);
+                        
+            //             const actualInputs = row.querySelectorAll(`input[name^="actual_values"]`);
+            //             const actualYTDInput = row.querySelector(`input[name^="actual_ytd"]`);
+
+            //             const monthlyPlan = Array.from(planInputs).map(input => {
+            //                 const val = parseFloat(input.value);
+            //                 return isNaN(val) ? 0 : val;
+            //             });
+
+            //             const monthlyActual = Array.from(actualInputs).map(input => {
+            //                 const val = parseFloat(input.value);
+            //                 return isNaN(val) ? 0 : val;
+            //             });
+
+            //             const planYTD = parseFloat(ytdInput?.value) || 0;
+            //             const actualYTD = parseFloat(actualYTDInput?.value) || 0;
+
+            //             summaryData[currentCategory] = {
+            //                 plan_values: monthlyPlan,
+            //                 plan_ytd: planYTD,
+            //                 actual_values: monthlyActual,
+            //                 actual_ytd: actualYTD
+            //             };
+            //         }
+            //     });
+
+            //     console.log("Summary data to send:", summaryData);
+
+            //     fetch('{{ route("crp.store") }}', {
+            //         method: 'POST',
+            //         headers: {
+            //             'Content-Type': 'application/json',
+            //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            //         },
+            //         body: JSON.stringify({ summaryData })
+            //     })
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         alert('Data berhasil disimpan!');
+            //         location.reload();
+            //     })
+            //     .catch(error => {
+            //         console.error('Terjadi kesalahan:', error);
+            //         alert('Gagal menyimpan data.');
+            //     });
+            // }
 
 
 
@@ -811,44 +989,77 @@
 
 
         <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                calculateYTD();  // Panggil fungsi untuk menghitung YTD saat halaman dimuat
+            });
             // Fungsi untuk menghitung YTD
             function calculateYTD() {
-    const rows = document.querySelectorAll('#tabelsummary tbody tr');
-    console.log('Jumlah baris:', rows.length);
+                const rows = document.querySelectorAll('#tabelsummary tbody tr');
+                console.log('Jumlah baris:', rows.length);
 
-    for (let i = 0; i < rows.length; i += 2) {
-        const planRow = rows[i];
-        const actualRow = rows[i + 1]; // Mungkin ada atau tidak
+                const currentMonth = new Date().getMonth() + 1; // Mendapatkan bulan saat ini, 1-12
 
-        // --- Hitung YTD PLAN ---
-        let totalPlan = 0;
-        if (planRow) {
-            for (let col = 3; col < 15; col++) {
-                const input = planRow.cells[col]?.querySelector('input');
-                if (input) {
-                    totalPlan += parseFloat(input.value) || 0;
+                for (let i = 0; i < rows.length; i += 2) {
+                    const planRow = rows[i];
+                    const actualRow = rows[i + 1]; // Mungkin ada atau tidak
+
+                    // --- Hitung YTD PLAN (FY dan Existing) ---
+                    let totalPlanFY = 0;
+                    let totalPlanExisting = 0;
+                    if (planRow) {
+                        for (let col = 3; col <= 14; col++) {  // Kolom bulan 1 hingga bulan 12
+                            const input = planRow.cells[col]?.querySelector('input');
+                            if (input) {
+                                totalPlanFY += parseFloat(input.value) || 0;  // Untuk menghitung FY
+                                if (col <= (2 + currentMonth)) {  // Untuk menghitung Existing (bulan yang sudah terlewati)
+                                    totalPlanExisting += parseFloat(input.value) || 0;
+                                }
+                            }
+                        }
+                        const ytdPlanInputFY = planRow.cells[15]?.querySelector('input'); // Kolom YTD untuk FY (15)
+                        const ytdPlanInputExisting = planRow.cells[16]?.querySelector('input'); // Kolom YTD untuk Existing (16)
+                        console.log('Plan YTD FY:', totalPlanFY, 'Input:', ytdPlanInputFY);
+                        console.log('Plan YTD Existing:', totalPlanExisting, 'Input:', ytdPlanInputExisting);
+
+                        if (ytdPlanInputFY) {
+                            ytdPlanInputFY.value = Math.round(totalPlanFY);  // Mengisi nilai YTD FY
+                        }
+                        if (ytdPlanInputExisting) {
+                            ytdPlanInputExisting.value = Math.round(totalPlanExisting);  // Mengisi nilai YTD Existing
+                        }
+                    }
+
+                    // --- Hitung YTD ACTUAL (FY dan Existing) ---
+                    let totalActualFY = 0;
+                    let totalActualExisting = 0;
+                    if (actualRow) {
+                        for (let col = 2; col <= 13; col++) {  // Kolom bulan 1 hingga bulan 12
+                            const input = actualRow.cells[col]?.querySelector('input');
+                            if (input) {
+                                totalActualFY += parseFloat(input.value) || 0;  // Untuk menghitung FY
+                                if (col <= (1 + currentMonth)) {  // Untuk menghitung Existing (bulan yang sudah terlewati)
+                                    totalActualExisting += parseFloat(input.value) || 0;
+                                }
+                            }
+                        }
+                        const ytdActualInputFY = actualRow.cells[14]?.querySelector('input[name*="actual_ytd"]'); // Kolom Actual YTD untuk FY (14)
+                        const ytdActualInputExisting = actualRow.cells[15]?.querySelector('input[name*="actual_ytd_existing"]'); // Kolom Actual YTD untuk Existing (15)
+                        console.log('Actual YTD FY:', totalActualFY, 'Input:', ytdActualInputFY);
+                        console.log('Actual YTD Existing:', totalActualExisting, 'Input:', ytdActualInputExisting);
+
+                        if (ytdActualInputFY) {
+                            ytdActualInputFY.value = Math.round(totalActualFY);  // Mengisi nilai YTD Actual FY
+                        }
+                        if (ytdActualInputExisting) {
+                            ytdActualInputExisting.value = Math.round(totalActualExisting);  // Mengisi nilai YTD Actual Existing
+                        }
+                    }
                 }
             }
-            const ytdPlanInput = planRow.cells[15]?.querySelector('input');
-            console.log('Plan YTD:', totalPlan, 'Input:', ytdPlanInput);
-            if (ytdPlanInput) ytdPlanInput.value = Math.round(totalPlan);
-        }
 
-        // --- Hitung YTD ACTUAL ---
-        let totalActual = 0;
-        if (actualRow) {
-            for (let col = 2; col < 14; col++) {
-                const input = actualRow.cells[col]?.querySelector('input');
-                if (input) {
-                    totalActual += parseFloat(input.value) || 0;
-                }
-            }
-            const ytdActualInput = actualRow.cells[14]?.querySelector('input[name*="actual_ytd"]');
-            console.log('Actual YTD:', totalActual, 'Input:', ytdActualInput);
-            if (ytdActualInput) ytdActualInput.value = Math.round(totalActual);
-        }
-    }
-}
+
+
+
             
         </script>
     </main>
