@@ -558,7 +558,6 @@
                         <textarea class="form-control" id="source_pr" name="source_pr" placeholder="Masukkan source pr" required></textarea>
                         <div class="form-text"></div>
                     </div>
-                    
                 </form>                                                                    
             </div>
             <div class="modal-footer">
@@ -624,6 +623,27 @@
 
 
         <script>
+            
+            document.getElementById('source_pr').addEventListener('keydown', function(event) {
+                if (event.ctrlKey && event.key === 'Enter') {
+                    // Mencegah aksi default jika Ctrl + Enter ditekan
+                    // Agar baris baru tetap ditambahkan
+                    event.preventDefault();
+                    
+                    // Menambahkan baris baru dalam textarea
+                    var cursorPos = this.selectionStart; // Menyimpan posisi kursor saat ini
+                    var textBefore = this.value.substring(0, cursorPos); // Bagian sebelum kursor
+                    var textAfter = this.value.substring(cursorPos); // Bagian setelah kursor
+                    
+                    // Menambahkan line break di posisi kursor
+                    this.value = textBefore + '\n' + textAfter;
+
+                    // Mengatur posisi kursor setelah baris baru
+                    this.selectionStart = this.selectionEnd = cursorPos + 1;
+                }
+            });
+
+
             function showInquiry(id) {
                 // Tampilkan detail inquiry dan tambahkan parameter query
                 window.location.href = '{{ route('showFormSS', '') }}/' + id + '?source=approval';
