@@ -555,9 +555,10 @@
                     <input type="hidden" id="inquiryId" name="inquiryId"> <!-- ID untuk inquiry yang akan diedit -->
                     <div class="mb-3">
                         <label for="source_pr" class="form-label">Source PR</label>
-                        <input type="text" class="form-control" id="source_pr" name="source_pr" placeholder="Masukkan source pr" required>
+                        <textarea class="form-control" id="source_pr" name="source_pr" placeholder="Masukkan source pr" required></textarea>
                         <div class="form-text"></div>
                     </div>
+                    
                 </form>                                                                    
             </div>
             <div class="modal-footer">
