@@ -1049,7 +1049,7 @@ class InquirySalesController extends Controller
     {
         // Validasi input
         $request->validate([
-            'source_pr' => 'required|string|regex:/^PR\/\d{4}\/\d{4}$/',  // Validasi format PR/{year}/{4-digit-number}
+            'source_pr' => 'required|string',  // Validasi format PR/{year}/{4-digit-number}
             'id' => 'required|exists:inquiry_sales,id', // Menggunakan 'id' sesuai dengan nama parameter
         ]);
 

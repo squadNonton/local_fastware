@@ -555,8 +555,8 @@
                     <input type="hidden" id="inquiryId" name="inquiryId"> <!-- ID untuk inquiry yang akan diedit -->
                     <div class="mb-3">
                         <label for="source_pr" class="form-label">Source PR</label>
-                        <input type="text" class="form-control" id="source_pr" name="source_pr" maxlength="4" placeholder="Masukkan 4 angka" required>
-                        <div class="form-text">Masukkan 4 angka untuk source_pr</div>
+                        <input type="text" class="form-control" id="source_pr" name="source_pr" placeholder="Masukkan source pr" required>
+                        <div class="form-text"></div>
                     </div>
                 </form>                                                                    
             </div>
@@ -644,13 +644,6 @@
 
                 // Ambil nilai source_pr yang dimasukkan user
                 const sourcePrInput = document.getElementById('source_pr').value;
-
-                // Format source_pr menjadi PR/{currentYear}/{4-digit-number}
-                const currentYear = new Date().getFullYear();
-                const formattedSourcePr = `PR/${currentYear}/${sourcePrInput}`;
-
-                // Menambahkan formatted source_pr ke formData untuk dikirim ke server
-                formData.set('source_pr', formattedSourcePr); // Ganti 'source_pr' di FormData
 
                 // Pastikan 'inquiryId' diganti menjadi 'id' saat dikirim
                 formData.set('id', document.getElementById('inquiryId').value); // Menggunakan 'id' sesuai backend
