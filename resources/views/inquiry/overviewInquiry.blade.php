@@ -460,10 +460,11 @@
                                                         <i class="bi bi-eye-fill"></i>
                                                     </a>
                                                     <a href="#" class="btn btn-primary btn-sm" 
-                                                    onclick="showEditDataModal1({{ $inquiry->id }}, '{{ $inquiry->source_pr }}'); return false;" 
-                                                    title="Edit Inquiry">
-                                                    <i class="bi bi-pencil"></i>
-                                                    </a>
+   onclick="showEditDataModal1({{ $inquiry->id }}, {{ json_encode($inquiry->source_pr) }}); return false;" 
+   title="Edit Inquiry">
+    <i class="bi bi-pencil"></i>
+</a>
+
 
                                                 </td>
                                             </tr>
