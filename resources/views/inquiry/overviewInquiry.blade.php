@@ -366,6 +366,7 @@
                                             <th>Ship-to</th>
                                             <th>Last Update</th>
                                             <th>Est. Date</th>
+                                            <th>Source PR</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -452,11 +453,18 @@
                                                     {{ $progress ? $progress->description : 'No updates yet' }}
                                                 </td>
                                                 <td>{{ $inquiry->est_date }}</td>
+                                                <td>{{ $inquiry->source_pr }}</td>
                                                 <td>
                                                     <a href="{{ route('showFormSS', ['id' => $inquiry->id]) }}"
                                                         class="btn btn-warning btn-sm" title="View Form">
                                                         <i class="bi bi-eye-fill"></i>
                                                     </a>
+                                                    <a href="#" class="btn btn-primary btn-sm" 
+                                                    onclick="showEditDataModal1({{ $inquiry->id }}, '{{ $inquiry->source_pr }}'); return false;" 
+                                                    title="Edit Inquiry">
+                                                    <i class="bi bi-pencil"></i>
+                                                    </a>
+
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -532,6 +540,36 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Modal Edit Data -->
+<div class="modal fade" id="editDataModal1" tabindex="-1" aria-labelledby="editDataModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editDataModalLabel">Edit Inquiry</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editInquiryForm">
+                    @csrf
+                    <input type="hidden" id="inquiryId" name="inquiryId"> <!-- ID untuk inquiry yang akan diedit -->
+                    <div class="mb-3">
+                        <label for="source_pr" class="form-label">Source PR</label>
+                        <input type="text" class="form-control" id="source_pr" name="source_pr" maxlength="4" placeholder="Masukkan 4 angka" required>
+                        <div class="form-text">Masukkan 4 angka untuk source_pr</div>
+                    </div>
+                </form>                                                                    
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="saveData()">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
                 </section>
             </div>
         </section>
@@ -589,6 +627,54 @@
                 // Tampilkan detail inquiry dan tambahkan parameter query
                 window.location.href = '{{ route('showFormSS', '') }}/' + id + '?source=approval';
             }
+
+            function showEditDataModal1(id, source_pr) {
+                // Pastikan ID yang benar dimasukkan ke input hidden
+                document.getElementById('inquiryId').value = id;  // Ini akan mengisi input hidden dengan id
+
+                // Masukkan 4 digit angka ke field input
+                document.getElementById('source_pr').value = source_pr;
+
+                new bootstrap.Modal(document.getElementById('editDataModal1')).show();
+            }
+
+            function saveData() {
+                const form = document.getElementById('editInquiryForm');
+                const formData = new FormData(form);
+
+                // Ambil nilai source_pr yang dimasukkan user
+                const sourcePrInput = document.getElementById('source_pr').value;
+
+                // Format source_pr menjadi PR/{currentYear}/{4-digit-number}
+                const currentYear = new Date().getFullYear();
+                const formattedSourcePr = `PR/${currentYear}/${sourcePrInput}`;
+
+                // Menambahkan formatted source_pr ke formData untuk dikirim ke server
+                formData.set('source_pr', formattedSourcePr); // Ganti 'source_pr' di FormData
+
+                // Pastikan 'inquiryId' diganti menjadi 'id' saat dikirim
+                formData.set('id', document.getElementById('inquiryId').value); // Menggunakan 'id' sesuai backend
+
+                $.ajax({
+                    url: '{{ route('updateOverviewPurchase') }}', // Route untuk update inquiry
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        Swal.fire('Success!', response.message, 'success').then(() => {
+                            location.reload(); // Reload halaman
+                        });
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        Swal.fire('Error!', 'An error occurred while updating.', 'error');
+                    }
+                });
+            }
+
+
+
         </script>
 
     </main>

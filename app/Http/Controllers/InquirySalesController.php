@@ -1045,6 +1045,62 @@ class InquirySalesController extends Controller
     ]);
 }
 
+    public function updateOverviewPurchase(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'source_pr' => 'required|string|regex:/^PR\/\d{4}\/\d{4}$/',  // Validasi format PR/{year}/{4-digit-number}
+            'id' => 'required|exists:inquiry_sales,id', // Menggunakan 'id' sesuai dengan nama parameter
+        ]);
+
+        // Mengambil data yang diterima
+        $sourcePrInput = $request->source_pr;  // Menangkap nilai source_pr yang dikirimkan
+        $id = $request->id;  // Mengambil 'id' dari request
+        $userId = auth()->id();  // Mendapatkan ID user yang sedang login
+        $userName = auth()->user()->name;  // Mendapatkan nama user yang sedang login
+
+        // Validasi apakah inquiry sudah ada dengan source_pr yang sesuai
+        $hasValidInquiry = InquirySales::where('id', $id)
+            ->where('source_pr', $sourcePrInput)  // Membandingkan source_pr yang sudah diformat
+            ->exists();
+
+        if ($hasValidInquiry) {
+            return response()->json([
+                'message' => "Inquiry dengan source_pr '$sourcePrInput' sudah ada.",
+            ]);
+        }
+
+        // Temukan InquirySales berdasarkan ID yang diberikan
+        $inquiry = InquirySales::find($id);
+
+        if (!$inquiry) {
+            // Jika Inquiry tidak ditemukan
+            return response()->json([
+                'message' => "Inquiry dengan ID $id tidak ditemukan.",
+            ]);
+        }
+
+        // Update inquiry dengan source_pr baru yang sudah diformat
+        $inquiry->source_pr = $sourcePrInput;
+        $inquiry->save();  // Simpan perubahan
+
+        // Membuat deskripsi dengan format yang diinginkan
+        $description = "source_pr: {$sourcePrInput}, ditambah oleh: {$userName}";
+
+        // Log transaksi atau buat entri tambahan jika perlu
+        TrxDboProgPurchase::create([
+            'inquiry_id' => $id,
+            'user_id' => $userId,
+            'description' => $description,
+        ]);
+
+        return response()->json([
+            'message' => "Inquiry dengan ID $id telah berhasil diperbarui dengan source_pr '$sourcePrInput'."
+        ]);
+    }
+
+
+
 
 
 public function updateProgressImport(Request $request, $id)
