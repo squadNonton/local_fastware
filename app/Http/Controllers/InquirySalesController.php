@@ -439,33 +439,59 @@ class InquirySalesController extends Controller
 
 
     public function showFormSS(Request $request, $id)
-    {
-        $inquiry = InquirySales::with('details.type_materials')->findOrFail($id);
+{
+    // Ambil inquiry berdasarkan ID dan pastikan loc_imp = 'local'
+    $inquiry = InquirySales::with('details.type_materials')
+        ->where('loc_imp', 'local') // Hanya inquiry dengan loc_imp = 'local'
+        ->find($id);
 
-        // Fetch all detail inquiries based on id_inquiry from the main inquiry
-        $materials = DetailInquiry::where('id_inquiry', $inquiry->id)->with('type_materials')->get();
+    if (!$inquiry) {
+        // Jika inquiry dengan loc_imp = 'local' tidak ditemukan, cari inquiry berikutnya atau sebelumnya yang 'local'
+        $inquiry = InquirySales::with('details.type_materials')
+            ->where('loc_imp', 'local')
+            ->where('id', '>', $id) // Cari inquiry setelah ID ini
+            ->first();
 
-        $typeMaterials = TypeMaterial::all(); // Ambil semua data TypeMaterial, sesuaikan dengan kebutuhan
-
-
-        // Ambil semua nama file yang ter-upload
-        $uploadedFiles = DetailInquiry::where('id_inquiry', $inquiry->id)
-            ->pluck('file')
-            ->flatMap(function ($file) {
-                return json_decode($file) ?? []; // Kembalikan array kosong jika null
-            })
-            ->toArray();
-
-        // $progressUpdates = TrxDboProgPurchase::where('inquiry_id', $id)->with('user')->get();
-        $progressUpdates = TrxDboProgPurchase::where('inquiry_id', $id)
-            ->with('user')
-            ->orderBy('created_at', 'desc') // Urutkan berdasarkan created_at menurun
-            ->get();
-
-        // Cek apakah berasal dari halaman approval
-        $isFromApproval = request()->query('source') === 'approval';
-        return view('inquiry.showFormSS', compact('inquiry', 'materials', 'typeMaterials', 'progressUpdates', 'uploadedFiles', 'isFromApproval'));
+        if (!$inquiry) {
+            // Jika tidak ada inquiry setelahnya, cari inquiry sebelumnya
+            $inquiry = InquirySales::with('details.type_materials')
+                ->where('loc_imp', 'local')
+                ->where('id', '<', $id) // Cari inquiry sebelum ID ini
+                ->latest() // Ambil yang terbaru
+                ->first();
+        }
     }
+
+    // Fetch all detail inquiries based on id_inquiry from the main inquiry
+    $materials = DetailInquiry::where('id_inquiry', $inquiry->id)->with('type_materials')->get();
+    $typeMaterials = TypeMaterial::all(); // Ambil semua data TypeMaterial
+
+    // Ambil semua nama file yang ter-upload
+    $uploadedFiles = DetailInquiry::where('id_inquiry', $inquiry->id)
+        ->pluck('file')
+        ->flatMap(function ($file) {
+            return json_decode($file) ?? []; // Kembalikan array kosong jika null
+        })
+        ->toArray();
+
+    $progressUpdates = TrxDboProgPurchase::where('inquiry_id', $id)
+        ->with('user')
+        ->orderBy('created_at', 'desc') // Urutkan berdasarkan created_at menurun
+        ->get();
+
+    // Cek apakah berasal dari halaman approval
+    $isFromApproval = request()->query('source') === 'approval';
+
+    // Ambil ID maksimal untuk validasi navigasi
+    $maxInquiryId = InquirySales::where('loc_imp', 'local')->max('id'); // Max ID untuk loc_imp = 'local'
+
+    if ($request->ajax()) {
+        return view('inquiry.showFormSS', compact('inquiry', 'materials', 'typeMaterials', 'progressUpdates', 'uploadedFiles', 'isFromApproval', 'maxInquiryId'))->render();
+    }
+
+    return view('inquiry.showFormSS', compact('inquiry', 'materials', 'typeMaterials', 'progressUpdates', 'uploadedFiles', 'isFromApproval', 'maxInquiryId'));
+}
+
 
     public function showFormSSimport(Request $request, $id)
     {
@@ -1049,7 +1075,7 @@ class InquirySalesController extends Controller
     {
         // Validasi input
         $request->validate([
-            'source_pr' => 'required|string',  // Validasi format PR/{year}/{4-digit-number}
+            'source_pr' => 'required|string|',  // Validasi format PR/{year}/{4-digit-number}
             'id' => 'required|exists:inquiry_sales,id', // Menggunakan 'id' sesuai dengan nama parameter
         ]);
 
