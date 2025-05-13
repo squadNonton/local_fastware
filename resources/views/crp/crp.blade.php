@@ -142,6 +142,7 @@
 
     <main id="main" class="main">
         <section class="section">
+
             <head>
                 <meta name="csrf-token" content="{{ csrf_token() }}">
             </head>
@@ -155,7 +156,7 @@
                     <a href="{{ route('export.mst.actual') }}" class="btn btn-success mb-3">
                         Export to Excel
                     </a>
-                    
+
                     <div class="table-responsive">
                         <table id="tabelsummary" class="table table-striped table-bordered table-hover text-center">
                             <thead class="thead-dark">
@@ -177,12 +178,23 @@
                                     <th>Dec</th>
                                     <th>FY</th>
                                     <th>YTD</th>
-                                    
+                                    <th>PICA</th>
+
                                 </tr>
                             </thead>
                             <tbody id="summaryBody">
                                 @php
-                                    $allCategories = ['IT', 'Subcont', 'Consumable', 'Repair Maintenance', 'Utility', 'General Affair', 'Material Cost', 'Indirect Material', 'Others'];
+                                    $allCategories = [
+                                        'IT',
+                                        'Subcont',
+                                        'Consumable',
+                                        'Repair Maintenance',
+                                        'Utility',
+                                        'General Affair',
+                                        'Material Cost',
+                                        'Indirect Material',
+                                        'Others',
+                                    ];
                                 @endphp
                                 @foreach ($allCategories as $category)
                                     @php
@@ -191,29 +203,33 @@
                                         $actual = $records->firstWhere('plan_actual', 'Actual');
                                         $value = ($plan->id ?? '') . ($actual ? ',' . $actual->id : '');
                                     @endphp
+                                    {{-- PICA --}}
+                                    {{-- <td></td> --}}
                                     <!-- Plan Row -->
                                     <tr>
                                         <td>
                                             <input type="checkbox" name="record[]" value="{{ $value }}">
                                         </td>
-                                        <td rowspan="2" class="align-middle font-weight-bold text-dark">{{ $category }}</td>
+                                        <td rowspan="2" class="align-middle font-weight-bold text-dark">
+                                            {{ $category }}</td>
                                         <td class="font-weight-bold text-primary">Plan</td>
                                         @for ($i = 1; $i <= 12; $i++)
                                             <td>
                                                 <input type="text" class="form-control text-center"
-                                                       name="plan_values[{{ $category }}][]"
-                                                       value="{{ $plan ? $plan->{'month_' . $i} : '' }}"
-                                                       oninput="calculateYTD()" /> <!-- Memanggil calculateYTD untuk menghitung FY dan Existing -->
+                                                    name="plan_values[{{ $category }}][]"
+                                                    value="{{ $plan ? $plan->{'month_' . $i} : '' }}"
+                                                    oninput="calculateYTD()" />
+                                                <!-- Memanggil calculateYTD untuk menghitung FY dan Existing -->
                                             </td>
                                         @endfor
                                         <td>
                                             <input type="text" class="form-control text-center font-weight-bold"
-                                                   name="plan_ytd[{{ $category }}]"
-                                                   value="{{ $plan ? $plan->grand_tot : '' }}" readonly />
+                                                name="plan_ytd[{{ $category }}]"
+                                                value="{{ $plan ? $plan->grand_tot : '' }}" readonly />
                                         </td>
                                         <td>
                                             <input type="text" class="form-control text-center font-weight-bold"
-                                                   readonly />
+                                                readonly />
                                         </td>
                                     </tr>
                                     <!-- Actual Row -->
@@ -223,24 +239,24 @@
                                         @for ($i = 1; $i <= 12; $i++)
                                             <td>
                                                 <input type="text" class="form-control text-center"
-                                                       name="actual_values[{{ $category }}][]"
-                                                       value="{{ $actual ? $actual->{'month_' . $i} : '' }}" disabled />
+                                                    name="actual_values[{{ $category }}][]"
+                                                    value="{{ $actual ? $actual->{'month_' . $i} : '' }}" disabled />
                                             </td>
                                         @endfor
                                         <td><input type="text" class="form-control text-center font-weight-bold" disabled
-                                            name="actual_ytd[{{ $category }}]"
-                                            value="{{ $actual ? $actual->grand_tot : '' }}" readonly /></td>
+                                                name="actual_ytd[{{ $category }}]"
+                                                value="{{ $actual ? $actual->grand_tot : '' }}" readonly /></td>
                                         <td>
                                             <input type="text" class="form-control text-center font-weight-bold" disabled
-
-                                                   value="{{ $actual ? $actual->grand_tot : '' }}" readonly />
+                                                value="{{ $actual ? $actual->grand_tot : '' }}" readonly />
                                         </td>
+                                        <td><button>Act</button></td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
-                    
+
                     {{-- <div class="table-responsive">
                         <table id="tabelsummary" class="table table-striped table-bordered table-hover text-center">
                             <thead class="thead-dark">
@@ -359,7 +375,7 @@
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importModal">
                             <i class="bi bi-file-earmark-excel"></i> Import Data
                         </button>
-                    </div>                    
+                    </div>
                     <div class="title text-center font-weight-bold text-primary">Detail Pencatatan Actual</div>
                     <div class="table-responsive">
                         <table id="detailTable" class="table table-bordered">
@@ -381,29 +397,41 @@
                             </thead>
                             <tbody>
                                 @foreach ($trsDboCrps as $row)
-                                <tr data-id="{{ $row->id }}">
-                                    <td><input type="checkbox" name="record[]" value="{{ $row->id }}"></td>
-                                    <td>
-                                        <select class="form-select" name="actual_category[]">
-                                            @foreach ($mstDboCrps->pluck('nm_category')->unique() as $category)
-                                                <option value="{{ $category }}" {{ $row->nm_category == $category ? 'selected' : '' }}>{{ $category }}</option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                    <td><input type="text" class="form-control" name="detail_activity[]" value="{{ $row->detail_activity }}"></td>
-                                    <td><input type="text" class="form-control" name="no_po[]" value="{{ $row->no_po }}"></td>
-                                    <td><input type="date" class="form-control" name="date[]" value="{{ $row->date }}"></td>
-                                    <td><input type="number" class="form-control" name="qty[]" oninput="calculateCRP(this)" value="{{ $row->qty }}"></td>
-                                    <td><input type="number" class="form-control" name="price_before[]" oninput="calculateCRP(this)" value="{{ $row->price_before }}"></td>
-                                    <td><input type="number" class="form-control" name="price_after[]" oninput="calculateCRP(this)" value="{{ $row->price_after }}"></td>
-                                    <td><input type="number" class="form-control" name="selisih[]" value="{{ $row->price_sell }}" readonly></td>
-                                    <td><input type="number" class="form-control" name="total_cost_before[]" value="{{ $row->total_cost_before }}" readonly></td>
-                                    <td><input type="number" class="form-control" name="total_cost_after[]" value="{{ $row->total_cost_after }}" readonly></td>
-                                    <td><input type="number" class="form-control crp" name="total_cost_crp[]" value="{{ $row->total_cost_crp }}" readonly></td>
-                                </tr>
+                                    <tr data-id="{{ $row->id }}">
+                                        <td><input type="checkbox" name="record[]" value="{{ $row->id }}"></td>
+                                        <td>
+                                            <select class="form-select" name="actual_category[]">
+                                                @foreach ($mstDboCrps->pluck('nm_category')->unique() as $category)
+                                                    <option value="{{ $category }}"
+                                                        {{ $row->nm_category == $category ? 'selected' : '' }}>
+                                                        {{ $category }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td><input type="text" class="form-control" name="detail_activity[]"
+                                                value="{{ $row->detail_activity }}"></td>
+                                        <td><input type="text" class="form-control" name="no_po[]"
+                                                value="{{ $row->no_po }}"></td>
+                                        <td><input type="date" class="form-control" name="date[]"
+                                                value="{{ $row->date }}"></td>
+                                        <td><input type="number" class="form-control" name="qty[]"
+                                                oninput="calculateCRP(this)" value="{{ $row->qty }}"></td>
+                                        <td><input type="number" class="form-control" name="price_before[]"
+                                                oninput="calculateCRP(this)" value="{{ $row->price_before }}"></td>
+                                        <td><input type="number" class="form-control" name="price_after[]"
+                                                oninput="calculateCRP(this)" value="{{ $row->price_after }}"></td>
+                                        <td><input type="number" class="form-control" name="selisih[]"
+                                                value="{{ $row->price_sell }}" readonly></td>
+                                        <td><input type="number" class="form-control" name="total_cost_before[]"
+                                                value="{{ $row->total_cost_before }}" readonly></td>
+                                        <td><input type="number" class="form-control" name="total_cost_after[]"
+                                                value="{{ $row->total_cost_after }}" readonly></td>
+                                        <td><input type="number" class="form-control crp" name="total_cost_crp[]"
+                                                value="{{ $row->total_cost_crp }}" readonly></td>
+                                    </tr>
                                 @endforeach
                             </tbody>
-                            
+
                         </table>
                     </div>
                     <div class="d-flex justify-content-center mt-3 gap-2">
@@ -426,44 +454,50 @@
                 </div>
             </div>
 
-            <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+            <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel"
+                aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <form action="#" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="modal-header">
                                 <h5 class="modal-title" id="importModalLabel">Import Detail Data</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                @if(session('import_success'))
+                                @if (session('import_success'))
                                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                                         {{ session('import_success') }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                            aria-label="Close"></button>
                                     </div>
                                 @endif
-            
-                                @if(session('import_error'))
+
+                                @if (session('import_error'))
                                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                         {{ session('import_error') }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                            aria-label="Close"></button>
                                     </div>
                                 @endif
-            
+
                                 <div class="mb-3">
                                     <label for="file" class="form-label">Excel File</label>
-                                    <input type="file" name="file" id="file" 
-                                           class="form-control @error('file') is-invalid @enderror" 
-                                           accept=".xlsx,.xls" required>
+                                    <input type="file" name="file" id="file"
+                                        class="form-control @error('file') is-invalid @enderror" accept=".xlsx,.xls"
+                                        required>
                                     @error('file')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    <div class="form-text">Upload the Excel file that was previously exported from the system.</div>
+                                    <div class="form-text">Upload the Excel file that was previously exported from the
+                                        system.</div>
                                 </div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                <button type="button" class="btn btn-primary" onclick="uploadexcel()">Import</button> <!-- Ubah type menjadi button -->
+                                <button type="button" class="btn btn-primary" onclick="uploadexcel()">Import</button>
+                                <!-- Ubah type menjadi button -->
                             </div>
                         </form>
                     </div>
@@ -481,26 +515,23 @@
                 //     const crp = (priceAfter - priceBefore) * qty; // Contoh perhitungan CRP
                 //     row.querySelector('.crp').value = crp.toFixed(2); // Modifikasi menyesuaikan hasil
                 // }
-
-
             </script>
 
-        <script>
-            window.mstCategories = @json($mstDboCrps->pluck('nm_category')->unique()->values());
-        </script>
             <script>
-
+                window.mstCategories = @json($mstDboCrps->pluck('nm_category')->unique()->values());
+            </script>
+            <script>
                 function uploadexcel() {
                     let fileInput = document.getElementById('file'); // Perbaiki ID di sini
-                    
+
                     if (fileInput.files.length === 0) {
                         alert("Pilih file terlebih dahulu!");
                         return;
                     }
-                    
+
                     let formData = new FormData();
                     formData.append("file", fileInput.files[0]);
-                    
+
                     $.ajax({
                         url: "{{ route('import.detailcrp') }}", // Pastikan rute ini benar
                         type: "POST",
@@ -520,7 +551,7 @@
                     });
                 }
 
-                function addRow() { 
+                function addRow() {
                     const table = document.getElementById('detailTable').getElementsByTagName('tbody')[0];
                     const newRow = table.insertRow();
                     newRow.classList.add('new-row'); // ← Tambahkan di sini, setelah insertRow()
@@ -548,61 +579,61 @@
                 }
 
 
-        function deleteRows() {
-            const table = document.getElementById('detailTable');
-            const checkboxes = table.querySelectorAll('input[name="record"]:checked');
-            checkboxes.forEach(checkbox => {
-                const row = checkbox.closest('tr');
-                if (row) {
-                    row.remove();
+                function deleteRows() {
+                    const table = document.getElementById('detailTable');
+                    const checkboxes = table.querySelectorAll('input[name="record"]:checked');
+                    checkboxes.forEach(checkbox => {
+                        const row = checkbox.closest('tr');
+                        if (row) {
+                            row.remove();
+                        }
+                    });
                 }
-            });
-        }
 
-        // function calculateCRP(input) {
-        //     const row = input.closest('tr');
-        //     const qty = parseFloat(row.querySelector('input[name="qty[]"]').value) || 0;
-        //     const priceBefore = parseFloat(row.querySelector('input[name="price_before[]"]').value) || 0;
-        //     const priceAfter = parseFloat(row.querySelector('input[name="price_after[]"]').value) || 0;
+                // function calculateCRP(input) {
+                //     const row = input.closest('tr');
+                //     const qty = parseFloat(row.querySelector('input[name="qty[]"]').value) || 0;
+                //     const priceBefore = parseFloat(row.querySelector('input[name="price_before[]"]').value) || 0;
+                //     const priceAfter = parseFloat(row.querySelector('input[name="price_after[]"]').value) || 0;
 
-        //     // Calculate selisih as the difference between price_after and price_before (can be negative)
-        //     const selisih = priceAfter - priceBefore;
-        //     row.querySelector('input[name="selisih[]"]').value = selisih.toFixed(2);
+                //     // Calculate selisih as the difference between price_after and price_before (can be negative)
+                //     const selisih = priceAfter - priceBefore;
+                //     row.querySelector('input[name="selisih[]"]').value = selisih.toFixed(2);
 
-        //     // Calculate total costs
-        //     const totalCostBefore = qty * priceBefore;
-        //     const totalCostAfter = qty * priceAfter;
+                //     // Calculate total costs
+                //     const totalCostBefore = qty * priceBefore;
+                //     const totalCostAfter = qty * priceAfter;
 
-        //     // Calculate total_cost_crp as the difference between total_cost_after and total_cost_before (can be negative)
-        //     const totalCostCrp = totalCostAfter - totalCostBefore;
+                //     // Calculate total_cost_crp as the difference between total_cost_after and total_cost_before (can be negative)
+                //     const totalCostCrp = totalCostAfter - totalCostBefore;
 
-        //     row.querySelector('input[name="total_cost_before[]"]').value = totalCostBefore.toFixed(2);
-        //     row.querySelector('input[name="total_cost_after[]"]').value = totalCostAfter.toFixed(2);
-        //     row.querySelector('input[name="total_cost_crp[]"]').value = totalCostCrp.toFixed(2);
-        // }
+                //     row.querySelector('input[name="total_cost_before[]"]').value = totalCostBefore.toFixed(2);
+                //     row.querySelector('input[name="total_cost_after[]"]').value = totalCostAfter.toFixed(2);
+                //     row.querySelector('input[name="total_cost_crp[]"]').value = totalCostCrp.toFixed(2);
+                // }
 
 
-        function calculateCRP(input) {
-            const row = input.closest('tr');
-            const qty = parseFloat(row.querySelector('input[name="qty[]"]').value) || 0;
-            const priceBefore = parseFloat(row.querySelector('input[name="price_before[]"]').value) || 0;
-            const priceAfter = parseFloat(row.querySelector('input[name="price_after[]"]').value) || 0;
-            
-            // Calculate selisih as the absolute difference between price_after and price_before
-            const selisih = Math.abs(priceAfter - priceBefore);
-            row.querySelector('input[name="selisih[]"]').value = selisih.toFixed(2);
+                function calculateCRP(input) {
+                    const row = input.closest('tr');
+                    const qty = parseFloat(row.querySelector('input[name="qty[]"]').value) || 0;
+                    const priceBefore = parseFloat(row.querySelector('input[name="price_before[]"]').value) || 0;
+                    const priceAfter = parseFloat(row.querySelector('input[name="price_after[]"]').value) || 0;
 
-            // Calculate total costs
-            const totalCostBefore = qty * priceBefore;
-            const totalCostAfter = qty * priceAfter;
-            
-            // Calculate total_cost_crp as the absolute difference between total_cost_after and total_cost_before
-            const totalCostCrp = Math.abs(totalCostAfter - totalCostBefore);
+                    // Calculate selisih as the absolute difference between price_after and price_before
+                    const selisih = Math.abs(priceAfter - priceBefore);
+                    row.querySelector('input[name="selisih[]"]').value = selisih.toFixed(2);
 
-            row.querySelector('input[name="total_cost_before[]"]').value = totalCostBefore.toFixed(2);
-            row.querySelector('input[name="total_cost_after[]"]').value = totalCostAfter.toFixed(2);
-            row.querySelector('input[name="total_cost_crp[]"]').value = totalCostCrp.toFixed(2);
-        }
+                    // Calculate total costs
+                    const totalCostBefore = qty * priceBefore;
+                    const totalCostAfter = qty * priceAfter;
+
+                    // Calculate total_cost_crp as the absolute difference between total_cost_after and total_cost_before
+                    const totalCostCrp = Math.abs(totalCostAfter - totalCostBefore);
+
+                    row.querySelector('input[name="total_cost_before[]"]').value = totalCostBefore.toFixed(2);
+                    row.querySelector('input[name="total_cost_after[]"]').value = totalCostAfter.toFixed(2);
+                    row.querySelector('input[name="total_cost_crp[]"]').value = totalCostCrp.toFixed(2);
+                }
 
                 function resetInputs1() {
                     document.querySelectorAll("#detailTable tbody input").forEach(input => {
@@ -642,7 +673,8 @@
                                 selisih: parseFloat(row.querySelector('input[name="selisih[]"]')?.value) || 0,
                                 price_before: parseFloat(row.querySelector('input[name="price_before[]"]')?.value) || 0,
                                 price_after: parseFloat(row.querySelector('input[name="price_after[]"]')?.value) || 0,
-                                total_cost_before: parseFloat(row.querySelector('input[name="total_cost_before[]"]')?.value) || 0,
+                                total_cost_before: parseFloat(row.querySelector('input[name="total_cost_before[]"]')?.value) ||
+                                    0,
                                 total_cost_after: parseFloat(row.querySelector('input[name="total_cost_after[]"]')?.value) || 0,
                                 total_cost_crp: parseFloat(row.querySelector('input[name="total_cost_crp[]"]')?.value) || 0
                             };
@@ -661,41 +693,43 @@
 
                     console.log('Sending data:', data);
 
-                    fetch('{{ route("crp.savedetail") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-                        },
-                        body: JSON.stringify({ rows: data })
-                    })
-                    .then(async response => {
-                        const text = await response.text();
-                        console.log('Raw response:', text);
+                    fetch('{{ route('crp.savedetail') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                            },
+                            body: JSON.stringify({
+                                rows: data
+                            })
+                        })
+                        .then(async response => {
+                            const text = await response.text();
+                            console.log('Raw response:', text);
 
-                        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-                        try {
-                            return JSON.parse(text);
-                        } catch (e) {
-                            throw new Error('Invalid JSON response from server: ' + text);
-                        }
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            alert('Data saved successfully!');
-                            location.reload();
-                        } else {
-                            alert('Error saving data: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Fetch error:', error);
-                        alert('An error occurred while saving data: ' + error.message);
-                    });
+                            try {
+                                return JSON.parse(text);
+                            } catch (e) {
+                                throw new Error('Invalid JSON response from server: ' + text);
+                            }
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                alert('Data saved successfully!');
+                                location.reload();
+                            } else {
+                                alert('Error saving data: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Fetch error:', error);
+                            alert('An error occurred while saving data: ' + error.message);
+                        });
                 }
 
-                document.addEventListener('input', function (e) {
+                document.addEventListener('input', function(e) {
                     const row = e.target.closest('tr');
                     if (row && row.dataset.id) {
                         row.classList.add('modified-row');
@@ -742,36 +776,34 @@
                     if (confirm("Yakin ingin menghapus data terpilih?")) {
                         // Kirim ke endpoint Laravel pakai AJAX / fetch / form tersembunyi
                         fetch('{{ route('crp.deletePermanenDetail') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            },
-                            body: JSON.stringify({ ids: ids })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert("Data berhasil dihapus.");
-                                location.reload();
-                            } else {
-                                alert("Gagal menghapus data.");
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                        });
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                },
+                                body: JSON.stringify({
+                                    ids: ids
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    alert("Data berhasil dihapus.");
+                                    location.reload();
+                                } else {
+                                    alert("Gagal menghapus data.");
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
                     }
                 }
             </script>
 
         </section>
 
-        <script>
-            
-
-
-        </script> 
+        <script></script>
 
 
         {{-- Tabel SummaryJSQ --}}
@@ -828,12 +860,14 @@
                 // Input bulan Jan-Dec untuk Plan
                 for (let i = 0; i < 12; i++) {
                     const cell = newRowPlan.insertCell();
-                    cell.innerHTML = `<input type="text" class="form-control text-center" name="plan_values[]" oninput="calculateYTD()">`;
+                    cell.innerHTML =
+                        `<input type="text" class="form-control text-center" name="plan_values[]" oninput="calculateYTD()">`;
                 }
 
                 // YTD Plan
                 const cellYTDPlan = newRowPlan.insertCell();
-                cellYTDPlan.innerHTML = '<input type="text" class="form-control text-center font-weight-bold" name="plan_ytd" readonly>';
+                cellYTDPlan.innerHTML =
+                    '<input type="text" class="form-control text-center font-weight-bold" name="plan_ytd" readonly>';
 
                 // Membuat baris Actual
                 const newRowActual = table.insertRow();
@@ -850,18 +884,20 @@
                 // Input bulan Jan-Dec untuk Actual
                 for (let i = 0; i < 12; i++) {
                     const cell = newRowActual.insertCell();
-                    cell.innerHTML = `<input type="text" class="form-control text-center" name="actual_values[]" oninput="calculateYTD()">`;
+                    cell.innerHTML =
+                        `<input type="text" class="form-control text-center" name="actual_values[]" oninput="calculateYTD()">`;
                 }
 
                 // YTD Actual
                 const cellYTDActual = newRowActual.insertCell();
-                cellYTDActual.innerHTML = '<input type="text" class="form-control text-center font-weight-bold" name="actual_ytd" readonly>';
+                cellYTDActual.innerHTML =
+                    '<input type="text" class="form-control text-center font-weight-bold" name="actual_ytd" readonly>';
             }
 
             function processRow(row, category, type, summaryData) {
                 const inputs = row.querySelectorAll(`input[name="${type.toLowerCase()}_values[]"]`);
                 const ytdInput = row.querySelector(`input[name="${type.toLowerCase()}_ytd"]`);
-                
+
                 const monthlyValues = Array.from(inputs).map(input => {
                     const value = input.value.trim();
                     return value === '' ? 0 : parseFloat(value) || 0;
@@ -934,23 +970,25 @@
 
                 console.log("Summary data to send:", summaryData);
 
-                fetch('{{ route("crp.store") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({ summaryData })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert('Data berhasil disimpan!');
-                    location.reload();
-                })
-                .catch(error => {
-                    console.error('Terjadi kesalahan:', error);
-                    alert('Gagal menyimpan data.');
-                });
+                fetch('{{ route('crp.store') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            summaryData
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert('Data berhasil disimpan!');
+                        location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Terjadi kesalahan:', error);
+                        alert('Gagal menyimpan data.');
+                    });
             }
 
 
@@ -971,7 +1009,7 @@
 
             //             const planInputs = row.querySelectorAll(`input[name^="plan_values"]`);
             //             const ytdInput = row.querySelector(`input[name^="plan_ytd"]`);
-                        
+
             //             const actualInputs = row.querySelectorAll(`input[name^="actual_values"]`);
             //             const actualYTDInput = row.querySelector(`input[name^="actual_ytd"]`);
 
@@ -999,7 +1037,7 @@
 
             //     console.log("Summary data to send:", summaryData);
 
-            //     fetch('{{ route("crp.store") }}', {
+            //     fetch('{{ route('crp.store') }}', {
             //         method: 'POST',
             //         headers: {
             //             'Content-Type': 'application/json',
@@ -1039,25 +1077,27 @@
                 if (confirm("Yakin ingin menghapus data terpilih?")) {
                     // Kirim ke endpoint Laravel pakai AJAX / fetch / form tersembunyi
                     fetch('{{ route('crp.deletePermanen') }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({ ids: ids })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert("Data berhasil dihapus.");
-                            location.reload();
-                        } else {
-                            alert("Gagal menghapus data.");
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({
+                                ids: ids
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert("Data berhasil dihapus.");
+                                location.reload();
+                            } else {
+                                alert("Gagal menghapus data.");
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
                 }
             }
 
@@ -1066,14 +1106,12 @@
                     input.value = "";
                 });
             }
-
-            
         </script>
 
 
         <script>
             document.addEventListener("DOMContentLoaded", function() {
-                calculateYTD();  // Panggil fungsi untuk menghitung YTD saat halaman dimuat
+                calculateYTD(); // Panggil fungsi untuk menghitung YTD saat halaman dimuat
             });
             // Fungsi untuk menghitung YTD
             function calculateYTD() {
@@ -1090,11 +1128,11 @@
                     let totalPlanFY = 0;
                     let totalPlanExisting = 0;
                     if (planRow) {
-                        for (let col = 3; col <= 14; col++) {  // Kolom bulan 1 hingga bulan 12
+                        for (let col = 3; col <= 14; col++) { // Kolom bulan 1 hingga bulan 12
                             const input = planRow.cells[col]?.querySelector('input');
                             if (input) {
-                                totalPlanFY += parseFloat(input.value) || 0;  // Untuk menghitung FY
-                                if (col <= (2 + currentMonth)) {  // Untuk menghitung Existing (bulan yang sudah terlewati)
+                                totalPlanFY += parseFloat(input.value) || 0; // Untuk menghitung FY
+                                if (col <= (2 + currentMonth)) { // Untuk menghitung Existing (bulan yang sudah terlewati)
                                     totalPlanExisting += parseFloat(input.value) || 0;
                                 }
                             }
@@ -1105,10 +1143,10 @@
                         console.log('Plan YTD Existing:', totalPlanExisting, 'Input:', ytdPlanInputExisting);
 
                         if (ytdPlanInputFY) {
-                            ytdPlanInputFY.value = Math.round(totalPlanFY);  // Mengisi nilai YTD FY
+                            ytdPlanInputFY.value = Math.round(totalPlanFY); // Mengisi nilai YTD FY
                         }
                         if (ytdPlanInputExisting) {
-                            ytdPlanInputExisting.value = Math.round(totalPlanExisting);  // Mengisi nilai YTD Existing
+                            ytdPlanInputExisting.value = Math.round(totalPlanExisting); // Mengisi nilai YTD Existing
                         }
                     }
 
@@ -1116,34 +1154,31 @@
                     let totalActualFY = 0;
                     let totalActualExisting = 0;
                     if (actualRow) {
-                        for (let col = 2; col <= 13; col++) {  // Kolom bulan 1 hingga bulan 12
+                        for (let col = 2; col <= 13; col++) { // Kolom bulan 1 hingga bulan 12
                             const input = actualRow.cells[col]?.querySelector('input');
                             if (input) {
-                                totalActualFY += parseFloat(input.value) || 0;  // Untuk menghitung FY
-                                if (col <= (1 + currentMonth)) {  // Untuk menghitung Existing (bulan yang sudah terlewati)
+                                totalActualFY += parseFloat(input.value) || 0; // Untuk menghitung FY
+                                if (col <= (1 + currentMonth)) { // Untuk menghitung Existing (bulan yang sudah terlewati)
                                     totalActualExisting += parseFloat(input.value) || 0;
                                 }
                             }
                         }
-                        const ytdActualInputFY = actualRow.cells[14]?.querySelector('input[name*="actual_ytd"]'); // Kolom Actual YTD untuk FY (14)
-                        const ytdActualInputExisting = actualRow.cells[15]?.querySelector('input[name*="actual_ytd_existing"]'); // Kolom Actual YTD untuk Existing (15)
+                        const ytdActualInputFY = actualRow.cells[14]?.querySelector(
+                            'input[name*="actual_ytd"]'); // Kolom Actual YTD untuk FY (14)
+                        const ytdActualInputExisting = actualRow.cells[15]?.querySelector(
+                            'input[name*="actual_ytd_existing"]'); // Kolom Actual YTD untuk Existing (15)
                         console.log('Actual YTD FY:', totalActualFY, 'Input:', ytdActualInputFY);
                         console.log('Actual YTD Existing:', totalActualExisting, 'Input:', ytdActualInputExisting);
 
                         if (ytdActualInputFY) {
-                            ytdActualInputFY.value = Math.round(totalActualFY);  // Mengisi nilai YTD Actual FY
+                            ytdActualInputFY.value = Math.round(totalActualFY); // Mengisi nilai YTD Actual FY
                         }
                         if (ytdActualInputExisting) {
-                            ytdActualInputExisting.value = Math.round(totalActualExisting);  // Mengisi nilai YTD Actual Existing
+                            ytdActualInputExisting.value = Math.round(totalActualExisting); // Mengisi nilai YTD Actual Existing
                         }
                     }
                 }
             }
-
-
-
-
-            
         </script>
     </main>
 @endsection
