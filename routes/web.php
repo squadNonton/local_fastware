@@ -150,6 +150,9 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/crp/delete-detail', [CrpController::class, 'deleteDetail'])->name('crp.deletePermanenDetail');
     Route::post('/crp/save-detail', [CrpController::class, 'savedetail'])->name('crp.savedetail');
     Route::get('/export-mst-actual', [CrpController::class, 'exportMstActual'])->name('export.mst.actual');
+    Route::get('/crp/showDetailModal/{crpId}', [CrpController::class, 'showDetailModal'])->name('crp.showDetailModal');
+    Route::post('/crp/saveDetails', [CrpController::class, 'saveCrpDetails'])->name('crp.saveDetails');
+
     // Download File
     Route::get('download-excel/{tindaklanjut}', [FormFPPController::class, 'downloadAttachment'])->name('download.attachment');
     // DashboardforALL
@@ -567,4 +570,5 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/custom-request/marketing-approved/{id}', [CustomRequestController::class, 'approveMarketing'])->name('approveMarketing');
     Route::get('/custom-request/approve-finance-cstmreq', [CustomRequestController::class, 'showApprovalFinance'])->name('showApproveFinance');
     Route::post('/custom-request/finance-approved/{id}', [CustomRequestController::class, 'approveFinance'])->name('approveFinance');
+
 });

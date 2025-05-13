@@ -116,6 +116,11 @@
             border-radius: 5px;
             font-size: 14px;
         }
+       
+        .modal-dialog.modal-lg {
+            max-width: 90%;
+        }
+
 
         .action-buttons button:hover {
             background-color: #45a049;
@@ -179,7 +184,6 @@
                                     <th>FY</th>
                                     <th>YTD</th>
                                     <th>PICA</th>
-
                                 </tr>
                             </thead>
                             <tbody id="summaryBody">
@@ -203,33 +207,27 @@
                                         $actual = $records->firstWhere('plan_actual', 'Actual');
                                         $value = ($plan->id ?? '') . ($actual ? ',' . $actual->id : '');
                                     @endphp
-                                    {{-- PICA --}}
-                                    {{-- <td></td> --}}
                                     <!-- Plan Row -->
                                     <tr>
                                         <td>
                                             <input type="checkbox" name="record[]" value="{{ $value }}">
                                         </td>
                                         <td rowspan="2" class="align-middle font-weight-bold text-dark">
-                                            {{ $category }}</td>
+                                            {{ $category }}
+                                        </td>
                                         <td class="font-weight-bold text-primary">Plan</td>
                                         @for ($i = 1; $i <= 12; $i++)
                                             <td>
-                                                <input type="text" class="form-control text-center"
-                                                    name="plan_values[{{ $category }}][]"
-                                                    value="{{ $plan ? $plan->{'month_' . $i} : '' }}"
-                                                    oninput="calculateYTD()" />
-                                                <!-- Memanggil calculateYTD untuk menghitung FY dan Existing -->
+                                                <input type="text" class="form-control text-center" name="plan_values[{{ $category }}][{{ $i }}]"
+                                                    value="{{ $plan ? $plan->{'month_' . $i} : '' }}" oninput="calculateYTD()">
                                             </td>
                                         @endfor
                                         <td>
-                                            <input type="text" class="form-control text-center font-weight-bold"
-                                                name="plan_ytd[{{ $category }}]"
+                                            <input type="text" class="form-control text-center font-weight-bold" name="plan_ytd[{{ $category }}]"
                                                 value="{{ $plan ? $plan->grand_tot : '' }}" readonly />
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control text-center font-weight-bold"
-                                                readonly />
+                                            <input type="text" class="form-control text-center font-weight-bold" readonly />
                                         </td>
                                     </tr>
                                     <!-- Actual Row -->
@@ -238,24 +236,28 @@
                                         <td class="font-weight-bold text-success">Actual</td>
                                         @for ($i = 1; $i <= 12; $i++)
                                             <td>
-                                                <input type="text" class="form-control text-center"
-                                                    name="actual_values[{{ $category }}][]"
+                                                <input type="text" class="form-control text-center" name="actual_values[{{ $category }}][{{ $i }}]"
                                                     value="{{ $actual ? $actual->{'month_' . $i} : '' }}" disabled />
                                             </td>
                                         @endfor
-                                        <td><input type="text" class="form-control text-center font-weight-bold" disabled
-                                                name="actual_ytd[{{ $category }}]"
-                                                value="{{ $actual ? $actual->grand_tot : '' }}" readonly /></td>
                                         <td>
-                                            <input type="text" class="form-control text-center font-weight-bold" disabled
+                                            <input type="text" class="form-control text-center font-weight-bold" disabled name="actual_ytd[{{ $category }}]"
                                                 value="{{ $actual ? $actual->grand_tot : '' }}" readonly />
                                         </td>
-                                        <td><button>Act</button></td>
+                                        <td>
+                                            <input type="text" class="form-control text-center font-weight-bold" disabled value="{{ $actual ? $actual->grand_tot : '' }}" readonly />
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-info" onclick="openModal({{ $actual ? $actual->id : 0 }})">Act</button>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
+
                     </div>
+
+
 
                     {{-- <div class="table-responsive">
                         <table id="tabelsummary" class="table table-striped table-bordered table-hover text-center">
@@ -504,6 +506,56 @@
                 </div>
             </div>
 
+            <!-- Modal -->
+            <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">  <!-- Modal diperbesar dengan modal-lg -->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="detailModalLabel">Detail DBO CRP</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="{{ route('crp.saveDetails') }}">
+                                @csrf
+                                <input type="hidden" name="crp_id" id="crp_id_input">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Bulan</th>
+                                            <th>PI</th>
+                                            <th>CA</th>
+                                            <th>Due Date</th>
+                                            <th>Remark</th>
+                                            <th>Check CRP</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="modalTableBody">
+                                        @foreach(range(1, 12) as $month)
+                                            <tr>
+                                                <td>{{ date('F', mktime(0, 0, 0, $month, 1)) }}</td>
+                                                <!-- Ganti input teks menjadi textarea untuk kolom yang lebih panjang -->
+                                                <td><textarea name="pi_{{ $month }}" class="form-control" rows="3"></textarea></td>
+                                                <td><textarea name="ca_{{ $month }}" class="form-control" rows="3"></textarea></td>
+                                                <td><input type="date" name="due_date_{{ $month }}" class="form-control"></td>
+                                                <td><textarea name="remark_{{ $month }}" class="form-control" rows="3"></textarea></td>
+                                                <td><input type="checkbox" name="check_crp_{{ $month }}"></td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
             <script>
                 // function calculateCRP(input) {
                 //     const row = input.closest('tr');
@@ -521,6 +573,53 @@
                 window.mstCategories = @json($mstDboCrps->pluck('nm_category')->unique()->values());
             </script>
             <script>
+
+
+                function openModal(crpId) {
+                    $('#crp_id_input').val(crpId);
+
+                    $.ajax({
+                        url: "{{ route('crp.showDetailModal', ['crpId' => '__crpId__']) }}".replace('__crpId__', crpId),
+                        method: 'GET',
+                        success: function(response) {
+                            // Pastikan data dikirim dan tidak kosong
+                            if (response && response.length > 0) {
+                                for (let month = 1; month <= 12; month++) {
+                                    // Cari detail untuk bulan tersebut
+                                    let data = response.find(detail => detail.Month === month); 
+
+                                    // Jika data bulan ada, masukkan ke dalam input
+                                    if (data) {
+                                        $(`textarea[name="pi_${month}"]`).val(data.pi || '');  // Menangani null atau undefined
+                                        $(`textarea[name="ca_${month}"]`).val(data.ca || '');
+                                        $(`input[name="due_date_${month}"]`).val(data.due_date || '');
+                                        $(`textarea[name="remark_${month}"]`).val(data.remark || '');
+                                        // Cek apakah check_crp 1 (centang) atau 0 (tidak centang)
+                                        $(`input[name="check_crp_${month}"]`).prop('checked', data.check_crp == 1);
+                                    } else {
+                                        // Jika tidak ada data untuk bulan ini, kosongkan input
+                                        $(`textarea[name="pi_${month}"]`).val('');
+                                        $(`textarea[name="ca_${month}"]`).val('');
+                                        $(`input[name="due_date_${month}"]`).val('');
+                                        $(`textarea[name="remark_${month}"]`).val('');
+                                        $(`input[name="check_crp_${month}"]`).prop('checked', false);
+                                    }
+                                }
+                            } else {
+                                console.log('No data found for this CRP ID.');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.log('Error fetching data:', error);
+                        }
+                    });
+
+                    // Show modal
+                    $('#detailModal').modal('show');
+                }
+
+
+
                 function uploadexcel() {
                     let fileInput = document.getElementById('file'); // Perbaiki ID di sini
 

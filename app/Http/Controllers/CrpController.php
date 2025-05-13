@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Customer;
 use App\Models\MstDboCrp;
 use App\Models\TrsDboCrp;
+use App\Models\DetailDboCrp;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -435,6 +436,47 @@ class CrpController extends Controller
         }
     }
 
+     public function showDetailModal($crpId)
+    {
+        // Ambil semua detail berdasarkan crpId
+        $details = DetailDboCrp::where('crp_id', $crpId)->get();
+
+        // Pastikan data dikirim dalam format JSON
+        return response()->json($details);
+    }
+
+    // Fungsi untuk menyimpan data CRP ke database
+    public function saveCrpDetails(Request $request)
+    {
+        $crpId = $request->input('crp_id');
+
+        for ($month = 1; $month <= 12; $month++) {
+            $detail = DetailDboCrp::where('crp_id', $crpId)->where('month', $month)->first();
+
+            if (!$detail) {
+                DetailDboCrp::create([
+                    'crp_id' => $crpId,
+                    'month' => $month,
+                    'pi' => $request->input("pi_$month"),
+                    'ca' => $request->input("ca_$month"),
+                    'due_date' => $request->input("due_date_$month"),
+                    'remark' => $request->input("remark_$month"),
+                    'check_crp' => $request->has("check_crp_$month")
+                ]);
+            } else {
+                $detail->update([
+                    'pi' => $request->input("pi_$month"),
+                    'ca' => $request->input("ca_$month"),
+                    'due_date' => $request->input("due_date_$month"),
+                    'remark' => $request->input("remark_$month"),
+                    'check_crp' => $request->has("check_crp_$month")
+                ]);
+            }
+        }
+
+        return redirect()->back()->with('message', 'Data berhasil disimpan');
+    }
+
     public function importCrpDetail(Request $request)
     {
         $request->validate([
@@ -496,5 +538,7 @@ class CrpController extends Controller
             return response()->json(['success' => false, 'message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }
     }
+
+    
 
 }
