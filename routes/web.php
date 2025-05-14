@@ -533,7 +533,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/download-file/{id}', [PoPengajuanController::class, 'downloadFile'])->name('download.file');
     Route::get('/get-data', [PoPengajuanController::class, 'getData'])->name('getData');
 
-    Route::get('/dashboardFPB', [PoPengajuanController::class, 'dashboardFPB'])->name('dashboardFPB');
+    Route::get('/dashboardFPB', [PoPengajuanController::class, 'dashboardgabungan'])->name('dashboardFPB');
 
 
     //E-Mading Adasi

@@ -13,6 +13,10 @@ use App\Models\InquirySales;
 use Illuminate\Support\Carbon;
 use ZipArchive;
 use Illuminate\Support\Facades\Auth;
+use app\Http\Controllers\CrpController;
+use App\Models\MstDboCrp;
+use App\Models\TrsDboCrp;
+use App\Models\TrsDboCrpDetail;
 
 class PoPengajuanController extends Controller
 {
@@ -118,8 +122,9 @@ class PoPengajuanController extends Controller
         return view('po_pengajuan.index_po_pengajuan', compact('data'));
     }
 
-    public function dashboardFPB(Request $request)
+    public function dashboardFPB()
     {
+        $request = request();
 
         // Filter Lead Time
         $startDate2 = $request->input('start_date_leadtime');
@@ -397,7 +402,7 @@ class PoPengajuanController extends Controller
         $inquiryFinishPercentage = $totalinquiry > 0 ? round(($inquiryFinishUnique / $totalinquiry) * 100) : 0;
 
 
-        return view('dashboard.dashboardFPB', [
+        return [
             'fpbOpen' => $fpbOpenUnique,
             'fpbFinish' => $fpbFinishUnique,
             'fpbOpenPercentage' => $fpbOpenPercentage,
@@ -425,7 +430,144 @@ class PoPengajuanController extends Controller
             'inquiryFinishPercentage' => $inquiryFinishPercentage,
             'monthlyData1' => $monthlyData1,
             'totalinquiry' => $totalinquiry,
-        ]);
+        ];
+    }
+
+    public function dashboardcrp()
+    {
+        $user = Auth::user();
+        $userName = $user->name;
+
+        // Daftar kategori
+        $allCategories = [
+            'IT', 'Subcont', 'Consumable', 'Repair Maintenance', 'Utility',
+            'General Affair', 'Material Cost', 'Indirect Material', 'Others',
+        ];
+        $categories = array_merge(['Total'], $allCategories);
+
+        // Ambil data berdasarkan user
+        $mstDboCrps = MstDboCrp::where('partner_user', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $actuals = MstDboCrp::where('partner_user', $user->id)
+            ->where('plan_actual', 'Actual')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $plans = MstDboCrp::where('partner_user', $user->id)
+            ->where('plan_actual', 'Plan')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $mstIds = $mstDboCrps->pluck('id')->toArray();
+        $trsDboCrps = TrsDboCrp::whereIn('mst_id', $mstIds)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Inisialisasi array
+        $monthlyActuals = [];
+        $monthlyPlans = [];
+        $monthlyPlanCumulative = [];
+        $monthlyActualCumulative = [];
+        $grandTotalComparison = [];
+
+        foreach ($categories as $cat) {
+            $monthlyActuals[$cat] = array_fill(0, 12, 0);
+            $monthlyPlans[$cat] = array_fill(0, 12, 0);
+            $monthlyPlanCumulative[$cat] = array_fill(0, 12, 0);
+            $monthlyActualCumulative[$cat] = array_fill(0, 12, 0);
+            $grandTotalComparison[$cat] = ['Plan' => 0, 'Actual' => 0];
+        }
+
+        // Proses data actual
+        foreach ($actuals as $item) {
+            $cat = $item->nm_category;
+            for ($i = 1; $i <= 12; $i++) {
+                $val = $item->{"month_$i"} ?? 0;
+                $monthlyActuals[$cat][$i - 1] += $val;
+                $monthlyActuals['Total'][$i - 1] += $val;
+            }
+            $grandTotalComparison[$cat]['Actual'] += $item->grand_tot ?? 0;
+            $grandTotalComparison['Total']['Actual'] += $item->grand_tot ?? 0;
+        }
+
+        // Proses data plan (tanpa rata-rata)
+        foreach ($plans as $item) {
+            $cat = $item->nm_category;
+            for ($i = 1; $i <= 12; $i++) {
+                $val = $item->{"month_$i"} ?? 0;
+                $monthlyPlans[$cat][$i - 1] += $val;
+                $monthlyPlans['Total'][$i - 1] += $val;
+            }
+            $grandTotalComparison[$cat]['Plan'] += $item->grand_tot ?? 0;
+            $grandTotalComparison['Total']['Plan'] += $item->grand_tot ?? 0;
+        }
+
+        // Hitung data kumulatif
+        foreach ($categories as $cat) {
+            $cumulativePlan = 0;
+            $cumulativeActual = 0;
+            for ($month = 0; $month < 12; $month++) {
+                $cumulativePlan += $monthlyPlans[$cat][$month];
+                $cumulativeActual += $monthlyActuals[$cat][$month];
+                $monthlyPlanCumulative[$cat][$month] = $cumulativePlan;
+                $monthlyActualCumulative[$cat][$month] = $cumulativeActual;
+            }
+        }
+
+        // Siapkan data untuk semua kategori (untuk chart dinamis)
+        $allMonthlyData = [];
+        foreach ($categories as $cat) {
+            $allMonthlyData[$cat] = [
+                'plan' => $monthlyPlanCumulative[$cat],
+                'actual' => $monthlyActualCumulative[$cat],
+            ];
+        }
+
+        // Ambil kategori yang dipilih
+        $selectedCategory = request('category', 'Total');
+        if (!in_array($selectedCategory, $categories)) {
+            $selectedCategory = 'Total';
+        }
+
+
+        // Data untuk chart kumulatif kategori yang dipilih
+        $monthlyPlanData = $monthlyPlanCumulative[$selectedCategory];
+        $monthlyActualData = $monthlyActualCumulative[$selectedCategory];
+
+        // Daftar bulan
+        $bulanList = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+
+        return compact(
+            'mstDboCrps',
+            'trsDboCrps',
+            'userName',
+            'actuals',
+            'plans',
+            'monthlyActuals',
+            'monthlyPlans',
+            'allCategories',
+            'grandTotalComparison',
+            'monthlyPlanData',
+            'monthlyActualData',
+            'selectedCategory',
+            'bulanList',
+            'allMonthlyData'
+        );
+    }
+
+    public function dashboardgabungan()
+    {
+        $fpbData = $this->DashboardFPB();
+        $datacrp = $this->dashboardcrp();
+
+        $gabunganData = array_merge($fpbData, $datacrp);
+
+        return view('dashboard.dashboardFPB', $gabunganData);
     }
 
     public function overviewfpb()

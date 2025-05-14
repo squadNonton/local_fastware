@@ -1,6 +1,19 @@
 @extends('layout')
 
 @section('content')
+
+<style>
+    .carousel-item {
+      min-height: 8vh; /* Sesuaikan tinggi minimal */
+      padding: 20px;
+  }
+
+  .carousel-control-prev,
+  .carousel-control-next {
+      color: rgba(95, 86, 86, 0.2);
+      width: 2%;
+  }
+  </style>
 <main id="main" class="main">
 
   <div class="pagetitle">
@@ -9,193 +22,290 @@
       </nav>
   </div><!-- End Page Title -->
 
-  <section class="section dashboard">
-
-    <div class="row">
-      <!-- Viewcard Kiri: Pengajuan Barang -->
-      <div class="col-sm-8">
-          <div class="card" style="height: 100%;">
-              <div class="card-header d-flex justify-content-between align-items-center">
-                  <h4>FORM PENGAJUAN BARANG</h4>
-  
-                  <!-- Form Filter Pengajuan Barang (Chart FPB) -->
-                  <form method="GET" action="{{ route('dashboardFPB') }}" class="form-inline">
-                      <input type="hidden" name="filter_type" value="fpb">
-                      
-                      <!-- Field Filter FPB -->
-                      <div class="form-group mr-2">
-                          <label for="start_date_fpb" class="mr-2">Dari:</label>
-                          <input type="date" name="start_date_fpb" id="start_date_fpb" class="form-control" value="{{ request('start_date_fpb', '2025-01-01') }}">
-                      </div>
-                      <div class="form-group mr-2">
-                          <label for="end_date_fpb" class="mr-2">Sampai:</label>
-                          <input type="date" name="end_date_fpb" id="end_date_fpb" class="form-control" value="{{ request('end_date_fpb', '2025-12-31') }}">
-                      </div>
-                      <div class="form-group mr-2">
-                          <label for="kategori_po" class="mr-2">Kategori:</label>
-                          <select name="kategori_po" id="kategori_po" class="form-control">
-                              <option value="">Semua Kategori</option>
-                              @foreach($kategoriList as $kategoriItem)
-                                  <option value="{{ $kategoriItem }}" {{ request('kategori_po') == $kategoriItem ? 'selected' : '' }}>
-                                      {{ $kategoriItem }}
-                                  </option>
-                              @endforeach
-                          </select>
-                      </div>
-                      
-                      <!-- Hidden Input untuk Filter Lead Time agar tetap dipertahankan -->
-                      <input type="hidden" name="start_date_leadtime" value="{{ request('start_date_leadtime') }}">
-                      <input type="hidden" name="end_date_leadtime" value="{{ request('end_date_leadtime') }}">
-                      
-                      <button type="submit" class="btn btn-primary">Filter</button>
-                  </form>
-  
-                  <!-- Card Total FPB -->
-                  <div class="card p-2 bg-light text-dark">
-                      <strong>Total: {{ $totalFPB }}</strong>
-                  </div>
-              </div>
-  
-              <!-- Informasi Filter Aktif -->
-              <div class="card-body">
-                  <div class="alert alert-info">
-                      <p><strong>Periode:</strong> 
-                          @if(request('start_date_fpb') && request('end_date_fpb'))
-                              {{ \Carbon\Carbon::parse(request('start_date_fpb'))->format('d M Y') }} 
-                              s/d 
-                              {{ \Carbon\Carbon::parse(request('end_date_fpb'))->format('d M Y') }}
-                          @else
-                              Semua Tanggal
-                          @endif
-                      </p>
-                      <p><strong>Kategori:</strong> 
-                           {{ request('kategori_po') ? request('kategori_po') : 'Semua Kategori' }}
-                      </p>
-                  </div>
-  
-                  <figure class="highcharts-figure">
-                      <div id="chart-status-fpb" style="min-width: 310px; height: 100%; margin: 0 auto;"></div>
-                  </figure> 
-              </div>
-          </div>
-      </div>    
-  
-      <!-- ViewCard Pie Chart 1 -->
-      <div class="col-sm-4">
-          <div class="row">
-              <div class="col-sm-12">
-                  <div class="card">
-                      <div class="card-body">
-                          <div id="pieChart" style="height: 400px;"></div>
-                      </div>
-                  </div>
-              </div>
-  
-              <!-- ViewCard Pie Chart 2 -->
-              <div class="col-sm-12">
-                  <div class="card">
-                      <div class="card-body">
-                          <div id="pieChart1" style="height: 400px;"></div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-      </div>
-  </div>
-  
-        
-    <p></p>
-
-    <div class="row">
-
-      <!-- Viewcard Kanan: Lead Time Order Fulfillment -->
-      <div class="col-sm-6">
-        <div class="card" style="height: 100%;">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h4>LEADTIME ORDER FULFILLMENT</h4>
-
-                <!-- Form Filter Lead Time (Chart Lead Time) -->
-                <form method="GET" action="{{ route('dashboardFPB') }}" class="form-inline">
-                  <input type="hidden" name="filter_type" value="leadtime">
-                  
-                  <!-- Field Filter Lead Time -->
-                  <div class="form-group mr-2">
-                      <label for="start_date_leadtime" class="mr-2">Dari:</label>
-                      <input type="date" name="start_date_leadtime" id="start_date_leadtime" class="form-control" value="{{ request('start_date_leadtime') }}">
-                  </div>
-                  <div class="form-group mr-2">
-                      <label for="end_date_leadtime" class="mr-2">Sampai:</label>
-                      <input type="date" name="end_date_leadtime" id="end_date_leadtime" class="form-control" value="{{ request('end_date_leadtime') }}">
-                  </div>
-                  
-                  <!-- Hidden Input untuk Filter FPB agar tetap dipertahankan -->
-                  <input type="hidden" name="start_date_fpb" value="{{ request('start_date_fpb') }}">
-                  <input type="hidden" name="end_date_fpb" value="{{ request('end_date_fpb') }}">
-                  <input type="hidden" name="kategori_po" value="{{ request('kategori_po') }}">
-                  
-                  <button type="submit" class="btn btn-primary">Filter</button>
-                </form>
-
-            </div>
-
-            <!-- Informasi Filter Aktif untuk Lead Time -->
-            <div class="card-body">
-                <div class="alert alert-info">
-                    <p><strong>Periode Lead Time:</strong> 
-                        @if(request('start_date_leadtime') && request('end_date_leadtime'))
-                            {{ \Carbon\Carbon::parse(request('start_date_leadtime'))->format('d M Y') }} 
-                            s/d 
-                            {{ \Carbon\Carbon::parse(request('end_date_leadtime'))->format('d M Y') }}
-                        @else
-                            Semua Tanggal
-                        @endif
-                    </p>
-                </div>
-
-                <figure class="highcharts-figure">
-                    <div id="chart-lead-time" style="min-width: 310px; height: 100%; margin: 0 auto;"></div>
-                </figure>
-            </div>
+  <section class="section dashboard min-vh-100">
+    <div id="dashboardCarousel" class="carousel slide h-100" data-bs-ride="carousel" data-bs-interval="10000">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#dashboardCarousel" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#dashboardCarousel" data-bs-slide-to="1"></button>
         </div>
+        
+        <div class="carousel-inner h-100">
+            <!-- Slide 1: Form Pengajuan + 2 Pie Chart -->
+            <div class="carousel-item active h-100">
+                <div class="row h-100">
+                    <!-- Viewcard Kiri: Pengajuan Barang -->
+                    <div class="col-sm-8 h-100">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h4>FORM PENGAJUAN BARANG</h4>
+                                <!-- Form Filter Pengajuan Barang (Chart FPB) -->
+                                <form method="GET" action="{{ route('dashboardFPB') }}" class="form-inline">
+                                    <input type="hidden" name="filter_type" value="fpb">
+                                    <!-- Field Filter FPB -->
+                                    <div class="form-group mr-2">
+                                        <label for="start_date_fpb" class="mr-2">Dari:</label>
+                                        <input type="date" name="start_date_fpb" id="start_date_fpb" class="form-control" value="{{ request('start_date_fpb', '2025-01-01') }}">
+                                    </div>
+                                    <div class="form-group mr-2">
+                                        <label for="end_date_fpb" class="mr-2">Sampai:</label>
+                                        <input type="date" name="end_date_fpb" id="end_date_fpb" class="form-control" value="{{ request('end_date_fpb', '2025-12-31') }}">
+                                    </div>
+                                    <div class="form-group mr-2">
+                                        <label for="kategori_po" class="mr-2">Kategori:</label>
+                                        <select name="kategori_po" id="kategori_po" class="form-control">
+                                            <option value="">Semua Kategori</option>
+                                            @foreach($kategoriList as $kategoriItem)
+                                                <option value="{{ $kategoriItem }}" {{ request('kategori_po') == $kategoriItem ? 'selected' : '' }}>
+                                                    {{ $kategoriItem }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <!-- Hidden Input untuk Filter Lead Time -->
+                                    <input type="hidden" name="start_date_leadtime" value="{{ request('start_date_leadtime') }}">
+                                    <input type="hidden" name="end_date_leadtime" value="{{ request('end_date_leadtime') }}">
+                                    <button type="submit" class="btn btn-primary">Filter</button>
+                                </form>
+                                <!-- Card Total FPB -->
+                                <div class="card p-2 bg-light text-dark">
+                                    <strong>Total: {{ $totalFPB }}</strong>
+                                </div>
+                            </div>
+                            <!-- Informasi Filter Aktif -->
+                            <div class="card-body h-100">
+                                <div class="alert alert-info">
+                                    <p><strong>Periode:</strong> 
+                                        @if(request('start_date_fpb') && request('end_date_fpb'))
+                                            {{ \Carbon\Carbon::parse(request('start_date_fpb'))->format('d M Y') }} 
+                                            s/d 
+                                            {{ \Carbon\Carbon::parse(request('end_date_fpb'))->format('d M Y') }}
+                                        @else
+                                            Semua Tanggal
+                                        @endif
+                                    </p>
+                                    <p><strong>Kategori:</strong> 
+                                        {{ request('kategori_po') ? request('kategori_po') : 'Semua Kategori' }}
+                                    </p>
+                                </div>
+                                <figure class="highcharts-figure h-100">
+                                    <div id="chart-status-fpb" style="min-width: 310px; height: 100%; margin: 0 auto;"></div>
+                                </figure> 
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ViewCard Pie Chart 1 & 2 -->
+                    <div class="col-sm-4 h-100">
+                        <div class="row h-100">
+                            <div class="col-sm-12 h-50">
+                                <div class="card h-100">
+                                    <div class="card-body h-100">
+                                        <div id="pieChart" style="height: 100%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 h-50">
+                                <div class="card h-100">
+                                    <div class="card-body h-100">
+                                        <div id="pieChart1" style="height: 100%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2: Leadtime + Form Inquiry -->
+            <div class="carousel-item h-100">
+                <div class="row h-100">
+                    <!-- Lead Time Order Fulfillment -->
+                    <div class="col-sm-6 h-100">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h4>LEADTIME ORDER FULFILLMENT</h4>
+                                <!-- Form Filter Lead Time -->
+                                <form method="GET" action="{{ route('dashboardFPB') }}" class="form-inline">
+                                    <input type="hidden" name="filter_type" value="leadtime">
+                                    <div class="form-group mr-2">
+                                        <label for="start_date_leadtime" class="mr-2">Dari:</label>
+                                        <input type="date" name="start_date_leadtime" id="start_date_leadtime" class="form-control" value="{{ request('start_date_leadtime') }}">
+                                    </div>
+                                    <div class="form-group mr-2">
+                                        <label for="end_date_leadtime" class="mr-2">Sampai:</label>
+                                        <input type="date" name="end_date_leadtime" id="end_date_leadtime" class="form-control" value="{{ request('end_date_leadtime') }}">
+                                    </div>
+                                    <!-- Hidden Input untuk Filter FPB -->
+                                    <input type="hidden" name="start_date_fpb" value="{{ request('start_date_fpb') }}">
+                                    <input type="hidden" name="end_date_fpb" value="{{ request('end_date_fpb') }}">
+                                    <input type="hidden" name="kategori_po" value="{{ request('kategori_po') }}">
+                                    <button type="submit" class="btn btn-primary">Filter</button>
+                                </form>
+                            </div>
+                            <!-- Informasi Filter Aktif untuk Lead Time -->
+                            <div class="card-body h-100">
+                                <div class="alert alert-info">
+                                    <p><strong>Periode Lead Time:</strong> 
+                                        @if(request('start_date_leadtime') && request('end_date_leadtime'))
+                                            {{ \Carbon\Carbon::parse(request('start_date_leadtime'))->format('d M Y') }} 
+                                            s/d 
+                                            {{ \Carbon\Carbon::parse(request('end_date_leadtime'))->format('d M Y') }}
+                                        @else
+                                            Semua Tanggal
+                                        @endif
+                                    </p>
+                                </div>
+                                <figure class="highcharts-figure h-100">
+                                    <div id="chart-lead-time" style="min-width: 310px; height: 100%; margin: 0 auto;"></div>
+                                </figure>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Form Inquiry Local -->
+                    <div class="col-sm-6 h-100">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h4>FORM INQUIRY LOCAL</h4>
+                                <div class="card p-2 bg-light text-dark">
+                                    <strong>Total: {{ $totalinquiry }}</strong>
+                                </div>
+                                <form method="GET" action="{{ route('dashboardFPB') }}" class="form-inline">
+                                    <input type="hidden" name="filter_type" value="inquiry">
+                                    <div class="form-group mr-2">
+                                        <label for="start_date_inquiry" class="mr-2">Dari:</label>
+                                        <input type="date" name="start_date_inquiry" id="start_date_inquiry" class="form-control" value="{{ request('start_date_inquiry') }}">
+                                    </div>
+                                    <div class="form-group mr-2">
+                                        <label for="end_date_inquiry" class="mr-2">Sampai:</label>
+                                        <input type="date" name="end_date_inquiry" id="end_date_inquiry" class="form-control" value="{{ request('end_date_inquiry') }}">
+                                    </div>                                
+                                    <button type="submit" class="btn btn-primary">Filter</button>
+                                </form>
+                            </div>
+                            <div class="card-body h-100">
+                                <div class="row h-100">
+                                    <!-- Chart Bar -->
+                                    <div class="col-sm-9 h-100">
+                                        <figure class="highcharts-figure h-100">
+                                            <div id="chart-status-inquiry" style="min-width: 310px; height: 100%; margin: 0 auto;"></div>
+                                        </figure>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="carousel-item h-100">
+                <div class="row h-100">
+                    <!-- Lead Time Order Fulfillment -->
+                    <div class="row">
+                      <div class="col-sm-6 h-100">
+                          <div class="card h-100" style="min-height: 500px;">
+                              <div class="card-header d-flex justify-content-between align-items-center">
+                                  <h4>CRP</h4>
+                              </div>
+                              <div class="card-body">
+                                  <div class="d-flex align-items-center mb-3" style="gap: 10px;">
+                                      <div style="max-width: 200px;">
+                                          <label for="category-filter" class="form-label"><strong>Filter Kategori:</strong></label>
+                                          <select id="category-filter" class="form-select form-select-sm" onchange="filterChart()">
+                                              <option value="Total" selected>All Categories (Total)</option>
+                                              @foreach ($allCategories as $category)
+                                                  <option value="{{ $category }}">{{ $category }}</option>
+                                              @endforeach
+                                          </select>
+                                      </div>
+                                  </div>
+                                  <div class="card mt-4">
+                                      <div class="card-header">
+                                          <h5>Actual dan Plan</h5>
+                                      </div>
+                                      <div class="card-body">
+                                          <div id="chart-crp" style="height: 400px;"></div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="col-sm-6 h-100">
+                          <div class="card h-100" style="min-height: 500px;">
+                              <div class="card-header d-flex justify-content-between align-items-center">
+                                  <h4>YTD</h4>
+                              </div>
+                              <div class="card-body">
+                                  <div class="d-flex align-items-center mb-3" style="gap: 10px;">
+                                      <div style="max-width: 200px;">
+                                          <label for="category-grandtot-filter" class="form-label"><strong>Filter Kategori (YTD):</strong></label>
+                                          <select id="category-grandtot-filter" class="form-select form-select-sm" onchange="updateGrandTotChart()">
+                                              <option value="Total" selected>All Categories (Total)</option>
+                                              @foreach ($allCategories as $category)
+                                                  <option value="{{ $category }}">{{ $category }}</option>
+                                              @endforeach
+                                          </select>
+                                      </div>
+                                  </div>
+                                  <div class="card mt-4">
+                                      <div class="card-header">
+                                          <h5>Perbandingan YTD Plan vs Actual</h5>
+                                      </div>
+                                      <div class="card-body">
+                                          <div id="grandtot-chart" style="height: 400px;"></div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="row mt-4">
+                      <div class="col-sm-12 h-100">
+                          <div class="card h-100">
+                              <div class="card-header d-flex justify-content-between align-items-center">
+                                  <h4>Kumulatif Bulanan</h4>
+                              </div>
+                              <div class="card-body">
+                                  <div class="d-flex align-items-center mb-3" style="gap: 10px;">
+                                      <div style="max-width: 200px;">
+                                          <label for="category-filter-cumulative" class="form-label"><strong>Filter Kategori:</strong></label>
+                                          <select id="category-filter-cumulative" class="form-select form-select-sm" onchange="updateCategory()">
+                                              <option value="Total" {{ $selectedCategory == 'Total' ? 'selected' : '' }}>All Categories (Total)</option>
+                                              @foreach ($allCategories as $category)
+                                                  <option value="{{ $category }}" {{ $selectedCategory == $category ? 'selected' : '' }}>{{ $category }}</option>
+                                              @endforeach
+                                          </select>
+                                      </div>
+                                  </div>
+                                  <div class="card mt-4">
+                                      <div class="card-header">
+                                          <h5>Perbandingan Kumulatif Bulanan Plan vs Actual</h5>
+                                      </div>
+                                      <div class="card-body">
+                                          <div id="chart-cumulative-crp" style="height: 400px;"></div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+            </div>
+
+        </div>
+        
+        </div>
+
+
+
+        <!-- Tombol Navigasi Carousel -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#dashboardCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#dashboardCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
     </div>
-
-      <!-- ViewCard Utama -->
-      <div class="col-sm-6">
-          <div class="card" style="height: 100%;">
-              <div class="card-header d-flex justify-content-between align-items-center">
-                  <h4>FORM INQUIRY LOCAL</h4>
-                  <div class="card p-2 bg-light text-dark">
-                      <strong>Total: {{ $totalinquiry }}</strong>
-                  </div>
-                  <form method="GET" action="{{ route('dashboardFPB') }}" class="form-inline">
-                      <input type="hidden" name="filter_type" value="inquiry">
-                      <div class="form-group mr-2">
-                          <label for="start_date_inquiry" class="mr-2">Dari:</label>
-                          <input type="date" name="start_date_inquiry" id="start_date_inquiry" class="form-control" value="{{ request('start_date_inquiry') }}">
-                      </div>
-                      <div class="form-group mr-2">
-                          <label for="end_date_inquiry" class="mr-2">Sampai:</label>
-                          <input type="date" name="end_date_inquiry" id="end_date_inquiry" class="form-control" value="{{ request('end_date_inquiry') }}">
-                      </div>                                
-                      <button type="submit" class="btn btn-primary">Filter</button>
-                  </form>
-
-                  
-              </div>
-              
-              <div class="card-body">
-                  <div class="row">
-                      <!-- Chart Bar -->
-                      <div class="col-sm-9">
-                          <figure class="highcharts-figure">
-                              <div id="chart-status-inquiry" style="min-width: 310px; height: 100%; margin: 0 auto;"></div>
-                          </figure>
-                      </div>
-                  
-                  </div>
-              </div>
-          </div>
-      </div>
 </section>
 
 
@@ -573,6 +683,242 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
+</script>
+<script>
+    // Daftar bulan
+    const bulanList = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+    // Data dari controller
+    const actuals = @json($monthlyActuals);
+    const plans = @json($monthlyPlans);
+    const grandTotalData = @json($grandTotalComparison);
+    const allMonthlyData = @json($allMonthlyData);
+    const monthlyPlanData = @json($monthlyPlanData);
+    const monthlyActualData = @json($monthlyActualData);
+
+    // Debugging data
+    console.log('actuals:', actuals);
+    console.log('plans:', plans);
+    console.log('grandTotalData:', grandTotalData);
+    console.log('allMonthlyData:', allMonthlyData);
+    console.log('monthlyPlanData:', monthlyPlanData);
+    console.log('monthlyActualData:', monthlyActualData);
+
+    // Inisialisasi chart
+    let chart = null;
+    let grandTotChart = null;
+    let chartCumulativeCrp = null;
+
+    // Fungsi untuk chart-crp (Actual vs Plan bulanan)
+    function getChartOptions(category) {
+        const actualData = actuals[category] ?? [];
+        const planData = plans[category] ?? [];
+
+        if (!actualData.length || !planData.length) {
+            console.warn(`Data untuk kategori ${category} tidak tersedia di chart-crp`);
+        }
+
+        return {
+            chart: {
+                zoomType: 'xy'
+            },
+            title: {
+                text: `CRP Actual vs Plan - ${category}`
+            },
+            xAxis: [{
+                categories: bulanList,
+                crosshair: true
+            }],
+            yAxis: [{
+                title: {
+                    text: 'Nilai CRP (Rp)'
+                }
+            }],
+            tooltip: {
+                shared: true,
+                valueDecimals: 2
+            },
+            series: [{
+                name: 'Actual',
+                type: 'column',
+                data: actualData,
+                color: '#7cb5ec',
+                tooltip: {
+                    valueSuffix: ''
+                }
+            }, {
+                name: 'Plan (Target)',
+                type: 'spline',
+                data: planData,
+                color: '#f45b5b',
+                tooltip: {
+                    valueSuffix: ''
+                }
+            }],
+            credits: {
+                enabled: false
+            }
+        };
+    }
+
+    function filterChart() {
+        const selected = document.getElementById('category-filter').value;
+        console.log('Filter chart-crp dipilih:', selected);
+        const options = getChartOptions(selected);
+        if (chart) {
+            chart.update(options, true, true);
+        } else {
+            console.error('Chart CRP belum diinisialisasi');
+            chart = Highcharts.chart('chart-crp', options);
+        }
+    }
+
+    // Fungsi untuk grandtot-chart (YTD Plan vs Actual)
+    function renderGrandTotChart(category) {
+        const data = grandTotalData[category];
+
+        if (!data) {
+            console.error(`Data YTD untuk kategori ${category} tidak ditemukan`);
+            return;
+        }
+
+        const chartData = [
+            {
+                name: 'Plan',
+                data: [data.Plan],
+                color: '#f45b5b'
+            },
+            {
+                name: 'Actual',
+                data: [data.Actual],
+                color: '#7cb5ec'
+            }
+        ];
+
+        if (grandTotChart) {
+            grandTotChart.series[0].setData(chartData[0].data);
+            grandTotChart.series[1].setData(chartData[1].data);
+            grandTotChart.setTitle({ text: `YTD CRP - ${category}` });
+        } else {
+            grandTotChart = Highcharts.chart('grandtot-chart', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: `YTD CRP - ${category}`
+                },
+                xAxis: {
+                    categories: ['YTD']
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Total Value (Rp)'
+                    }
+                },
+                tooltip: {
+                    valueDecimals: 2
+                },
+                series: chartData,
+                credits: {
+                    enabled: false
+                }
+            });
+        }
+    }
+
+    function updateGrandTotChart() {
+        const selected = document.getElementById('category-grandtot-filter').value;
+        console.log('Filter grandtot-chart dipilih:', selected);
+        renderGrandTotChart(selected);
+    }
+
+    // Fungsi untuk chart-cumulative-crp (Kumulatif Plan vs Actual)
+    function renderChart(category) {
+        const planData = allMonthlyData[category]?.plan || monthlyPlanData;
+        const actualData = allMonthlyData[category]?.actual || monthlyActualData;
+
+        if (!planData.length || !actualData.length) {
+            console.error(`Data kumulatif untuk kategori ${category} tidak ditemukan`);
+            return;
+        }
+
+        if (chartCumulativeCrp) {
+            chartCumulativeCrp.series[0].setData(planData);
+            chartCumulativeCrp.series[1].setData(actualData);
+            chartCumulativeCrp.setTitle({ text: `Kumulatif Bulanan Plan vs Actual - ${category}` });
+        } else {
+            chartCumulativeCrp = Highcharts.chart('chart-cumulative-crp', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: `Kumulatif Bulanan Plan vs Actual - ${category}`
+                },
+                xAxis: {
+                    categories: bulanList,
+                    crosshair: true
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Nilai Kumulatif (Rp)'
+                    }
+                },
+                tooltip: {
+                    shared: true,
+                    valueDecimals: 2
+                },
+                series: [{
+                    name: 'Plan',
+                    data: planData,
+                    color: '#f45b5b'
+                }, {
+                    name: 'Actual',
+                    data: actualData,
+                    color: '#7cb5ec'
+                }],
+                credits: {
+                    enabled: false
+                }
+            });
+        }
+    }
+
+    function updateCategory() {
+        const selectedCategory = document.getElementById('category-filter-cumulative').value;
+        console.log('Filter chart-cumulative-crp dipilih:', selectedCategory);
+        renderChart(selectedCategory);
+    }
+
+    // Inisialisasi semua chart saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', function () {
+        try {
+            // Periksa apakah Highcharts dimuat
+            if (typeof Highcharts === 'undefined') {
+                console.error('Highcharts tidak dimuat');
+                return;
+            }
+
+            // Periksa apakah elemen chart ada
+            if (!document.getElementById('chart-crp') || !document.getElementById('grandtot-chart') || !document.getElementById('chart-cumulative-crp')) {
+                console.error('Salah satu elemen chart tidak ditemukan di DOM');
+                return;
+            }
+
+            // Inisialisasi chart-crp
+            chart = Highcharts.chart('chart-crp', getChartOptions('Total'));
+
+            // Inisialisasi grandtot-chart
+            renderGrandTotChart('Total');
+
+            // Inisialisasi chart-cumulative-crp
+            renderChart('Total');
+        } catch (error) {
+            console.error('Error inisialisasi chart:', error);
+        }
+    });
 </script>
 </main>
 @endsection

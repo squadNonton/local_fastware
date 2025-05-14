@@ -539,6 +539,34 @@ class CrpController extends Controller
         }
     }
 
+    public function dashboardcrp()
+    {
+        $userName = Auth::user()->name;
+
+        // Mengambil data dari model MstDboCrp
+        $mstDboCrps = MstDboCrp::where('partner_user', Auth::user()->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $actuals = MstDboCrp::where('partner_user', Auth::user()->id)
+            ->where('plan_actual', 'Actual')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        $plans = MstDboCrp::where('partner_user', Auth::user()->id)
+            ->where('plan_actual', 'Plan')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Mengambil data dari model TrsDboCrp berdasarkan mst_id
+        $mstIds = $mstDboCrps->pluck('id')->toArray();
+        $trsDboCrps = TrsDboCrp::whereIn('mst_id', $mstIds)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('crp.dashboardcrp', compact('mstDboCrps', 'trsDboCrps', 'userName', 'actuals', 'plans'));
+    }
+
     
 
 }
